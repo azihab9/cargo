@@ -46,6 +46,7 @@
 <div class="panel" id="import"><h2>Import data Excel</h2><div class="desc">Format ekspor waybill Delivery J&T Cargo (.xlsx, .xls, .csv).</div><div class="upload"><div class="ico">⇧</div><strong>Pilih file laporan delivery</strong><p>Data akan dipetakan berdasarkan nama kolom pada file sumber.</p><input type="file" id="file" accept=".xlsx,.xls,.csv"></div><div class="toolbar"><span class="muted" id="fileStatus">Belum ada file diimpor</span><button class="btn light" onclick="resetData()">Sinkronkan dari cloud</button></div><div class="note">File yang sama tidak dapat diimpor dua kali. File berbeda akan ditambahkan sebagai batch baru; pastikan periode/resinya tidak tumpang tindih. Data impor dan tarif fee disimpan di database cloud CargoFlow.</div></div>
 <div class="panel" id="fees"><h2>Pengaturan fee sprinter</h2><div class="desc">Kelola sprinter yang tersimpan di database cloud, termasuk gaji pokok dan fee per kg.</div><form id="sprinterForm" class="toolbar" style="justify-content:flex-start"><input id="newSprinterName" placeholder="Nama sprinter baru" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"><button class="btn" type="submit">Tambah sprinter</button></form><div class="tablewrap"><table><thead><tr><th>Nama sprinter</th><th class="r">Gaji pokok (Rp)</th><th class="r">Fee / kg (Rp)</th></tr></thead><tbody id="feeBody"><tr><td colspan="3" class="empty">Memuat data sprinter...</td></tr></tbody></table></div><div class="toolbar"><span class="muted">Gaji pokok dan fee disimpan ke Supabase.</span><button class="btn light" onclick="resetFees()">Reset fee ke Rp100</button></div></div>
 </section>
+<section class="panel section" id="koliUpdate"><div class="toolbar"><div><h2>Perbarui Jumlah Koli dari CSV</h2><div class="desc" style="margin:4px 0 0">Cocokkan No. Resi dengan data yang sudah ada. Tidak membuat batch atau resi baru.</div></div></div><div class="toolbar" style="justify-content:flex-start"><input type="file" id="koliFile" accept=".csv,text/csv"><button class="btn" id="koliUpdateButton" type="button" disabled onclick="applyKoliUpdate()">Perbarui koli di database</button></div><div class="muted" id="koliStatus">Pilih CSV yang berisi kolom No. Resi dan Jumlah Koli.</div><div class="note">Untuk keamanan, sistem hanya mengisi package_count yang masih 0. Data koli yang sudah terisi tidak akan ditimpa. AWB yang tidak ditemukan atau muncul ganda akan dilewati.</div></section>
 <section class="panel section" id="freelancers"><div class="toolbar"><div><h2>Master Data Freelance</h2><div class="desc" style="margin:4px 0 0">Daftarkan nama freelance dan atur tarif per koli. Tarif awal Rp8.000/koli.</div></div></div><form id="freelancerForm" class="toolbar" style="justify-content:flex-start;align-items:end"><label style="font-size:10px;color:var(--muted)">Nama freelance<br><input id="newFreelancerName" required placeholder="Nama sesuai kolom Sprinter delivery" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><label style="font-size:10px;color:var(--muted)">Tarif per koli (Rp)<br><input id="newFreelancerFee" type="number" min="0" step="1" value="8000" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><button class="btn" type="submit">Tambah freelance</button></form><div class="tablewrap"><table><thead><tr><th>Nama freelance</th><th class="r">Tarif / koli (Rp)</th><th>Metode hitung</th></tr></thead><tbody id="freelancerBody"><tr><td colspan="3" class="empty">Memuat data freelance...</td></tr></tbody></table></div><div class="note">Pastikan nama ditulis sama persis dengan nama pada kolom "Sprinter delivery" di Excel. CargoFlow akan mencocokkan nama terdaftar untuk memisahkan payroll freelance dari payroll sprinter.</div></section>
 <section class="panel section" id="loans"><div class="toolbar"><div><h2>Pinjaman / Kasbon Karyawan</h2><div class="desc" style="margin:4px 0 0">Catat pinjaman, cicilan, dan saldo pinjaman karyawan.</div></div></div><form id="loanForm" class="toolbar" style="justify-content:flex-start;align-items:end"><label style="font-size:10px;color:var(--muted)">Nama karyawan<br><select id="loanPerson" required style="min-width:180px;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></select></label><label style="font-size:10px;color:var(--muted)">Nominal pinjaman (Rp)<br><input id="loanPrincipal" type="number" min="1" step="1" required placeholder="Contoh: 500000" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><label style="font-size:10px;color:var(--muted)">Cicilan per payroll (Rp)<br><input id="loanInstallment" type="number" min="0" step="1000" value="0" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><label style="font-size:10px;color:var(--muted)">Catatan<br><input id="loanNote" placeholder="Opsional" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><button class="btn" type="submit">Simpan pinjaman</button></form><div class="tablewrap"><table><thead><tr><th>Nama</th><th>Tanggal</th><th class="r">Pinjaman</th><th class="r">Cicilan</th><th class="r">Sisa saldo</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="loanBody"><tr><td colspan="7" class="empty">Memuat data pinjaman...</td></tr></tbody></table></div><div class="note">Pencatatan cicilan di sini masih manual. Potongan otomatis ke payroll akan kita sambungkan setelah modul payroll dibangun.</div></section>
 <section class="panel section" id="payroll"><div class="toolbar"><div><h2>Rekap payroll sprinter & freelance</h2><div class="desc" style="margin:4px 0 0">Sprinter: berat TTD × fee/kg. Freelance: jumlah koli TTD × tarif/koli.</div></div><button class="btn" onclick="exportPayroll()">Export payroll CSV</button></div><div class="tablewrap"><table><thead><tr><th>Nama</th><th>Jenis</th><th class="r">Jumlah TTD</th><th class="r">Berat (kg)</th><th class="r">Jumlah koli</th><th class="r">Tarif</th><th class="r">Estimasi gaji</th></tr></thead><tbody id="payBody"><tr><td colspan="7" class="empty">Upload Excel untuk menampilkan payroll.</td></tr></tbody></table></div></section>
@@ -56,7 +57,7 @@
 </main></div>
 <script>
 const STORAGE='cargoflow_v3_records',FEEKEY='cargoflow_v3_fees';
-let allRecords=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],freelancerRows=[],freelancerIds={};
+let allRecords=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],freelancerRows=[],freelancerIds={},pendingKoliUpdates=[];
 const aliases={awb:['no. resi','no resi','awb','waybill'],sprinter:['sprinter delivery','sprinter','nama sprinter','kurir'],label:['label ttd','status ttd','status delivery'],weight:['perhitungan biaya berat','berat','berat kg','weight'],koli:['jumlah koli','jumlah paket','total koli'],cod:['jumlah pembayaran cod','cod','nominal cod'],dfod:['biaya dfod','dfod'],ttddate:['waktu tanda terima','tanggal ttd','waktu ttd'],delivery:['waktu delivery']};
 function norm(x){return String(x??'').toLowerCase().trim().replace(/[^a-z0-9]/g,'')}
 function col(headers,type){let h=headers.find(x=>aliases[type].some(a=>norm(x)===norm(a)));if(h)return h;return headers.find(x=>aliases[type].some(a=>norm(x).includes(norm(a))))||null}
@@ -129,6 +130,58 @@ async function importRowsToCloud(rows,file){
   document.getElementById('fileStatus').textContent=file.name+' • '+rows.length+' baris berhasil disimpan ke cloud';
 }
 document.getElementById('file').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;const status=document.getElementById('fileStatus');status.textContent='Memproses dan mengirim data ke Supabase...';try{let wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});let ws=wb.Sheets[wb.SheetNames[0]],raw=XLSX.utils.sheet_to_json(ws,{defval:''});if(!raw.length)throw Error('File kosong.');const parsed=parseImportRows(raw,Object.keys(raw[0]));await importRowsToCloud(parsed,f)}catch(err){status.textContent='Import gagal';alert('Gagal mengimpor: '+(err.message||String(err)))}finally{e.target.value=''}});
+document.getElementById('koliFile').addEventListener('change',async e=>{
+  const file=e.target.files[0];pendingKoliUpdates=[];document.getElementById('koliUpdateButton').disabled=true;
+  const status=document.getElementById('koliStatus');if(!file){status.textContent='Pilih CSV yang berisi kolom No. Resi dan Jumlah Koli.';return}
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{defval:''});if(!rows.length)throw Error('CSV kosong atau tidak memiliki baris data.');
+    const headers=Object.keys(rows[0]);const awbCol=col(headers,'awb'),koliCol=col(headers,'koli');
+    if(!awbCol||!koliCol)throw Error('Kolom wajib tidak ditemukan. Pastikan ada No. Resi dan Jumlah Koli.');
+    const byAwb=new Map(),conflicts=new Set();
+    rows.forEach(row=>{const awb=String(row[awbCol]??'').trim();if(!awb)return;const koli=Math.max(0,Math.round(n(row[koliCol])));if(byAwb.has(awb)&&byAwb.get(awb)!==koli)conflicts.add(awb);else byAwb.set(awb,koli)});
+    conflicts.forEach(awb=>byAwb.delete(awb));
+    pendingKoliUpdates=[...byAwb].map(([awb,package_count])=>({awb,package_count}));
+    if(!pendingKoliUpdates.length)throw Error('Tidak ada pasangan AWB dan Jumlah Koli yang valid.');
+    status.textContent=pendingKoliUpdates.length+' nomor resi siap dicocokkan; '+conflicts.size+' AWB dengan jumlah koli berbeda di CSV akan dilewati. Periksa file sebelum menekan tombol Perbarui.';
+    document.getElementById('koliUpdateButton').disabled=false;
+  }catch(err){status.textContent='CSV tidak dapat dibaca: '+err.message;pendingKoliUpdates=[]}
+});
+async function applyKoliUpdate(){
+  if(!pendingKoliUpdates.length)return;
+  if(!confirm('Lanjutkan mencocokkan '+pendingKoliUpdates.length+' AWB? Hanya package_count yang masih 0 yang akan diisi. Tidak ada resi baru yang dibuat.'))return;
+  const button=document.getElementById('koliUpdateButton'),status=document.getElementById('koliStatus');button.disabled=true;status.textContent='Mencocokkan AWB dengan database...';
+  let updated=0,notFound=0,alreadyFilled=0,ambiguous=0,failed=0;
+  try{
+    for(let start=0;start<pendingKoliUpdates.length;start+=200){
+      const batch=pendingKoliUpdates.slice(start,start+200),awbs=batch.map(x=>x.awb);
+      const {data,error}=await supabaseClient.from('deliveries').select('id,awb,package_count').in('awb',awbs);
+      if(error)throw error;
+      const grouped=new Map();(data||[]).forEach(row=>{if(!grouped.has(row.awb))grouped.set(row.awb,[]);grouped.get(row.awb).push(row)});
+      const jobs=[];
+      for(const item of batch){
+        const matches=grouped.get(item.awb)||[];
+        if(!matches.length){notFound++;continue}
+        if(matches.length!==1){ambiguous++;continue}
+        if(Number(matches[0].package_count)>0){alreadyFilled++;continue}
+        jobs.push({id:matches[0].id,value:item.package_count});
+      }
+      for(let i=0;i<jobs.length;i+=10){
+        const results=await Promise.all(jobs.slice(i,i+10).map(async job=>{
+          const {data:updateData,error:updateError}=await supabaseClient.from('deliveries').update({package_count:job.value}).eq('id',job.id).eq('package_count',0).select('id');
+          return {data:updateData,error:updateError};
+        }));
+        results.forEach(result=>{if(result.error)failed++;else if(result.data&&result.data.length)updated++;else alreadyFilled++});
+      }
+      status.textContent='Sedang memperbarui... '+Math.min(start+200,pendingKoliUpdates.length)+' / '+pendingKoliUpdates.length+' AWB diperiksa.';
+    }
+    await loadCloudData();
+    status.textContent='Selesai. Berhasil diperbarui: '+updated+'; sudah terisi (dilewati): '+alreadyFilled+'; tidak ditemukan: '+notFound+'; AWB ganda di database: '+ambiguous+'; gagal: '+failed+'.';
+    pendingKoliUpdates=[];
+    document.getElementById('koliFile').value='';
+  }catch(err){status.textContent='Proses terhenti: '+err.message+' Pastikan perubahan yang sudah berhasil tidak diulang; file yang sama aman dipilih kembali karena nilai koli terisi akan dilewati.'}
+  finally{button.disabled=!pendingKoliUpdates.length}
+}
 function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}render()}
 function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';render()}
 function selected(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;return allRecords.filter(r=>isTtd(r)&&r.ttdDate&&(!from||r.ttdDate>=from)&&(!to||r.ttdDate<=to))}
