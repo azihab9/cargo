@@ -107,8 +107,10 @@ async function loadCloudData(){
   if(loanErr)throw loanErr;
   loanRows=loans||[];
   save();
+  restorePayrollPeriod();
   document.getElementById('fileStatus').textContent=allRecords.length+' baris tersinkron dari Supabase';
   render();
+  await refreshPayrollStatus();
   renderLoans();
   renderFreelancers();
 }
@@ -195,8 +197,23 @@ async function applyKoliUpdate(){
   }catch(err){status.textContent='Proses terhenti: '+err.message+' Pastikan perubahan yang sudah berhasil tidak diulang; file yang sama aman dipilih kembali karena nilai koli terisi akan dilewati.'}
   finally{button.disabled=!pendingKoliUpdates.length}
 }
-function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}render()}
-function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';render()}
+function persistPayrollPeriod(){localStorage.setItem('cargoflow_payroll_period',JSON.stringify({start:document.getElementById('fromDate').value,end:document.getElementById('toDate').value}))}
+function restorePayrollPeriod(){try{const p=JSON.parse(localStorage.getItem('cargoflow_payroll_period')||'null');if(p){document.getElementById('fromDate').value=p.start||'';document.getElementById('toDate').value=p.end||''}}catch(e){}}
+async function refreshPayrollStatus(){
+ const el=document.getElementById('payrollStatus'),save=document.getElementById('savePayrollButton'),fin=document.getElementById('finalizePayrollButton'),paid=document.getElementById('paidPayrollButton');
+ const start=document.getElementById('fromDate').value,end=document.getElementById('toDate').value;
+ save.disabled=false;fin.disabled=true;paid.disabled=true;
+ if(!start||!end){el.textContent='Pilih tanggal Dari dan Sampai untuk melihat status payroll.';return}
+ try{
+  const run=await findPayrollRun({start,end});
+  if(!run){el.textContent='Belum ada payroll tersimpan untuk periode '+start+' sampai '+end+'.';save.disabled=false;return}
+  if(run.status==='draft'){el.textContent='Status: DRAFT • '+start+' sampai '+end+'. Draft tersimpan dan belum memotong kasbon.';save.disabled=false;fin.disabled=false}
+  else if(run.status==='locked'){el.textContent='Status: FINAL • '+start+' sampai '+end+'. Payroll terkunci dan potongan kasbon sudah dicatat.';save.disabled=true;fin.disabled=true;paid.disabled=false}
+  else if(run.status==='paid'){el.textContent='Status: SUDAH DIBAYAR • '+start+' sampai '+end+'.';save.disabled=true;fin.disabled=true;paid.disabled=true}
+ }catch(e){el.textContent='Gagal membaca status payroll: '+e.message}
+}
+function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}persistPayrollPeriod();render();refreshPayrollStatus()}
+function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';localStorage.removeItem('cargoflow_payroll_period');render();refreshPayrollStatus()}
 function selected(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;return allRecords.filter(r=>isTtd(r)&&r.ttdDate&&(!from||r.ttdDate>=from)&&(!to||r.ttdDate<=to))}
 function aggregate(){let g={};selected().forEach(r=>{let k=r.sprinter;if(!g[k])g[k]={name:k,count:0,weight:0,cod:0,dfod:0};g[k].count++;g[k].weight+=r.weight;g[k].cod+=r.cod;g[k].dfod+=r.dfod});return Object.values(g).sort((a,b)=>a.name.localeCompare(b.name))}
 function aggregatePayroll(){const sp={},fr={};Object.keys(sprinterIds).forEach(name=>{sp[name]={name,count:0,weight:0,fee:Number(fees[name])||0,basicSalary:Number(basicSalaries[name])||0,feeAmount:0,gross:0,loanDeduction:0,total:0}});selected().forEach(r=>{const f=freelancerRows.find(x=>norm(x.name)===norm(r.sprinter));if(f){if(!fr[f.id])fr[f.id]={name:f.name,count:0,koli:0,fee:Number(f.fee_per_package)||0,feeAmount:0,basicSalary:0,gross:0,loanDeduction:0,total:0};fr[f.id].count++;fr[f.id].koli+=Math.max(0,Number(r.packageCount)||0)}else{const k=r.sprinter;if(!sp[k])sp[k]={name:k,count:0,weight:0,fee:Number(fees[k])||0,basicSalary:Number(basicSalaries[k])||0,feeAmount:0,gross:0,loanDeduction:0,total:0};sp[k].count++;sp[k].weight+=r.weight}});Object.values(sp).forEach(x=>{x.feeAmount=x.weight*x.fee;x.gross=x.basicSalary+x.feeAmount;const id=sprinterIds[x.name];const due=loanRows.filter(l=>l.sprinter_id===id&&l.status==='open').reduce((sum,l)=>sum+Math.min(Number(l.installment_amount)||0,Number(l.balance)||0),0);x.loanDeduction=Math.min(x.gross,due);x.total=x.gross-x.loanDeduction});Object.values(fr).forEach(x=>{x.feeAmount=x.koli*x.fee;x.gross=x.feeAmount;x.total=x.gross});return {sprinters:Object.values(sp).sort((a,b)=>a.name.localeCompare(b.name)),freelancers:Object.values(fr).sort((a,b)=>a.name.localeCompare(b.name))}}
@@ -266,12 +283,14 @@ async function savePayrollDraft(){
  button.disabled=true;status.textContent='Menyimpan draft payroll...';
  try{
   const period=payrollPeriod(),items=payrollPayload();
+  persistPayrollPeriod();
   if(!items.length)throw Error('Belum ada data payroll untuk disimpan.');
   const {data,error}=await supabaseClient.rpc('save_payroll_draft',{
    p_period_start:period.start,p_period_end:period.end,p_items:items
   });
   if(error)throw error;
   status.textContent='Draft tersimpan untuk periode '+period.start+' sampai '+period.end+'. Saldo kasbon belum dipotong.';
+  await refreshPayrollStatus();
   alert('Draft payroll berhasil disimpan.');
  }catch(e){status.textContent='Draft gagal disimpan: '+e.message;alert('Draft gagal disimpan: '+e.message)}
  finally{button.disabled=false}
