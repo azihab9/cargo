@@ -71,6 +71,19 @@ function kg(v){return new Intl.NumberFormat('id-ID',{maximumFractionDigits:2}).f
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify(allRecords));localStorage.setItem(FEEKEY,JSON.stringify(fees))}catch(e){}}
 function load(){try{allRecords=JSON.parse(localStorage.getItem(STORAGE)||'[]');fees=JSON.parse(localStorage.getItem(FEEKEY)||'{}')}catch(e){allRecords=[];fees={}}}
 function parseImportRows(rows,headers){let c={};for(let k of Object.keys(aliases))c[k]=col(headers,k);if(!c.sprinter||!c.label||!c.weight||!c.ttddate)throw Error('Kolom wajib tidak lengkap. Dibutuhkan: Sprinter delivery, Label TTD, Perhitungan biaya berat, dan Waktu tanda terima.');return rows.map(r=>({awb:c.awb?String(r[c.awb]??'').trim():'',sprinter:String(r[c.sprinter]||'Tanpa nama').trim(),label:String(r[c.label]||'').trim(),weight:n(r[c.weight]),packageCount:c.koli?Math.max(0,Math.round(n(r[c.koli]))):0,cod:c.cod?n(r[c.cod]):0,dfod:c.dfod?n(r[c.dfod]):0,ttdDate:dateKey(dateVal(r[c.ttddate])),deliveryDate:dateKey(dateVal(c.delivery?r[c.delivery]:null))}))}
+function parseCsvText(text){
+  text=String(text||'').replace(/^\\uFEFF/,'');
+  const firstLine=(text.split(/\\r?\\n/,1)[0]||'');
+  const count=(line,delimiter)=>{let quoted=false,total=0;for(let i=0;i<line.length;i++){if(line[i]==='"'){if(quoted&&line[i+1]==='"')i++;else quoted=!quoted}else if(!quoted&&line[i]===delimiter)total++}return total};
+  const delimiter=count(firstLine,';')>count(firstLine,',')?';':',';
+  const records=[];let row=[],field='',quoted=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}else if(ch==='"'&&field==='')quoted=true;else if(ch===delimiter){row.push(field);field=''}else if(ch==='\\n'){row.push(field.replace(/\\r$/,''));records.push(row);row=[];field=''}else field+=ch}
+  if(field.length||row.length){row.push(field.replace(/\\r$/,''));records.push(row)}
+  while(records.length&&records[records.length-1].every(v=>String(v).trim()===''))records.pop();
+  if(!records.length)throw Error('CSV kosong.');
+  const headers=records.shift().map((v,i)=>i===0?v.replace(/^\\uFEFF/,'').trim():String(v).trim());
+  return {headers,rows:records.filter(r=>r.some(v=>String(v).trim()!=='')).map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??''])))};
+}
 async function sha256(file){const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function loadCloudData(){
   document.getElementById('fileStatus').textContent='Mengambil data dari database...';
@@ -129,7 +142,7 @@ async function importRowsToCloud(rows,file){
   await loadCloudData();
   document.getElementById('fileStatus').textContent=file.name+' • '+rows.length+' baris berhasil disimpan ke cloud';
 }
-document.getElementById('file').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;const status=document.getElementById('fileStatus');status.textContent='Memproses dan mengirim data ke Supabase...';try{let wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});let ws=wb.Sheets[wb.SheetNames[0]],raw=XLSX.utils.sheet_to_json(ws,{defval:''});if(!raw.length)throw Error('File kosong.');const parsed=parseImportRows(raw,Object.keys(raw[0]));await importRowsToCloud(parsed,f)}catch(err){status.textContent='Import gagal';alert('Gagal mengimpor: '+(err.message||String(err)))}finally{e.target.value=''}});
+document.getElementById('file').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;const status=document.getElementById('fileStatus');status.textContent='Memproses dan mengirim data ke Supabase...';try{let raw,headers;if(/\\.csv$/i.test(f.name)){const parsedCsv=parseCsvText(await f.text());raw=parsedCsv.rows;headers=parsedCsv.headers}else{let wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});let ws=wb.Sheets[wb.SheetNames[0]];raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});headers=raw.length?Object.keys(raw[0]):[]}if(!raw.length)throw Error('File kosong.');const parsed=parseImportRows(raw,headers);await importRowsToCloud(parsed,f)}catch(err){status.textContent='Import gagal';alert('Gagal mengimpor: '+(err.message||String(err)))}finally{e.target.value=''}});
 document.getElementById('koliFile').addEventListener('change',async e=>{
   const file=e.target.files[0];pendingKoliUpdates=[];document.getElementById('koliUpdateButton').disabled=true;
   const status=document.getElementById('koliStatus');if(!file){status.textContent='Pilih CSV yang berisi kolom No. Resi dan Jumlah Koli.';return}
