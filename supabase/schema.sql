@@ -13,11 +13,11 @@ create table if not exists public.profiles (
 
 create or replace function public.current_role()
 returns text language sql stable security definer set search_path = public
-as $$ select role from public.profiles where id = auth.uid() and active = true $$;
+as 'select role from public.profiles where id = auth.uid() and active = true';
 
 create or replace function public.has_role(allowed text[])
 returns boolean language sql stable security definer set search_path = public
-as $$ select coalesce(public.current_role() = any(allowed), false) $$;
+as 'select coalesce(public.current_role() = any(allowed), false)';
 
 create table if not exists public.sprinters (
   id uuid primary key default gen_random_uuid(),
@@ -176,22 +176,150 @@ drop policy if exists "admin manage profiles" on public.profiles;
 create policy "admin manage profiles" on public.profiles for all to authenticated
 using (public.has_role(array['admin'])) with check (public.has_role(array['admin']));
 
--- Authenticated staff can read operational data. Writes are role-scoped.
-do $$
-declare t text;
-begin
-  foreach t in array array['sprinters','freelancers','import_batches','deliveries','employee_loans','payroll_runs','payroll_items','loan_installments','freelance_work','expenses','audit_logs']
-  loop
-    execute format('drop policy if exists "authenticated read %1$s" on public.%1$I', t);
-    execute format('create policy "authenticated read %1$s" on public.%1$I for select to authenticated using (public.current_role() is not null)', t);
-    execute format('drop policy if exists "authorized insert %1$s" on public.%1$I', t);
-    execute format('create policy "authorized insert %1$s" on public.%1$I for insert to authenticated with check (public.has_role(array[''admin'',''finance'',''operations'']))', t);
-    execute format('drop policy if exists "admin finance update %1$s" on public.%1$I', t);
-    execute format('create policy "admin finance update %1$s" on public.%1$I for update to authenticated using (public.has_role(array[''admin'',''finance''])) with check (public.has_role(array[''admin'',''finance'']))', t);
-    execute format('drop policy if exists "admin delete %1$s" on public.%1$I', t);
-    execute format('create policy "admin delete %1$s" on public.%1$I for delete to authenticated using (public.has_role(array[''admin'']))', t);
-  end loop;
-end $$;
+-- Role-based policies for operational tables (explicit statements; no dynamic SQL block).
+
+drop policy if exists "authenticated read sprinters" on public.sprinters;
+create policy "authenticated read sprinters" on public.sprinters for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert sprinters" on public.sprinters;
+create policy "authorized insert sprinters" on public.sprinters for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update sprinters" on public.sprinters;
+create policy "admin finance update sprinters" on public.sprinters for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete sprinters" on public.sprinters;
+create policy "admin delete sprinters" on public.sprinters for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read freelancers" on public.freelancers;
+create policy "authenticated read freelancers" on public.freelancers for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert freelancers" on public.freelancers;
+create policy "authorized insert freelancers" on public.freelancers for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update freelancers" on public.freelancers;
+create policy "admin finance update freelancers" on public.freelancers for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete freelancers" on public.freelancers;
+create policy "admin delete freelancers" on public.freelancers for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read import_batches" on public.import_batches;
+create policy "authenticated read import_batches" on public.import_batches for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert import_batches" on public.import_batches;
+create policy "authorized insert import_batches" on public.import_batches for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update import_batches" on public.import_batches;
+create policy "admin finance update import_batches" on public.import_batches for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete import_batches" on public.import_batches;
+create policy "admin delete import_batches" on public.import_batches for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read deliveries" on public.deliveries;
+create policy "authenticated read deliveries" on public.deliveries for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert deliveries" on public.deliveries;
+create policy "authorized insert deliveries" on public.deliveries for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update deliveries" on public.deliveries;
+create policy "admin finance update deliveries" on public.deliveries for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete deliveries" on public.deliveries;
+create policy "admin delete deliveries" on public.deliveries for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read employee_loans" on public.employee_loans;
+create policy "authenticated read employee_loans" on public.employee_loans for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert employee_loans" on public.employee_loans;
+create policy "authorized insert employee_loans" on public.employee_loans for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update employee_loans" on public.employee_loans;
+create policy "admin finance update employee_loans" on public.employee_loans for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete employee_loans" on public.employee_loans;
+create policy "admin delete employee_loans" on public.employee_loans for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read payroll_runs" on public.payroll_runs;
+create policy "authenticated read payroll_runs" on public.payroll_runs for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert payroll_runs" on public.payroll_runs;
+create policy "authorized insert payroll_runs" on public.payroll_runs for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update payroll_runs" on public.payroll_runs;
+create policy "admin finance update payroll_runs" on public.payroll_runs for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete payroll_runs" on public.payroll_runs;
+create policy "admin delete payroll_runs" on public.payroll_runs for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read payroll_items" on public.payroll_items;
+create policy "authenticated read payroll_items" on public.payroll_items for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert payroll_items" on public.payroll_items;
+create policy "authorized insert payroll_items" on public.payroll_items for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update payroll_items" on public.payroll_items;
+create policy "admin finance update payroll_items" on public.payroll_items for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete payroll_items" on public.payroll_items;
+create policy "admin delete payroll_items" on public.payroll_items for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read loan_installments" on public.loan_installments;
+create policy "authenticated read loan_installments" on public.loan_installments for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert loan_installments" on public.loan_installments;
+create policy "authorized insert loan_installments" on public.loan_installments for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update loan_installments" on public.loan_installments;
+create policy "admin finance update loan_installments" on public.loan_installments for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete loan_installments" on public.loan_installments;
+create policy "admin delete loan_installments" on public.loan_installments for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read freelance_work" on public.freelance_work;
+create policy "authenticated read freelance_work" on public.freelance_work for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert freelance_work" on public.freelance_work;
+create policy "authorized insert freelance_work" on public.freelance_work for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update freelance_work" on public.freelance_work;
+create policy "admin finance update freelance_work" on public.freelance_work for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete freelance_work" on public.freelance_work;
+create policy "admin delete freelance_work" on public.freelance_work for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read expenses" on public.expenses;
+create policy "authenticated read expenses" on public.expenses for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert expenses" on public.expenses;
+create policy "authorized insert expenses" on public.expenses for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update expenses" on public.expenses;
+create policy "admin finance update expenses" on public.expenses for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete expenses" on public.expenses;
+create policy "admin delete expenses" on public.expenses for delete to authenticated
+using (public.has_role(array['admin']));
+
+drop policy if exists "authenticated read audit_logs" on public.audit_logs;
+create policy "authenticated read audit_logs" on public.audit_logs for select to authenticated
+using (public.current_role() is not null);
+drop policy if exists "authorized insert audit_logs" on public.audit_logs;
+create policy "authorized insert audit_logs" on public.audit_logs for insert to authenticated
+with check (public.has_role(array['admin','finance','operations']));
+drop policy if exists "admin finance update audit_logs" on public.audit_logs;
+create policy "admin finance update audit_logs" on public.audit_logs for update to authenticated
+using (public.has_role(array['admin','finance'])) with check (public.has_role(array['admin','finance']));
+drop policy if exists "admin delete audit_logs" on public.audit_logs;
+create policy "admin delete audit_logs" on public.audit_logs for delete to authenticated
+using (public.has_role(array['admin']));
 
 -- Private bucket for receipt photos/PDFs.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -211,14 +339,12 @@ using (bucket_id = 'cargoflow-receipts' and public.has_role(array['admin']));
 -- Every new auth user receives a basic operations profile; no one is auto-promoted to admin.
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public
-as $
-begin
-  insert into public.profiles (id, full_name, role)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name',''), 'operations')
-  on conflict (id) do nothing;
-  return new;
-end;
-$;
+as 'BEGIN
+  INSERT INTO public.profiles (id, full_name, role)
+  VALUES (new.id, coalesce(new.raw_user_meta_data->>''full_name'', ''''), ''operations'')
+  ON CONFLICT (id) DO NOTHING;
+  RETURN new;
+END;';
 
 drop trigger if exists on_auth_user_created_cargoflow on auth.users;
 create trigger on_auth_user_created_cargoflow
