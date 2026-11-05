@@ -56,7 +56,7 @@
 <script>
 const STORAGE='cargoflow_v3_records',FEEKEY='cargoflow_v3_fees';
 let allRecords=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[];
-const aliases={awb:['no. resi','no resi','awb','waybill'],sprinter:['sprinter delivery','sprinter','nama sprinter','kurir'],label:['label ttd','status ttd','status delivery'],weight:['perhitungan biaya berat','berat','berat kg','weight'],cod:['jumlah pembayaran cod','cod','nominal cod'],dfod:['biaya dfod','dfod'],ttddate:['waktu tanda terima','tanggal ttd','waktu ttd'],delivery:['waktu delivery']};
+const aliases={awb:['no. resi','no resi','awb','waybill'],sprinter:['sprinter delivery','sprinter','nama sprinter','kurir'],label:['label ttd','status ttd','status delivery'],weight:['perhitungan biaya berat','berat','berat kg','weight'],koli:['jumlah koli','jumlah paket','total koli'],cod:['jumlah pembayaran cod','cod','nominal cod'],dfod:['biaya dfod','dfod'],ttddate:['waktu tanda terima','tanggal ttd','waktu ttd'],delivery:['waktu delivery']};
 function norm(x){return String(x??'').toLowerCase().trim().replace(/[^a-z0-9]/g,'')}
 function col(headers,type){let h=headers.find(x=>aliases[type].some(a=>norm(x)===norm(a)));if(h)return h;return headers.find(x=>aliases[type].some(a=>norm(x).includes(norm(a))))||null}
 function n(v){if(typeof v==='number')return v;let s=String(v??'').trim().replace(/[^\d,.-]/g,'');if(!s)return 0;if(s.includes('.')&&s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');return Number(s)||0}
@@ -68,7 +68,7 @@ function money(v){return new Intl.NumberFormat('id-ID',{style:'currency',currenc
 function kg(v){return new Intl.NumberFormat('id-ID',{maximumFractionDigits:2}).format(v||0)}
 function save(){try{localStorage.setItem(STORAGE,JSON.stringify(allRecords));localStorage.setItem(FEEKEY,JSON.stringify(fees))}catch(e){}}
 function load(){try{allRecords=JSON.parse(localStorage.getItem(STORAGE)||'[]');fees=JSON.parse(localStorage.getItem(FEEKEY)||'{}')}catch(e){allRecords=[];fees={}}}
-function parseImportRows(rows,headers){let c={};for(let k of Object.keys(aliases))c[k]=col(headers,k);if(!c.sprinter||!c.label||!c.weight||!c.ttddate)throw Error('Kolom wajib tidak lengkap. Dibutuhkan: Sprinter delivery, Label TTD, Perhitungan biaya berat, dan Waktu tanda terima.');return rows.map(r=>({awb:c.awb?String(r[c.awb]??'').trim():'',sprinter:String(r[c.sprinter]||'Tanpa nama').trim(),label:String(r[c.label]||'').trim(),weight:n(r[c.weight]),cod:c.cod?n(r[c.cod]):0,dfod:c.dfod?n(r[c.dfod]):0,ttdDate:dateKey(dateVal(r[c.ttddate])),deliveryDate:dateKey(dateVal(c.delivery?r[c.delivery]:null))}))}
+function parseImportRows(rows,headers){let c={};for(let k of Object.keys(aliases))c[k]=col(headers,k);if(!c.sprinter||!c.label||!c.weight||!c.ttddate)throw Error('Kolom wajib tidak lengkap. Dibutuhkan: Sprinter delivery, Label TTD, Perhitungan biaya berat, dan Waktu tanda terima.');return rows.map(r=>({awb:c.awb?String(r[c.awb]??'').trim():'',sprinter:String(r[c.sprinter]||'Tanpa nama').trim(),label:String(r[c.label]||'').trim(),weight:n(r[c.weight]),packageCount:c.koli?Math.max(0,Math.round(n(r[c.koli]))):0,cod:c.cod?n(r[c.cod]):0,dfod:c.dfod?n(r[c.dfod]):0,ttdDate:dateKey(dateVal(r[c.ttddate])),deliveryDate:dateKey(dateVal(c.delivery?r[c.delivery]:null))}))}
 async function sha256(file){const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('')}
 async function loadCloudData(){
   document.getElementById('fileStatus').textContent='Mengambil data dari database...';
@@ -78,13 +78,13 @@ async function loadCloudData(){
   (sp||[]).forEach(x=>{fees[x.name]=Number(x.fee_per_kg)||0;basicSalaries[x.name]=Number(x.basic_salary)||0;sprinterIds[x.name]=x.id});
   let rows=[],start=0,pageSize=1000;
   while(true){
-    const {data,error}=await supabaseClient.from('deliveries').select('awb,sprinter_name,ttd_status,weight_kg,cod_amount,dfod_amount,ttd_date,delivery_date').order('created_at',{ascending:true}).range(start,start+pageSize-1);
+    const {data,error}=await supabaseClient.from('deliveries').select('awb,sprinter_name,ttd_status,weight_kg,package_count,cod_amount,dfod_amount,ttd_date,delivery_date').order('created_at',{ascending:true}).range(start,start+pageSize-1);
     if(error)throw error;
     rows=rows.concat(data||[]);
     if(!data||data.length<pageSize)break;
     start+=pageSize;
   }
-  allRecords=rows.map(x=>({awb:x.awb||'',sprinter:x.sprinter_name||'Tanpa nama',label:x.ttd_status||'',weight:Number(x.weight_kg)||0,cod:Number(x.cod_amount)||0,dfod:Number(x.dfod_amount)||0,ttdDate:x.ttd_date||'',deliveryDate:x.delivery_date||''}));
+  allRecords=rows.map(x=>({awb:x.awb||'',sprinter:x.sprinter_name||'Tanpa nama',label:x.ttd_status||'',weight:Number(x.weight_kg)||0,packageCount:Number(x.package_count)||0,cod:Number(x.cod_amount)||0,dfod:Number(x.dfod_amount)||0,ttdDate:x.ttd_date||'',deliveryDate:x.delivery_date||''}));
   const {data:loans,error:loanErr}=await supabaseClient.from('employee_loans').select('id,sprinter_id,person_name,principal,installment_amount,balance,loan_date,note,status').order('loan_date',{ascending:false});
   if(loanErr)throw loanErr;
   loanRows=loans||[];
@@ -111,7 +111,7 @@ async function importRowsToCloud(rows,file){
   const {data:batch,error:batchErr}=await supabaseClient.from('import_batches').insert({file_name:file.name,file_hash:fileHash,row_count:rows.length,imported_by:userData.user?.id||null}).select('id').single();
   if(batchErr)throw batchErr;
   try{
-    const payload=rows.map(x=>({import_batch_id:batch.id,awb:x.awb||null,sprinter_id:sprinterIds[x.sprinter]||null,sprinter_name:x.sprinter,ttd_status:x.label,weight_kg:x.weight,cod_amount:x.cod,dfod_amount:x.dfod,ttd_date:x.ttdDate||null,delivery_date:x.deliveryDate||null}));
+    const payload=rows.map(x=>({import_batch_id:batch.id,awb:x.awb||null,sprinter_id:sprinterIds[x.sprinter]||null,sprinter_name:x.sprinter,ttd_status:x.label,weight_kg:x.weight,package_count:x.packageCount||0,cod_amount:x.cod,dfod_amount:x.dfod,ttd_date:x.ttdDate||null,delivery_date:x.deliveryDate||null}));
     for(let i=0;i<payload.length;i+=500){
       const {error}=await supabaseClient.from('deliveries').insert(payload.slice(i,i+500));
       if(error)throw error;
