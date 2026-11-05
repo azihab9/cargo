@@ -71,7 +71,7 @@
 <label style="font-size:10px;color:var(--muted)">Keterangan<br><input id="expenseDescription" maxlength="250" placeholder="Contoh: Isi BBM kendaraan operasional" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label>
 <button class="btn" type="submit">Simpan Pengeluaran</button>
 </form>
-<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="r">Nominal</th></tr></thead><tbody id="expenseBody"><tr><td colspan="4" class="empty">Memuat pengeluaran...</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="r">Nominal</th><th>Aksi</th></tr></thead><tbody id="expenseBody"><tr><td colspan="5" class="empty">Memuat pengeluaran...</td></tr></tbody></table></div>
 <div class="note">Laporan ini belum menghitung pendapatan jasa pengiriman. Total biaya merupakan pengeluaran operasional ditambah payroll yang sudah difinalisasi atau dibayar. Draft payroll tidak dihitung.</div>
 </section>
 <section class="grid2 section">
@@ -312,12 +312,12 @@ async function loadFinanceData(){
  if(!from||!to||from>to){alert('Periksa tanggal laporan keuangan.');return}
  expenseBody.innerHTML='<tr><td colspan="4" class="empty">Memuat pengeluaran...</td></tr>';
  try{
-  const {data:expenses,error:expenseError}=await supabaseClient.from('expenses').select('expense_date,category,amount,description').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false});
+  const {data:expenses,error:expenseError}=await supabaseClient.from('expenses').select('id,expense_date,category,amount,description').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false});
   if(expenseError)throw expenseError;
   expenseRows=expenses||[];
   const expenseTotal=expenseRows.reduce((sum,x)=>sum+(Number(x.amount)||0),0);
   document.getElementById('financeExpenses').textContent=money(expenseTotal);
-  expenseBody.innerHTML=expenseRows.length?expenseRows.map(x=>'<tr><td>'+esc(x.expense_date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.description||'-')+'</td><td class="r">'+money(x.amount)+'</td></tr>').join(''):'<tr><td colspan="4" class="empty">Belum ada pengeluaran pada periode ini.</td></tr>';
+  expenseBody.innerHTML=expenseRows.length?expenseRows.map(x=>'<tr><td>'+esc(x.expense_date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.description||'-')+'</td><td class="r">'+money(x.amount)+'</td><td><button class="smallbtn" onclick="editExpense(\''+x.id+'\')">Edit</button> <button class="smallbtn" onclick="deleteExpense(\''+x.id+'\')">Hapus</button></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada pengeluaran pada periode ini.</td></tr>';
   const categories={};expenseRows.forEach(x=>{categories[x.category]=(categories[x.category]||0)+(Number(x.amount)||0)});
   const catRows=Object.entries(categories).sort((a,b)=>b[1]-a[1]);
   document.getElementById('expenseCategoryBody').innerHTML=catRows.length?catRows.map(x=>'<tr><td>'+esc(x[0])+'</td><td class="r">'+money(x[1])+'</td></tr>').join(''):'<tr><td colspan="2" class="empty">Belum ada data kategori.</td></tr>';
@@ -335,9 +335,39 @@ async function loadFinanceData(){
   document.getElementById('financeTotal').textContent=money(expenseTotal+payrollTotal);
   document.getElementById('financePayrollBody').innerHTML=details.length?details.map(x=>'<tr><td>'+esc(x.run.period_start)+' s/d '+esc(x.run.period_end)+'</td><td>'+(x.run.status==='locked'?'FINAL':'SUDAH DIBAYAR')+'</td><td class="r">'+money(x.total)+'</td></tr>').join(''):'<tr><td colspan="3" class="empty">Belum ada payroll FINAL / SUDAH DIBAYAR pada periode ini.</td></tr>';
  }catch(e){
-  expenseBody.innerHTML='<tr><td colspan="4" class="empty">Gagal memuat laporan: '+esc(e.message)+'</td></tr>';
+  expenseBody.innerHTML='<tr><td colspan="5" class="empty">Gagal memuat laporan: '+esc(e.message)+'</td></tr>';
   alert('Laporan keuangan gagal dimuat: '+e.message);
  }
+}
+async function editExpense(id){
+ const item=expenseRows.find(x=>x.id===id);
+ if(!item){alert('Data pengeluaran tidak ditemukan. Muat ulang laporan.');return}
+ const date=prompt('Tanggal pengeluaran (YYYY-MM-DD):',item.expense_date||'');
+ if(date===null)return;
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)){alert('Format tanggal harus YYYY-MM-DD.');return}
+ const category=prompt('Kategori pengeluaran:',item.category||'');
+ if(category===null)return;
+ if(!category.trim()){alert('Kategori tidak boleh kosong.');return}
+ const rawAmount=prompt('Nominal pengeluaran (Rp):',String(item.amount??''));
+ if(rawAmount===null)return;
+ const amount=Number(rawAmount);
+ if(!Number.isFinite(amount)||amount<=0){alert('Nominal harus lebih besar dari 0.');return}
+ const description=prompt('Keterangan:',item.description||'');
+ if(description===null)return;
+ if(!confirm('Simpan perubahan pengeluaran ini?'))return;
+ const {error}=await supabaseClient.from('expenses').update({expense_date:date,category:category.trim(),amount,description:description.trim()||null}).eq('id',id);
+ if(error){alert('Perubahan gagal disimpan: '+error.message);return}
+ await loadFinanceData();
+ alert('Pengeluaran berhasil diperbarui.');
+}
+async function deleteExpense(id){
+ const item=expenseRows.find(x=>x.id===id);
+ if(!item){alert('Data pengeluaran tidak ditemukan. Muat ulang laporan.');return}
+ if(!confirm('Hapus pengeluaran '+item.category+' sebesar '+money(item.amount)+'? Data yang dihapus tidak dapat dikembalikan.'))return;
+ const {error}=await supabaseClient.from('expenses').delete().eq('id',id);
+ if(error){alert('Pengeluaran gagal dihapus: '+error.message);return}
+ await loadFinanceData();
+ alert('Pengeluaran berhasil dihapus.');
 }
 document.getElementById('expenseForm').addEventListener('submit',async e=>{
  e.preventDefault();
