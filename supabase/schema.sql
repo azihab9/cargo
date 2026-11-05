@@ -208,6 +208,22 @@ drop policy if exists "receipt delete admin" on storage.objects;
 create policy "receipt delete admin" on storage.objects for delete to authenticated
 using (bucket_id = 'cargoflow-receipts' and public.has_role(array['admin']));
 
--- New user profiles are intentionally NOT auto-promoted to admin.
--- After the first user signs up, set their role manually in SQL Editor:
+-- Every new auth user receives a basic operations profile; no one is auto-promoted to admin.
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public
+as $
+begin
+  insert into public.profiles (id, full_name, role)
+  values (new.id, coalesce(new.raw_user_meta_data->>'full_name',''), 'operations')
+  on conflict (id) do nothing;
+  return new;
+end;
+$;
+
+drop trigger if exists on_auth_user_created_cargoflow on auth.users;
+create trigger on_auth_user_created_cargoflow
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+
+-- After first sign-up, promote the intended administrator manually in SQL Editor:
 -- update public.profiles set role = 'admin', full_name = 'Admin CargoFlow' where id = '<AUTH_USER_UUID>';
