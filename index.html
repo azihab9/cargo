@@ -288,12 +288,12 @@ function payrollPayload(){
  const pg=aggregatePayroll(),items=[];
  pg.sprinters.forEach(x=>items.push({
   sprinter_id:sprinterIds[x.name]||null,freelancer_id:null,person_name:x.name,pay_type:'sprinter',
-  basic_salary:x.basicSalary,ttd_weight_kg:x.weight,fee_per_kg:x.fee,package_count:0,fee_per_package:0,
+  basic_salary:x.basicSalary,ttd_weight_kg:x.weight,ttd_count:x.count,fee_per_kg:x.fee,package_count:0,fee_per_package:0,
   gross_amount:x.gross,loan_deduction:x.loanDeduction,net_amount:x.total
  }));
  pg.freelancers.forEach(x=>items.push({
   sprinter_id:null,freelancer_id:freelancerIds[norm(x.name)]||null,person_name:x.name,pay_type:'freelance',
-  basic_salary:0,ttd_weight_kg:0,fee_per_kg:0,package_count:x.koli,fee_per_package:x.fee,
+  basic_salary:0,ttd_weight_kg:0,ttd_count:x.count,fee_per_kg:0,package_count:x.koli,fee_per_package:x.fee,
   gross_amount:x.gross,loan_deduction:0,net_amount:x.total
  }));
  return items;
@@ -411,10 +411,10 @@ async function viewPayrollHistory(runId){
  try{
   const {data:run,error:runError}=await supabaseClient.from('payroll_runs').select('id,status,period_start,period_end').eq('id',runId).single();
   if(runError)throw runError;
-  const {data:items,error}=await supabaseClient.from('payroll_items').select('person_name,pay_type,ttd_weight_kg,package_count,basic_salary,gross_amount,loan_deduction,net_amount').eq('payroll_run_id',runId).order('person_name');
+  const {data:items,error}=await supabaseClient.from('payroll_items').select('person_name,pay_type,ttd_count,ttd_weight_kg,package_count,basic_salary,gross_amount,loan_deduction,net_amount').eq('payroll_run_id',runId).order('person_name');
   if(error)throw error;
   title.textContent=run.period_start+' sampai '+run.period_end+' • '+(run.status==='draft'?'DRAFT':run.status==='locked'?'FINAL':'SUDAH DIBAYAR');
-  body.innerHTML=(items||[]).length?(items||[]).map(x=>'<tr><td>'+esc(x.person_name)+'</td><td>'+esc(x.pay_type==='sprinter'?'Sprinter':'Freelance')+'</td><td class="r">-</td><td class="r">'+kg(x.ttd_weight_kg)+'</td><td class="r">'+(Number(x.package_count)||0).toLocaleString('id-ID')+'</td><td class="r">'+money(x.basic_salary)+'</td><td class="r">'+money(x.gross_amount)+'</td><td class="r">'+money(x.loan_deduction)+'</td><td class="r">'+money(x.net_amount)+'</td></tr>').join(''):'<tr><td colspan="9" class="empty">Tidak ada rincian payroll.</td></tr>';
+  body.innerHTML=(items||[]).length?(items||[]).map(x=>'<tr><td>'+esc(x.person_name)+'</td><td>'+esc(x.pay_type==='sprinter'?'Sprinter':'Freelance')+'</td><td class="r">'+(Number(x.ttd_count)||0).toLocaleString('id-ID')+'</td><td class="r">'+kg(x.ttd_weight_kg)+'</td><td class="r">'+(Number(x.package_count)||0).toLocaleString('id-ID')+'</td><td class="r">'+money(x.basic_salary)+'</td><td class="r">'+money(x.gross_amount)+'</td><td class="r">'+money(x.loan_deduction)+'</td><td class="r">'+money(x.net_amount)+'</td></tr>').join(''):'<tr><td colspan="9" class="empty">Tidak ada rincian payroll.</td></tr>';
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
  }catch(e){body.innerHTML='<tr><td colspan="9" class="empty">Gagal memuat rincian: '+esc(e.message)+'</td></tr>'}
 }
