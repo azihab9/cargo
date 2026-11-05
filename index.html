@@ -145,7 +145,8 @@ async function enterApp(session){
   document.getElementById('authScreen').style.display='none';
   document.getElementById('cargoApp').style.display='grid';
   const displayName=profile.full_name||session.user.email||'Pengguna';
-  document.getElementById('userBadge').textContent='●  '+displayName+' • '+String(profile.role||'user').toUpperCase();\n  try{await loadCloudData()}catch(e){document.getElementById('fileStatus').textContent='Gagal memuat data cloud';alert('Login berhasil, tetapi data cloud gagal dimuat: '+e.message)}
+  document.getElementById('userBadge').textContent='●  '+displayName+' • '+String(profile.role||'user').toUpperCase();
+  try{await loadCloudData()}catch(e){document.getElementById('fileStatus').textContent='Gagal memuat data cloud';alert('Login berhasil, tetapi data cloud gagal dimuat: '+e.message)}
 }
 document.getElementById('loginForm').addEventListener('submit',async event=>{
   event.preventDefault();
