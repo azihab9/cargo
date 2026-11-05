@@ -3,23 +3,38 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CargoFlow | Area Rantau</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--g:#168b46;--gd:#0e6935;--bg:#f3f7f4;--ink:#18251e;--muted:#718078;--line:#e4ece6;--white:#fff;--nav:#10271a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}.app{min-height:100vh;display:grid;grid-template-columns:240px 1fr}.side{background:var(--nav);color:#e9f4ec;padding:24px 16px;display:flex;flex-direction:column;gap:25px}.brand{font-size:21px;font-weight:850}.brand span{color:#65d58b}.tag{font-size:10px;color:#9ab5a3;letter-spacing:1.2px;margin-top:4px}.navlabel{font-size:10px;color:#85a391;text-transform:uppercase;letter-spacing:1.3px;padding:0 11px;margin:5px 0}.nav a{display:block;text-decoration:none;color:#c9d9cf;font-size:13px;padding:12px;border-radius:9px;margin:3px 0}.nav a:hover,.nav a.active{background:#205235;color:white}.foot{margin-top:auto;color:#89a392;font-size:10px;line-height:1.7}
-main{max-width:1500px;width:100%;padding:28px 30px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.eyebrow{color:var(--g);font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}.top h1{font-size:25px;margin:5px 0}.muted{color:var(--muted);font-size:11px}.user{background:white;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:11px}
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(135deg,#edf7ef,#f7faf8)}.auth-card{width:100%;max-width:410px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 18px 55px #12351e12}.auth-logo{font-size:27px;font-weight:900;color:var(--nav);margin-bottom:5px}.auth-logo span{color:var(--g)}.auth-card h1{font-size:21px;margin:25px 0 6px}.auth-card p{font-size:12px;color:var(--muted);line-height:1.6}.auth-card label{display:block;font-size:11px;font-weight:700;margin:16px 0 6px}.auth-card input{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font-size:13px}.auth-card .btn{width:100%;padding:12px;margin-top:18px}.auth-error{display:none;background:#fff0ef;color:#a52c24;border-radius:8px;padding:10px;font-size:11px;margin-top:12px}.auth-foot{font-size:10px;color:var(--muted);margin-top:18px}.main-user{display:flex;align-items:center;gap:8px}.logout{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 11px;font-size:11px;cursor:pointer;color:#526258}main{max-width:1500px;width:100%;padding:28px 30px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.eyebrow{color:var(--g);font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase}.top h1{font-size:25px;margin:5px 0}.muted{color:var(--muted);font-size:11px}.user{background:white;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:11px}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:15px}.card,.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 3px 12px #193a2407}.metric-label{font-size:11px;color:var(--muted)}.metric{font-size:23px;font-weight:850;margin:9px 0 4px}.green{color:var(--g)}.hint{font-size:10px;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.panel h2{font-size:14px;margin:0 0 5px}.desc{font-size:11px;color:var(--muted);margin-bottom:14px}
 .upload{background:#f7fcf8;border:1.5px dashed #a8cdb5;border-radius:11px;padding:19px;text-align:center}.upload .ico{font-size:25px;color:var(--g)}.upload strong{font-size:12px;display:block;margin:7px}.upload p{font-size:10px;color:var(--muted)}input,select{font:inherit}input[type=file]{font-size:11px;max-width:100%}.btn{border:0;border-radius:8px;padding:9px 13px;background:var(--g);color:white;font-size:11px;font-weight:750;cursor:pointer}.btn:hover{background:var(--gd)}.btn.light{background:#eaf5ee;color:var(--gd)}.btn.dark{background:#253a2c}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0}.toolbar input,.toolbar select,.datefilters input{border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px}.datefilters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.datefilters label{font-size:10px;color:var(--muted)}.pill{display:inline-block;background:#eaf6ee;color:#168345;border-radius:20px;padding:5px 8px;font-size:10px;font-weight:750}.note{background:#fff8e8;border:1px solid #f0e2bc;border-radius:9px;padding:10px 12px;font-size:10px;line-height:1.55;color:#735a23;margin-top:12px}.tablewrap{overflow:auto;max-height:370px}table{border-collapse:collapse;width:100%;font-size:11px}th{position:sticky;top:0;background:#f6faf7;color:#718078;text-align:left;font-size:10px}td,th{padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}.empty{text-align:center;color:var(--muted);padding:25px}.feeinput{width:100px;border:1px solid var(--line);border-radius:7px;padding:7px;font-size:11px;text-align:right}.status{font-size:10px;color:var(--g);font-weight:700}.section{margin-top:14px}.smallbtn{border:1px solid var(--line);background:white;padding:7px 9px;border-radius:7px;font-size:10px;cursor:pointer}
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:14px;gap:12px}.nav{display:flex;overflow:auto}.navlabel,.foot{display:none}.nav a{white-space:nowrap;padding:9px}.cards{grid-template-columns:repeat(2,1fr)}main{padding:18px 13px}}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}.top h1{font-size:21px}.metric{font-size:19px}.user{display:none}}
 </style></head>
-<body><div class="app">
+<body>
+<div class="auth-screen" id="authScreen">
+  <form class="auth-card" id="loginForm">
+    <div class="auth-logo">Cargo<span>Flow</span></div>
+    <div class="tag" style="color:#718078">AREA RANTAU • OPERATION & PAYROLL</div>
+    <h1>Masuk ke CargoFlow</h1>
+    <p>Gunakan akun yang sudah terdaftar untuk mengakses dashboard operasional.</p>
+    <label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" placeholder="nama@email.com" required>
+    <label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
+    <button class="btn" id="loginButton" type="submit">Masuk</button>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-foot">Akses akun dikelola oleh administrator CargoFlow.</div>
+  </form>
+</div>
+<div class="app" id="cargoApp" style="display:none">
 <aside class="side"><div><div class="brand">Cargo<span>Flow</span></div><div class="tag">AREA RANTAU • OPERATION & PAYROLL</div></div>
 <nav class="nav"><div class="navlabel">Workspace</div><a class="active" href="#dashboard">▦ &nbsp; Dashboard</a><a href="#import">⇧ &nbsp; Upload Excel</a><a href="#payroll">▤ &nbsp; Payroll Sprinter</a><a href="#cash">◎ &nbsp; COD & DFOD</a><a href="#fees">⚙ &nbsp; Pengaturan Fee</a><a href="#records">▣ &nbsp; Data Operasional</a></nav>
-<div class="foot">CARGOFLOW • PROTOTYPE V3<br>Data tersimpan di browser perangkat ini</div></aside>
+<div class="foot">CARGOFLOW • PROTOTYPE V3<br>Login terhubung ke Supabase • Data operasional masih tahap lokal</div></aside>
 <main id="dashboard">
-<div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="user">● &nbsp; Admin Operasional</div></div>
+<div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="main-user"><div class="user" id="userBadge">● &nbsp; Memuat akun...</div><button class="logout" id="logoutButton" type="button">Keluar</button></div></div>
 <div class="panel" style="margin-bottom:14px"><div class="toolbar" style="margin:0"><div><h2>Filter periode laporan</h2><div class="desc" style="margin:4px 0 0">Tanggal berdasarkan Waktu tanda terima (TTD)</div></div><div class="datefilters"><label>Dari <input type="date" id="fromDate"></label><label>Sampai <input type="date" id="toDate"></label><button class="btn light" onclick="applyFilter()">Terapkan</button><button class="smallbtn" onclick="clearFilter()">Semua tanggal</button></div></div></div>
 <section class="cards">
 <div class="card"><div class="metric-label">Total TTD</div><div class="metric" id="mTtd">0</div><div class="hint">Resi penerimaan normal</div></div>
@@ -68,5 +83,44 @@ function resetFees(){Object.keys(fees).forEach(k=>fees[k]=100);save();render()}
 function renderRecords(){let q=(document.getElementById('search').value||'').toLowerCase(),list=activeRecords.filter(r=>(r.sprinter+' '+r.awb).toLowerCase().includes(q));document.getElementById('rowCount').textContent=list.length+' resi';document.getElementById('recordBody').innerHTML=list.length?list.slice(0,500).map(r=>`<tr><td>${esc(r.awb||'-')}</td><td>${esc(r.sprinter)}</td><td class="r">${kg(r.weight)}</td><td class="r">${money(r.cod)}</td><td class="r">${money(r.dfod)}</td><td>${esc(r.ttdDate)}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Tidak ada data TTD yang cocok.</td></tr>'}
 function resetData(){if(!confirm('Hapus seluruh data operasional yang tersimpan di browser ini?'))return;allRecords=[];localStorage.removeItem(STORAGE);document.getElementById('file').value='';document.getElementById('fileStatus').textContent='Data telah dihapus';render()}
 function exportPayroll(){let g=aggregate(),rows=[['Nama Sprinter','Jumlah TTD','Total Berat (kg)','Fee per kg (Rp)','Estimasi Gaji (Rp)','Periode dari','Periode sampai'],...g.map(x=>[x.name,x.count,x.weight,Number(fees[x.name])||0,x.weight*(Number(fees[x.name])||0),document.getElementById('fromDate').value,document.getElementById('toDate').value])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='CargoFlow-Payroll.csv';a.click();URL.revokeObjectURL(a.href)}
+
+const SUPABASE_URL='https://vvzezmnohflnhqykydsc.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_VZb5sqNmiwBCXQl2z__E3Q_po1aH24T';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+function authMessage(message){const el=document.getElementById('authError');el.textContent=message;el.style.display='block'}
+async function enterApp(session){
+  if(!session){document.getElementById('authScreen').style.display='flex';document.getElementById('cargoApp').style.display='none';return}
+  const {data:profile,error}=await supabaseClient.from('profiles').select('full_name,role,active').eq('id',session.user.id).single();
+  if(error||!profile){await supabaseClient.auth.signOut();authMessage('Akun belum memiliki profil CargoFlow. Hubungi administrator.');return}
+  if(profile.active!==true){await supabaseClient.auth.signOut();authMessage('Akun ini sedang dinonaktifkan. Hubungi administrator.');return}
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('cargoApp').style.display='grid';
+  const displayName=profile.full_name||session.user.email||'Pengguna';
+  document.getElementById('userBadge').textContent='●  '+displayName+' • '+String(profile.role||'user').toUpperCase();
+}
+document.getElementById('loginForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=document.getElementById('loginButton');button.disabled=true;button.textContent='Memeriksa akun...';
+  document.getElementById('authError').style.display='none';
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){authMessage(error.message==='Invalid login credentials'?'Email atau password salah.':error.message)}
+  else{await enterApp(data.session)}
+  button.disabled=false;button.textContent='Masuk';
+});
+document.getElementById('logoutButton').addEventListener('click',async()=>{
+  const {error}=await supabaseClient.auth.signOut();
+  if(error){alert('Gagal keluar: '+error.message);return}
+  document.getElementById('cargoApp').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('loginPassword').value='';
+});
+(async()=>{
+  const {data,error}=await supabaseClient.auth.getSession();
+  if(error){authMessage('Tidak dapat memeriksa sesi. Muat ulang halaman.');return}
+  await enterApp(data.session);
+})();
+
 document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});load();render();
 </script></body></html>
