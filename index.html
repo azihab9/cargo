@@ -111,7 +111,8 @@ async function importRowsToCloud(rows,file){
       if(error)throw error;
     }
   }catch(err){
-    await supabaseClient.from('deliveries').delete().eq('import_batch_id',batch.id);\n    await supabaseClient.from('import_batches').delete().eq('id',batch.id);
+    await supabaseClient.from('deliveries').delete().eq('import_batch_id',batch.id);
+    await supabaseClient.from('import_batches').delete().eq('id',batch.id);
     throw err;
   }
   await loadCloudData();
