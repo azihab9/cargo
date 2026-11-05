@@ -53,6 +53,8 @@ create table if not exists public.deliveries (
   import_batch_id uuid references public.import_batches(id) on delete set null,
   awb text,
   sprinter_id uuid references public.sprinters(id),
+  freelancer_id uuid references public.freelancers(id),
+  package_count integer not null default 0 check (package_count >= 0),
   sprinter_name text not null default '',
   ttd_status text not null default '',
   weight_kg numeric(12,3) not null default 0,
@@ -63,6 +65,9 @@ create table if not exists public.deliveries (
   source_row jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
+alter table public.deliveries add column if not exists freelancer_id uuid references public.freelancers(id);
+alter table public.deliveries add column if not exists package_count integer not null default 0 check (package_count >= 0);
+
 create unique index if not exists deliveries_awb_batch_uq on public.deliveries(import_batch_id, awb) where awb is not null;
 
 create table if not exists public.employee_loans (
