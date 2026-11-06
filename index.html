@@ -238,6 +238,16 @@ tbody tr:hover{background:#f7fbfd}
 <section class="page" data-page="cash">
 <div class="panel" id="cash">
  <div class="toolbar"><div><h2>Setoran Harian COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Cocokkan tagihan harian dengan pembayaran customer dan uang yang sudah diterima outlet.</div></div><label style="font-size:10px;color:var(--muted)">Tanggal laporan<br><input type="date" id="cashDate" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div>
+ <div class="panel" style="background:#f3fbf7;margin:14px 0">
+  <h2>Import Laporan TTD J&T Cargo</h2>
+  <div class="desc">Unggah CSV laporan J&T Cargo. Tanggal transaksi dibaca dari <b>Waktu tanda terima</b>, COD dari <b>jumlah pembayaran COD</b>, dan DFOD dari <b>Biaya DFOD</b>.</div>
+  <div class="toolbar" style="justify-content:flex-start;align-items:center;margin-top:10px">
+   <input type="file" id="cashReportFile" accept=".csv,text/csv">
+   <button class="btn" id="cashReportImportButton" type="button" disabled onclick="importCashReport()">Import laporan</button>
+  </div>
+  <div class="muted" id="cashReportStatus">Pilih file CSV untuk memeriksa data sebelum diimpor.</div>
+  <div class="note">Import akan memperbarui data berdasarkan nomor resi (AWB), bukan menggandakan resi yang sama. Pastikan file merupakan laporan TTD.</div>
+ </div>
  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
   <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada tanggal terpilih</div></div>
   <div class="card"><div class="metric-label">Pembayaran tercatat</div><div class="metric" id="cashRecorded">Rp0</div><div class="hint">Termasuk uang yang masih di sprinter</div></div>
@@ -492,24 +502,29 @@ function payrollPayload(){
 
 function initCashDate(){
  const el=document.getElementById('cashDate');if(!el)return;
- const now=new Date();el.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+ if(!el.value){const now=new Date();el.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-')}
  const select=document.getElementById('cashSprinter');
- if(select)select.innerHTML=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b)).map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
+ const names=[...new Set([...Object.keys(sprinterIds),...cashReportRows.map(x=>x.sprinter_name).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+ if(select)select.innerHTML=names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
 }
+let cashReportRows=[];let pendingCashReportRows=[];
 async function loadCashSettlements(){
  try{
   const {data,error}=await supabaseClient.from('cash_settlements').select('id,payment_date,sprinter_id,sprinter_name,awb,amount,payment_method,destination,status,receipt_note,created_at,confirmed_at').order('created_at',{ascending:false}).limit(1000);
   if(error)throw error;cashSettlementRows=data||[];
+  const report=await supabaseClient.from('cash_report_items').select('id,awb,ttd_date,sprinter_name,cod_amount,dfod_amount').order('ttd_date',{ascending:false}).limit(10000);
+  if(report.error)throw report.error;cashReportRows=report.data||[];
   initCashDate();renderCashPage();
  }catch(e){
   const body=document.getElementById('cashPaymentBody');
-  if(body)body.innerHTML='<tr><td colspan="8" class="empty">Data setoran belum tersedia. Jalankan SQL setup setoran harian terlebih dahulu: '+esc(e.message)+'</td></tr>';
+  if(body)body.innerHTML='<tr><td colspan="8" class="empty">Setoran atau laporan TTD belum siap. Jalankan SQL cash_settlements.sql dan cash_report_items.sql: '+esc(e.message)+'</td></tr>';
  }
 }
 function renderCashPage(){
  const date=document.getElementById('cashDate')?.value;if(!date)return;
- const daily=allRecords.filter(r=>isTtd(r)&&r.ttdDate===date);
- const expected={};daily.forEach(r=>{const k=r.sprinter;if(!expected[k])expected[k]={cod:0,dfod:0};expected[k].cod+=Number(r.cod)||0;expected[k].dfod+=Number(r.dfod)||0});
+ const useImportedReport=cashReportRows.length>0;
+ const daily=useImportedReport?cashReportRows.filter(r=>r.ttd_date===date):allRecords.filter(r=>isTtd(r)&&r.ttdDate===date);
+ const expected={};daily.forEach(r=>{const k=useImportedReport?r.sprinter_name:r.sprinter;if(!k)return;if(!expected[k])expected[k]={cod:0,dfod:0};expected[k].cod+=Number(useImportedReport?r.cod_amount:r.cod)||0;expected[k].dfod+=Number(useImportedReport?r.dfod_amount:r.dfod)||0});
  const payments=cashSettlementRows.filter(x=>x.payment_date===date);
  const sum=(arr,fn)=>arr.reduce((a,x)=>a+(Number(fn(x))||0),0);
  const expectedTotal=sum(Object.values(expected),x=>x.cod+x.dfod);
@@ -533,6 +548,63 @@ function renderCashPage(){
   const action=x.status==='confirmed'?'<span class="muted">Selesai</span>':canConfirm?'<button class="smallbtn" onclick="confirmCashPayment(\''+x.id+'\')">'+(x.status==='held_by_sprinter'?'Konfirmasi diteruskan':'Konfirmasi masuk outlet')+'</button>':'<span class="muted">Menunggu admin</span>';
   return '<tr><td>'+esc(new Date(x.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.awb||'Tanpa resi')+'</td><td>'+method+'</td><td>'+dest+'</td><td class="r">'+money(x.amount)+'</td><td>'+status+'</td><td>'+action+'</td></tr>';
  }).join(''):'<tr><td colspan="8" class="empty">Belum ada pembayaran pada tanggal ini.</td></tr>';
+}
+function parseCashReportCsv(text){
+ const raw=String(text||'').replace(/^\\uFEFF/,'');
+ const firstLine=(raw.split(/\\r?\\n/,1)[0]||'');
+ const count=(line,delimiter)=>{let quoted=false,total=0;for(let i=0;i<line.length;i++){if(line[i]==='"'){if(quoted&&line[i+1]==='"')i++;else quoted=!quoted}else if(!quoted&&line[i]===delimiter)total++}return total};
+ const delimiter=count(firstLine,';')>count(firstLine,',')?';':',';
+ const matrix=[];let row=[],field='',quoted=false;
+ for(let i=0;i<raw.length;i++){const ch=raw[i];if(quoted){if(ch==='"'&&raw[i+1]==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}else if(ch==='"'&&field==='')quoted=true;else if(ch===delimiter){row.push(field);field=''}else if(ch==='\\n'){row.push(field.replace(/\\r$/,''));matrix.push(row);row=[];field=''}else field+=ch}
+ if(field.length||row.length){row.push(field.replace(/\\r$/,''));matrix.push(row)}
+ const headerIndex=matrix.findIndex(r=>r.some(v=>norm(v)==='noresi'));
+ if(headerIndex<0)throw Error('Header "No. Resi" tidak ditemukan.');
+ const headers=matrix[headerIndex].map(v=>String(v||'').trim());
+ const find=(name)=>headers.find(h=>norm(h)===norm(name));
+ const awbCol=find('No. Resi'),sprinterCol=find('Sprinter delivery'),ttdCol=find('Waktu tanda terima'),codCol=find('jumlah pembayaran COD'),dfodCol=find('Biaya DFOD');
+ if(!awbCol||!sprinterCol||!ttdCol||!codCol||!dfodCol)throw Error('Kolom wajib tidak lengkap. Periksa No. Resi, Sprinter delivery, Waktu tanda terima, jumlah pembayaran COD, dan Biaya DFOD.');
+ const amount=(v)=>{let x=String(v??'').trim().replace(/[^\\d,.-]/g,'');if(!x)return 0;if(x.includes(',')&&x.includes('.')){if(x.lastIndexOf('.')>x.lastIndexOf(','))x=x.replace(/,/g,'');else x=x.replace(/\\./g,'').replace(',','.')}else if(x.includes(',')){x=x.replace(',','.')}return Number(x)||0};
+ const date=(v)=>{const m=String(v??'').trim().match(/^(\\d{4})-(\\d{2})-(\\d{2})/);return m?m[1]+'-'+m[2]+'-'+m[3]:''};
+ const out=[];
+ for(const cells of matrix.slice(headerIndex+1)){
+  const obj=Object.fromEntries(headers.map((h,i)=>[h,cells[i]??'']));
+  const awb=String(obj[awbCol]||'').trim(),sprinter=String(obj[sprinterCol]||'').trim(),ttdDate=date(obj[ttdCol]);
+  if(!awb||!sprinter||!ttdDate)continue;
+  out.push({awb,ttd_date:ttdDate,sprinter_name:sprinter,cod_amount:amount(obj[codCol]),dfod_amount:amount(obj[dfodCol])});
+ }
+ if(!out.length)throw Error('Tidak ada baris dengan AWB, sprinter, dan Waktu tanda terima yang valid.');
+ const unique=new Map();out.forEach(x=>unique.set(x.awb,x));
+ return [...unique.values()];
+}
+document.getElementById('cashReportFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0],status=document.getElementById('cashReportStatus'),button=document.getElementById('cashReportImportButton');
+ pendingCashReportRows=[];button.disabled=true;
+ if(!file){status.textContent='Pilih file CSV untuk memeriksa data.';return}
+ try{
+  pendingCashReportRows=parseCashReportCsv(await file.text());
+  const dates=[...new Set(pendingCashReportRows.map(x=>x.ttd_date))].sort();
+  const cod=pendingCashReportRows.reduce((a,x)=>a+x.cod_amount,0),dfod=pendingCashReportRows.reduce((a,x)=>a+x.dfod_amount,0);
+  status.textContent=pendingCashReportRows.length+' resi siap diimpor • '+dates.length+' tanggal TTD • COD '+money(cod)+' • DFOD '+money(dfod)+'.';
+  button.disabled=false;
+ }catch(err){status.textContent='CSV tidak dapat dibaca: '+err.message;pendingCashReportRows=[]}
+});
+async function importCashReport(){
+ if(!pendingCashReportRows.length)return;
+ if(!confirm('Import '+pendingCashReportRows.length+' resi dari laporan TTD? Resi yang sudah ada akan diperbarui berdasarkan AWB.'))return;
+ const button=document.getElementById('cashReportImportButton'),status=document.getElementById('cashReportStatus');button.disabled=true;status.textContent='Mengimpor laporan TTD...';
+ try{
+  const {data:userData}=await supabaseClient.auth.getUser();
+  const rows=pendingCashReportRows.map(x=>({...x,imported_by:userData.user?.id||null}));
+  for(let i=0;i<rows.length;i+=250){
+   const {error}=await supabaseClient.from('cash_report_items').upsert(rows.slice(i,i+250),{onConflict:'awb'});
+   if(error)throw error;
+   status.textContent='Mengimpor... '+Math.min(i+250,rows.length)+' / '+rows.length+' resi';
+  }
+  const count=rows.length;pendingCashReportRows=[];document.getElementById('cashReportFile').value='';
+  await loadCashSettlements();status.textContent='Berhasil mengimpor '+count+' resi. Ringkasan COD & DFOD sekarang menggunakan tanggal Waktu tanda terima.';
+  alert('Laporan TTD berhasil diimpor.');
+ }catch(err){status.textContent='Import gagal: '+err.message}
+ finally{button.disabled=!pendingCashReportRows.length}
 }
 document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
  e.preventDefault();
