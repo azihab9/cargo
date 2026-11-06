@@ -251,7 +251,7 @@ tbody tr:hover{background:#f7fbfd}
    <label style="font-size:10px;color:var(--muted)">Nominal pembayaran (Rp)<br><input id="cashAmount" type="number" min="1" step="1" required placeholder="Contoh: 150000" style="border:1px solid var(--line);border-radius:10px;padding:10px;width:170px"></label>
    <label style="font-size:10px;color:var(--muted)">Metode pembayaran<br><select id="cashMethod" style="border:1px solid var(--line);border-radius:10px;padding:10px"><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="cash">Tunai</option></select></label>
    <label style="font-size:10px;color:var(--muted)">Uang masuk ke<br><select id="cashDestination" style="border:1px solid var(--line);border-radius:10px;padding:10px"><option value="outlet">Rekening outlet</option><option value="sprinter">Rekening sprinter</option></select></label>
-   <label style="font-size:10px;color:var(--muted);min-width:180px">Catatan / bukti (opsional)<br><input id="cashNote" maxlength="250" placeholder="No. referensi / keterangan" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
+   <label style="font-size:10px;color:var(--muted);min-width:180px">Catatan / no. referensi (opsional)<br><input id="cashNote" maxlength="250" placeholder="No. referensi transfer / keterangan" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
    <button class="btn" id="cashSaveButton" type="submit">Simpan Pembayaran</button>
   </form>
   <div class="note">Pembayaran ke rekening sprinter akan berstatus Menunggu Diteruskan. Pembayaran langsung ke outlet menunggu konfirmasi admin sebelum dihitung sebagai uang diterima outlet.</div>
