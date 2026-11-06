@@ -235,11 +235,36 @@ tbody tr:hover{background:#f7fbfd}
 <div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="r">Nominal</th><th>Aksi</th></tr></thead><tbody id="expenseBody"><tr><td colspan="5" class="empty">Memuat pengeluaran...</td></tr></tbody></table></div>
 <div class="note">Laporan ini belum menghitung pendapatan jasa pengiriman. Total biaya merupakan pengeluaran operasional ditambah payroll yang sudah difinalisasi atau dibayar. Draft payroll tidak dihitung.</div>
 </section></section>
-<section class="page" data-page="cash"><div class="panel" id="cash"><h2>Rekap COD & DFOD</h2><div class="desc">Nominal hanya dari resi berstatus TTD dalam periode terpilih.</div><div class="tablewrap"><table><thead><tr><th>Sprinter</th><th class="r">COD</th><th class="r">DFOD</th><th class="r">Total</th></tr></thead><tbody id="cashBody"><tr><td colspan="4" class="empty">Belum ada data.</td></tr></tbody></table></div></div></section><section class="page" data-page="records"><div class="panel" id="records"><h2>Data operasional TTD</h2><div class="desc">Hanya resi TTD yang masuk ke perhitungan payroll dan uang COD/DFOD.</div><div class="toolbar"><input id="search" placeholder="Cari sprinter / nomor resi..." oninput="renderRecords()"><span class="muted" id="rowCount">0 baris</span></div><div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th class="r">Berat kg</th><th class="r">COD</th><th class="r">DFOD</th><th>Tanggal TTD</th></tr></thead><tbody id="recordBody"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div></section>
+<section class="page" data-page="cash">
+<div class="panel" id="cash">
+ <div class="toolbar"><div><h2>Setoran Harian COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Cocokkan tagihan harian dengan pembayaran customer dan uang yang sudah diterima outlet.</div></div><label style="font-size:10px;color:var(--muted)">Tanggal laporan<br><input type="date" id="cashDate" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div>
+ <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
+  <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada tanggal terpilih</div></div>
+  <div class="card"><div class="metric-label">Pembayaran tercatat</div><div class="metric" id="cashRecorded">Rp0</div><div class="hint">Termasuk uang yang masih di sprinter</div></div>
+  <div class="card"><div class="metric-label">Sudah diterima outlet</div><div class="metric" id="cashReceived">Rp0</div><div class="hint">Sudah dikonfirmasi admin</div></div>
+ </div>
+ <div class="panel" style="background:#f8fbff;margin:14px 0">
+  <h2>Input Pembayaran Customer</h2><div class="desc">Nomor resi boleh dikosongkan jika sprinter hanya memiliki bukti pembayaran.</div>
+  <form id="cashPaymentForm" class="toolbar" style="justify-content:flex-start;align-items:end;gap:12px">
+   <label style="font-size:10px;color:var(--muted)">Nama sprinter<br><select id="cashSprinter" required style="min-width:170px;border:1px solid var(--line);border-radius:10px;padding:10px"></select></label>
+   <label style="font-size:10px;color:var(--muted)">Nomor resi (opsional)<br><input id="cashAwb" placeholder="Kosongkan jika lupa resi" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
+   <label style="font-size:10px;color:var(--muted)">Nominal pembayaran (Rp)<br><input id="cashAmount" type="number" min="1" step="1" required placeholder="Contoh: 150000" style="border:1px solid var(--line);border-radius:10px;padding:10px;width:170px"></label>
+   <label style="font-size:10px;color:var(--muted)">Metode pembayaran<br><select id="cashMethod" style="border:1px solid var(--line);border-radius:10px;padding:10px"><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="cash">Tunai</option></select></label>
+   <label style="font-size:10px;color:var(--muted)">Uang masuk ke<br><select id="cashDestination" style="border:1px solid var(--line);border-radius:10px;padding:10px"><option value="outlet">Rekening outlet</option><option value="sprinter">Rekening sprinter</option></select></label>
+   <label style="font-size:10px;color:var(--muted);min-width:180px">Catatan / bukti (opsional)<br><input id="cashNote" maxlength="250" placeholder="No. referensi / keterangan" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
+   <button class="btn" id="cashSaveButton" type="submit">Simpan Pembayaran</button>
+  </form>
+  <div class="note">Pembayaran ke rekening sprinter akan berstatus Menunggu Diteruskan. Pembayaran langsung ke outlet menunggu konfirmasi admin sebelum dihitung sebagai uang diterima outlet.</div>
+ </div>
+ <h2 style="margin:18px 0 10px">Ringkasan per Sprinter</h2>
+ <div class="tablewrap"><table><thead><tr><th>Sprinter</th><th class="r">COD + DFOD</th><th class="r">Pembayaran tercatat</th><th class="r">Diterima outlet</th><th class="r">Di rekening sprinter</th><th class="r">Belum tercatat</th></tr></thead><tbody id="cashBody"><tr><td colspan="6" class="empty">Memuat rekap...</td></tr></tbody></table></div>
+ <h2 style="margin:20px 0 10px">Riwayat Pembayaran</h2>
+ <div class="tablewrap"><table><thead><tr><th>Waktu input</th><th>Sprinter</th><th>No. Resi</th><th>Metode</th><th>Tujuan awal</th><th class="r">Nominal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="cashPaymentBody"><tr><td colspan="8" class="empty">Belum ada pembayaran.</td></tr></tbody></table></div>
+</div></section><section class="page" data-page="records"><div class="panel" id="records"><h2>Data operasional TTD</h2><div class="desc">Hanya resi TTD yang masuk ke perhitungan payroll dan uang COD/DFOD.</div><div class="toolbar"><input id="search" placeholder="Cari sprinter / nomor resi..." oninput="renderRecords()"><span class="muted" id="rowCount">0 baris</span></div><div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th class="r">Berat kg</th><th class="r">COD</th><th class="r">DFOD</th><th>Tanggal TTD</th></tr></thead><tbody id="recordBody"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div></section>
 </main></div>
 <script>
 const STORAGE='cargoflow_v3_records',FEEKEY='cargoflow_v3_fees';
-let allRecords=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],penaltyRows=[],freelancerRows=[],freelancerIds={},pendingKoliUpdates=[],expenseRows=[];
+let allRecords=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],penaltyRows=[],freelancerRows=[],freelancerIds={},pendingKoliUpdates=[],expenseRows=[],cashSettlementRows=[],currentUserRole='operations';
 const aliases={awb:['no. resi','no resi','awb','waybill'],sprinter:['sprinter delivery','sprinter','nama sprinter','kurir'],label:['label ttd','status ttd','status delivery'],weight:['perhitungan biaya berat','berat','berat kg','weight'],koli:['jumlah koli','jumlah paket','total koli'],cod:['jumlah pembayaran cod','cod','nominal cod'],dfod:['biaya dfod','dfod'],ttddate:['waktu tanda terima','tanggal ttd','waktu ttd'],delivery:['waktu delivery']};
 function norm(x){return String(x??'').toLowerCase().trim().replace(/[^a-z0-9]/g,'')}
 function col(headers,type){let h=headers.find(x=>aliases[type].some(a=>norm(x)===norm(a)));if(h)return h;return headers.find(x=>aliases[type].some(a=>norm(x).includes(norm(a))))||null}
@@ -295,6 +320,7 @@ async function loadCloudData(){
   restorePayrollPeriod();
   document.getElementById('fileStatus').textContent=allRecords.length+' baris tersinkron dari Supabase';
   render();
+  await loadCashSettlements();
   await refreshPayrollStatus();
   await loadPayrollHistory();
   await loadFinanceData();
@@ -408,7 +434,7 @@ function aggregatePayroll(){const sp={},fr={};Object.keys(sprinterIds).forEach(n
 function render(){activeRecords=selected();let g=aggregate(),pg=aggregatePayroll(),totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0);
 document.getElementById('mTtd').textContent=activeRecords.length.toLocaleString('id-ID');document.getElementById('mWeight').textContent=kg(totalWeight)+' kg';document.getElementById('mCash').textContent=money(cod+dfod);document.getElementById('mPayroll').textContent=money(pay);
 document.getElementById('payBody').innerHTML=(pg.sprinters.length+pg.freelancers.length)?pg.sprinters.map(x=>`<tr><td>${esc(x.name)}</td><td>Sprinter</td><td class="r">${x.count}</td><td class="r">${kg(x.weight)}</td><td class="r">—</td><td class="r">${money(x.basicSalary)}</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">${money(x.loanDeduction)}</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`).concat(pg.freelancers.map(x=>`<tr><td>${esc(x.name)}</td><td>Freelance</td><td class="r">${x.count}</td><td class="r">—</td><td class="r">${x.koli}</td><td class="r">—</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">Rp0</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`)).join(''):'<tr><td colspan="10" class="empty">Tidak ada resi TTD pada periode ini.</td></tr>';
-document.getElementById('cashBody').innerHTML=g.length?g.map(x=>`<tr><td>${esc(x.name)}</td><td class="r">${money(x.cod)}</td><td class="r">${money(x.dfod)}</td><td class="r"><b>${money(x.cod+x.dfod)}</b></td></tr>`).join(''):'<tr><td colspan="4" class="empty">Tidak ada data TTD.</td></tr>';
+if(document.getElementById('cashDate')&&!document.getElementById('cashDate').value) initCashDate();
 let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getElementById('feeBody').innerHTML=names.length?names.map(x=>`<tr><td>${esc(x)}</td><td class="r"><input class="feeinput" aria-label="Gaji pokok ${esc(x)}" type="number" min="0" step="1000" value="${Number(basicSalaries[x]??0)}" onchange="setBasicSalary('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td><td class="r"><input class="feeinput" aria-label="Fee per kg ${esc(x)}" type="number" min="0" step="1" value="${Number(fees[x]??100)}" onchange="setFee('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td></tr>`).join(''):'<tr><td colspan="3" class="empty">Belum ada data sprinter.</td></tr>';renderRecords()}
 async function setFee(name,value){const next=Math.max(0,Number(value)||0);fees[name]=next;save();render();if(sprinterIds[name]){const {error}=await supabaseClient.from('sprinters').update({fee_per_kg:next}).eq('id',sprinterIds[name]);if(error){alert('Fee gagal disimpan ke database: '+error.message);await loadCloudData().catch(e=>alert(e.message))}}}
 async function setBasicSalary(name,value){const next=Math.max(0,Number(value)||0);const id=sprinterIds[name];if(!id)return;const {error}=await supabaseClient.from('sprinters').update({basic_salary:next}).eq('id',id);if(error){alert('Gaji pokok gagal disimpan: '+error.message);return}basicSalaries[name]=next;save();alert('Gaji pokok '+name+' berhasil disimpan.');}
@@ -461,6 +487,82 @@ function payrollPayload(){
   gross_amount:x.gross,loan_deduction:0,penalty_deduction:x.penaltyDeduction,net_amount:x.total
  }));
  return items;
+}
+
+
+function initCashDate(){
+ const el=document.getElementById('cashDate');if(!el)return;
+ const now=new Date();el.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+ const select=document.getElementById('cashSprinter');
+ if(select)select.innerHTML=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b)).map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
+}
+async function loadCashSettlements(){
+ try{
+  const {data,error}=await supabaseClient.from('cash_settlements').select('id,payment_date,sprinter_id,sprinter_name,awb,amount,payment_method,destination,status,receipt_note,created_at,confirmed_at').order('created_at',{ascending:false}).limit(1000);
+  if(error)throw error;cashSettlementRows=data||[];
+  initCashDate();renderCashPage();
+ }catch(e){
+  const body=document.getElementById('cashPaymentBody');
+  if(body)body.innerHTML='<tr><td colspan="8" class="empty">Data setoran belum tersedia. Jalankan SQL setup setoran harian terlebih dahulu: '+esc(e.message)+'</td></tr>';
+ }
+}
+function renderCashPage(){
+ const date=document.getElementById('cashDate')?.value;if(!date)return;
+ const daily=allRecords.filter(r=>isTtd(r)&&r.ttdDate===date);
+ const expected={};daily.forEach(r=>{const k=r.sprinter;if(!expected[k])expected[k]={cod:0,dfod:0};expected[k].cod+=Number(r.cod)||0;expected[k].dfod+=Number(r.dfod)||0});
+ const payments=cashSettlementRows.filter(x=>x.payment_date===date);
+ const sum=(arr,fn)=>arr.reduce((a,x)=>a+(Number(fn(x))||0),0);
+ const expectedTotal=sum(Object.values(expected),x=>x.cod+x.dfod);
+ const recorded=sum(payments,x=>x.amount);
+ const received=sum(payments.filter(x=>x.status==='confirmed'),x=>x.amount);
+ document.getElementById('cashExpected').textContent=money(expectedTotal);
+ document.getElementById('cashRecorded').textContent=money(recorded);
+ document.getElementById('cashReceived').textContent=money(received);
+ const names=[...new Set([...Object.keys(expected),...payments.map(x=>x.sprinter_name)])].sort((a,b)=>a.localeCompare(b));
+ document.getElementById('cashBody').innerHTML=names.length?names.map(name=>{
+  const e=expected[name]||{cod:0,dfod:0},rows=payments.filter(x=>x.sprinter_name===name);
+  const exp=e.cod+e.dfod,rec=sum(rows,x=>x.amount),out=sum(rows.filter(x=>x.status==='confirmed'),x=>x.amount),held=sum(rows.filter(x=>x.status==='held_by_sprinter'),x=>x.amount);
+  const gap=exp-rec;
+  return '<tr><td>'+esc(name)+'</td><td class="r">'+money(exp)+'</td><td class="r">'+money(rec)+'</td><td class="r">'+money(out)+'</td><td class="r">'+money(held)+'</td><td class="r"><b style="color:'+(gap>0?'#b7791f':gap<0?'#16804d':'inherit')+'">'+money(gap)+'</b></td></tr>';
+ }).join(''):'<tr><td colspan="6" class="empty">Tidak ada tagihan atau pembayaran pada tanggal ini.</td></tr>';
+ const canConfirm=['admin','finance'].includes(currentUserRole);
+ document.getElementById('cashPaymentBody').innerHTML=payments.length?payments.map(x=>{
+  const method={transfer:'Transfer',qris:'QRIS',cash:'Tunai'}[x.payment_method]||x.payment_method;
+  const dest=x.destination==='outlet'?'Rekening outlet':'Rekening sprinter';
+  const status=x.status==='confirmed'?'<span class="state-chip state-paid">DITERIMA OUTLET</span>':x.status==='held_by_sprinter'?'<span class="state-chip state-open">DI REKENING SPRINTER</span>':'<span class="state-chip state-final">MENUNGGU KONFIRMASI</span>';
+  const action=x.status==='confirmed'?'<span class="muted">Selesai</span>':canConfirm?'<button class="smallbtn" onclick="confirmCashPayment(\''+x.id+'\')">'+(x.status==='held_by_sprinter'?'Konfirmasi diteruskan':'Konfirmasi masuk outlet')+'</button>':'<span class="muted">Menunggu admin</span>';
+  return '<tr><td>'+esc(new Date(x.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.awb||'Tanpa resi')+'</td><td>'+method+'</td><td>'+dest+'</td><td class="r">'+money(x.amount)+'</td><td>'+status+'</td><td>'+action+'</td></tr>';
+ }).join(''):'<tr><td colspan="8" class="empty">Belum ada pembayaran pada tanggal ini.</td></tr>';
+}
+document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const sprinterName=document.getElementById('cashSprinter').value,date=document.getElementById('cashDate').value,amount=Number(document.getElementById('cashAmount').value),destination=document.getElementById('cashDestination').value;
+ if(!sprinterName||!date||!Number.isFinite(amount)||amount<=0){alert('Pilih sprinter, tanggal, dan nominal yang benar.');return}
+ const button=document.getElementById('cashSaveButton');button.disabled=true;
+ try{
+  const {data:userData}=await supabaseClient.auth.getUser();
+  const {error}=await supabaseClient.from('cash_settlements').insert({
+   payment_date:date,sprinter_id:sprinterIds[sprinterName]||null,sprinter_name:sprinterName,
+   awb:document.getElementById('cashAwb').value.trim()||null,amount,
+   payment_method:document.getElementById('cashMethod').value,destination,
+   status:destination==='sprinter'?'held_by_sprinter':'pending',
+   receipt_note:document.getElementById('cashNote').value.trim()||null,created_by:userData.user?.id||null
+  });
+  if(error)throw error;
+  document.getElementById('cashAmount').value='';document.getElementById('cashAwb').value='';document.getElementById('cashNote').value='';
+  await loadCashSettlements();alert('Pembayaran berhasil dicatat.');
+ }catch(err){alert('Pembayaran gagal disimpan: '+err.message)}
+ finally{button.disabled=false}
+});
+async function confirmCashPayment(id){
+ if(!['admin','finance'].includes(currentUserRole)){alert('Hanya admin atau finance yang dapat mengonfirmasi penerimaan outlet.');return}
+ const item=cashSettlementRows.find(x=>x.id===id);if(!item)return;
+ const label=item.status==='held_by_sprinter'?'sprinter sudah meneruskan uang ke outlet':'uang sudah masuk ke rekening outlet';
+ if(!confirm('Konfirmasi bahwa '+label+' sebesar '+money(item.amount)+'?'))return;
+ const {data:userData}=await supabaseClient.auth.getUser();
+ const {error}=await supabaseClient.from('cash_settlements').update({status:'confirmed',confirmed_at:new Date().toISOString(),confirmed_by:userData.user?.id||null}).eq('id',id);
+ if(error){alert('Konfirmasi gagal: '+error.message);return}
+ await loadCashSettlements();alert('Pembayaran berhasil dikonfirmasi.');
 }
 
 function initFinancePeriod(){
@@ -676,6 +778,7 @@ async function enterApp(session){
   if(profile.active!==true){await supabaseClient.auth.signOut();authMessage('Akun ini sedang dinonaktifkan. Hubungi administrator.');return}
   document.getElementById('authScreen').style.display='none';
   document.getElementById('cargoApp').style.display='grid';
+  currentUserRole=String(profile.role||'operations');
   const displayName=profile.full_name||session.user.email||'Pengguna';
   document.getElementById('userBadge').textContent='●  '+displayName+' • '+String(profile.role||'user').toUpperCase();
   try{await loadCloudData()}catch(e){document.getElementById('fileStatus').textContent='Gagal memuat data cloud';alert('Login berhasil, tetapi data cloud gagal dimuat: '+e.message)}
