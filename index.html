@@ -636,7 +636,7 @@ function renderCashPage(){
  const inPaymentPeriod=value=>(!startDate||String(value||'')>=startDate)&&(!endDate||String(value||'')<=endDate);
  const useImportedReport=cashReportRows.length>0;
  renderCashReportItems();
- const daily=useImportedReport?cashReportRows.filter(r=>inPeriod(r.ttd_at||((r.ttd_date||'')+'T00:00:00'))):allRecords.filter(r=>isTtd(r)&&inPeriod((r.ttdDate||'')+'T00:00:00'));
+ const daily=useImportedReport?cashReportRows.filter(r=>r.ttd_at?inPeriod(r.ttd_at):(!!r.ttd_date&&(!startDate||r.ttd_date>=startDate)&&(!endDate||r.ttd_date<endDate))):allRecords.filter(r=>isTtd(r)&&inPeriod((r.ttdDate||'')+'T00:00:00'));
  const expected={};
  daily.forEach(r=>{
   const k=useImportedReport?r.sprinter_name:r.sprinter;
