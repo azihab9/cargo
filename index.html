@@ -237,7 +237,7 @@ tbody tr:hover{background:#f7fbfd}
 </section></section>
 <section class="page" data-page="cash">
 <div class="panel" id="cash">
- <div class="toolbar"><div><h2>Setoran Harian COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Cocokkan tagihan harian dengan pembayaran customer dan uang yang sudah diterima outlet.</div></div><label style="font-size:10px;color:var(--muted)">Tanggal laporan<br><input type="date" id="cashDate" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div>
+ <div class="toolbar"><div><h2>Laporan COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Rekap tagihan, pembayaran customer, dan uang yang sudah diterima outlet berdasarkan periode.</div></div><label style="font-size:10px;color:var(--muted)">Dari tanggal<br><input type="date" id="cashDateFrom" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label><label style="font-size:10px;color:var(--muted)">Sampai tanggal<br><input type="date" id="cashDateTo" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div>
  <div class="panel" style="background:#f3fbf7;margin:14px 0">
   <h2>Import Laporan TTD J&T Cargo</h2>
   <div class="desc">Unggah Excel laporan TTD J&T Cargo (.xlsx atau .xls). Tanggal transaksi dibaca dari <b>Waktu tanda terima</b>, COD dari <b>jumlah pembayaran COD</b>, dan DFOD dari <b>Biaya DFOD</b>.</div>
@@ -249,13 +249,14 @@ tbody tr:hover{background:#f7fbfd}
   <div class="note">Import akan memperbarui data berdasarkan nomor resi (AWB), bukan menggandakan resi yang sama. Pastikan file merupakan laporan TTD.</div>
  </div>
  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
-  <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada tanggal terpilih</div></div>
+  <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada periode terpilih</div></div>
   <div class="card"><div class="metric-label">Pembayaran tercatat</div><div class="metric" id="cashRecorded">Rp0</div><div class="hint">Termasuk uang yang masih di sprinter</div></div>
   <div class="card"><div class="metric-label">Sudah diterima outlet</div><div class="metric" id="cashReceived">Rp0</div><div class="hint">Sudah dikonfirmasi admin</div></div>
  </div>
  <div class="panel" style="background:#f8fbff;margin:14px 0">
   <h2>Input Pembayaran Customer</h2><div class="desc">Nomor resi boleh dikosongkan jika sprinter hanya memiliki bukti pembayaran.</div>
   <form id="cashPaymentForm" class="toolbar" style="justify-content:flex-start;align-items:end;gap:12px">
+   <label style="font-size:10px;color:var(--muted)">Tanggal pembayaran<br><input type="date" id="cashPaymentDate" required style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
    <label style="font-size:10px;color:var(--muted)">Nama sprinter<br><select id="cashSprinter" required style="min-width:170px;border:1px solid var(--line);border-radius:10px;padding:10px"></select></label>
    <label style="font-size:10px;color:var(--muted)">Nomor resi (opsional)<br><input id="cashAwb" placeholder="Kosongkan jika lupa resi" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label>
    <label style="font-size:10px;color:var(--muted)">Nominal pembayaran (Rp)<br><input id="cashAmount" type="number" min="1" step="1" required placeholder="Contoh: 150000" style="border:1px solid var(--line);border-radius:10px;padding:10px;width:170px"></label>
@@ -513,8 +514,12 @@ function payrollPayload(){
 
 
 function initCashDate(){
- const el=document.getElementById('cashDate');if(!el)return;
- if(!el.value){const now=new Date();el.value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-')}
+ const from=document.getElementById('cashDateFrom'),to=document.getElementById('cashDateTo'),paymentDate=document.getElementById('cashPaymentDate');
+ const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+ const monthStart=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),'01'].join('-');
+ if(from&&!from.value)from.value=monthStart;
+ if(to&&!to.value)to.value=today;
+ if(paymentDate&&!paymentDate.value)paymentDate.value=today;
  const select=document.getElementById('cashSprinter');
  const names=[...new Set([...Object.keys(sprinterIds),...cashReportRows.map(x=>x.sprinter_name).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
  if(select)select.innerHTML=names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
@@ -570,12 +575,27 @@ function clearCashReportFilters(){
  renderCashReportItems();
 }
 function renderCashPage(){
- const date=document.getElementById('cashDate')?.value;if(!date)return;
+ const from=document.getElementById('cashDateFrom')?.value||'';
+ const to=document.getElementById('cashDateTo')?.value||'';
+ if(from&&to&&from>to){
+  document.getElementById('cashBody').innerHTML='<tr><td colspan="6" class="empty">Tanggal awal tidak boleh melewati tanggal akhir.</td></tr>';
+  document.getElementById('cashPaymentBody').innerHTML='<tr><td colspan="8" class="empty">Periksa rentang tanggal laporan.</td></tr>';
+  ['cashExpected','cashRecorded','cashReceived'].forEach(id=>document.getElementById(id).textContent='Rp0');
+  return;
+ }
+ const inPeriod=value=>(!from||String(value||'')>=from)&&(!to||String(value||'')<=to);
  const useImportedReport=cashReportRows.length>0;
  renderCashReportItems();
- const daily=useImportedReport?cashReportRows.filter(r=>r.ttd_date===date):allRecords.filter(r=>isTtd(r)&&r.ttdDate===date);
- const expected={};daily.forEach(r=>{const k=useImportedReport?r.sprinter_name:r.sprinter;if(!k)return;if(!expected[k])expected[k]={cod:0,dfod:0};expected[k].cod+=Number(useImportedReport?r.cod_amount:r.cod)||0;expected[k].dfod+=Number(useImportedReport?r.dfod_amount:r.dfod)||0});
- const payments=cashSettlementRows.filter(x=>x.payment_date===date);
+ const daily=useImportedReport?cashReportRows.filter(r=>inPeriod(r.ttd_date)):allRecords.filter(r=>isTtd(r)&&inPeriod(r.ttdDate));
+ const expected={};
+ daily.forEach(r=>{
+  const k=useImportedReport?r.sprinter_name:r.sprinter;
+  if(!k)return;
+  if(!expected[k])expected[k]={cod:0,dfod:0};
+  expected[k].cod+=Number(useImportedReport?r.cod_amount:r.cod)||0;
+  expected[k].dfod+=Number(useImportedReport?r.dfod_amount:r.dfod)||0;
+ });
+ const payments=cashSettlementRows.filter(x=>inPeriod(x.payment_date));
  const sum=(arr,fn)=>arr.reduce((a,x)=>a+(Number(fn(x))||0),0);
  const expectedTotal=sum(Object.values(expected),x=>x.cod+x.dfod);
  const recorded=sum(payments,x=>x.amount);
@@ -589,7 +609,7 @@ function renderCashPage(){
   const exp=e.cod+e.dfod,rec=sum(rows,x=>x.amount),out=sum(rows.filter(x=>x.status==='confirmed'),x=>x.amount),held=sum(rows.filter(x=>x.status==='held_by_sprinter'),x=>x.amount);
   const gap=exp-rec;
   return '<tr><td>'+esc(name)+'</td><td class="r">'+money(exp)+'</td><td class="r">'+money(rec)+'</td><td class="r">'+money(out)+'</td><td class="r">'+money(held)+'</td><td class="r"><b style="color:'+(gap>0?'#b7791f':gap<0?'#16804d':'inherit')+'">'+money(gap)+'</b></td></tr>';
- }).join(''):'<tr><td colspan="6" class="empty">Tidak ada tagihan atau pembayaran pada tanggal ini.</td></tr>';
+ }).join(''):'<tr><td colspan="6" class="empty">Tidak ada tagihan atau pembayaran pada periode ini.</td></tr>';
  const canConfirm=['admin','finance'].includes(currentUserRole);
  document.getElementById('cashPaymentBody').innerHTML=payments.length?payments.map(x=>{
   const method={transfer:'Transfer',qris:'QRIS',cash:'Tunai'}[x.payment_method]||x.payment_method;
@@ -597,7 +617,7 @@ function renderCashPage(){
   const status=x.status==='confirmed'?'<span class="state-chip state-paid">DITERIMA OUTLET</span>':x.status==='held_by_sprinter'?'<span class="state-chip state-open">DI REKENING SPRINTER</span>':'<span class="state-chip state-final">MENUNGGU KONFIRMASI</span>';
   const action=x.status==='confirmed'?'<span class="muted">Selesai</span>':canConfirm?'<button class="smallbtn" onclick="confirmCashPayment(\''+x.id+'\')">'+(x.status==='held_by_sprinter'?'Konfirmasi diteruskan':'Konfirmasi masuk outlet')+'</button>':'<span class="muted">Menunggu admin</span>';
   return '<tr><td>'+esc(new Date(x.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.awb||'Tanpa resi')+'</td><td>'+method+'</td><td>'+dest+'</td><td class="r">'+money(x.amount)+'</td><td>'+status+'</td><td>'+action+'</td></tr>';
- }).join(''):'<tr><td colspan="8" class="empty">Belum ada pembayaran pada tanggal ini.</td></tr>';
+ }).join(''):'<tr><td colspan="8" class="empty">Belum ada pembayaran pada periode ini.</td></tr>';
 }
 function parseCashReportMatrix(matrix){
  const headerIndex=matrix.findIndex(r=>r.some(v=>norm(v)==='noresi'));
@@ -661,7 +681,7 @@ async function importCashReport(){
 }
 document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
  e.preventDefault();
- const sprinterName=document.getElementById('cashSprinter').value,date=document.getElementById('cashDate').value,amount=Number(document.getElementById('cashAmount').value),destination=document.getElementById('cashDestination').value;
+ const sprinterName=document.getElementById('cashSprinter').value,date=document.getElementById('cashPaymentDate').value,amount=Number(document.getElementById('cashAmount').value),destination=document.getElementById('cashDestination').value;
  if(!sprinterName||!date||!Number.isFinite(amount)||amount<=0){alert('Pilih sprinter, tanggal, dan nominal yang benar.');return}
  const button=document.getElementById('cashSaveButton');button.disabled=true;
  try{
