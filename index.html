@@ -660,7 +660,9 @@ function renderCashPage(){
   const gap=exp-rec;
   const locked=cashLocks.some(x=>x.settlement_date===startDate&&x.sprinter_name===name);
   const lockArg=JSON.stringify(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-  const lockCell=locked?'<span class="state-chip state-paid">SELESAI • TERKUNCI</span>':'<button class="smallbtn" type="button" onclick="lockCashSettlement('+lockArg+')">Kunci setoran</button>';
+  const pending=Math.max(0,rec-out-held);
+  const balanceStatus=gap>0?'<span class="state-chip state-open">KURANG SETOR</span>':gap<0?'<span class="state-chip state-paid">LEBIH SETOR</span>':held>0?'<span class="state-chip state-open">UANG DI SPRINTER</span>':pending>0?'<span class="state-chip state-final">MENUNGGU KONFIRMASI</span>':'<span class="state-chip state-paid">SESUAI</span>';
+  const lockCell=locked?'<span class="state-chip state-paid">SELESAI • TERKUNCI</span>':balanceStatus+'<br><button class="smallbtn" type="button" style="margin-top:6px" onclick="lockCashSettlement('+lockArg+')">Tandai selesai</button>';
   return '<tr><td>'+esc(name)+'</td><td class="r">'+money(e.cod)+'</td><td class="r">'+money(e.dfod)+'</td><td class="r"><b>'+money(exp)+'</b></td><td class="r">'+money(rec)+'</td><td class="r">'+money(out)+'</td><td class="r">'+money(held)+'</td><td class="r"><b style="color:'+(gap>0?'#b7791f':gap<0?'#16804d':'inherit')+'">'+money(gap)+'</b></td><td>'+lockCell+'</td></tr>';
  }).join(''):'<tr><td colspan="9" class="empty">Tidak ada tagihan atau pembayaran pada tanggal ini.</td></tr>';
  const totalCod=sum(Object.values(expected),x=>x.cod),totalDfod=sum(Object.values(expected),x=>x.dfod),totalHeld=sum(payments.filter(x=>x.status==='held_by_sprinter'),x=>x.amount),totalGap=expectedTotal-recorded;
