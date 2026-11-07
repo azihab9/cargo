@@ -248,6 +248,12 @@ tbody tr:hover{background:#f7fbfd}
   <div class="muted" id="cashReportStatus">Pilih file CSV untuk memeriksa data sebelum diimpor.</div>
   <div class="note">Import akan memperbarui data berdasarkan nomor resi (AWB), bukan menggandakan resi yang sama. Pastikan file merupakan laporan TTD.</div>
  </div>
+ <h2 style="margin:18px 0 10px">Daftar Resi COD & DFOD</h2>
+ <div class="toolbar" style="margin-bottom:10px">
+  <input id="cashReportSearch" placeholder="Cari nomor resi, sprinter, atau tanggal TTD..." oninput="renderCashReportItems()">
+  <span class="muted" id="cashReportCount">0 resi</span>
+ </div>
+ <div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th>Tanggal TTD</th><th class="r">COD</th><th class="r">DFOD</th><th class="r">Total</th></tr></thead><tbody id="cashReportBody"><tr><td colspan="6" class="empty">Memuat daftar resi...</td></tr></tbody></table></div>
  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
   <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada tanggal terpilih</div></div>
   <div class="card"><div class="metric-label">Pembayaran tercatat</div><div class="metric" id="cashRecorded">Rp0</div><div class="hint">Termasuk uang yang masih di sprinter</div></div>
@@ -520,9 +526,21 @@ async function loadCashSettlements(){
   if(body)body.innerHTML='<tr><td colspan="8" class="empty">Setoran atau laporan TTD belum siap. Jalankan SQL cash_settlements.sql dan cash_report_items.sql: '+esc(e.message)+'</td></tr>';
  }
 }
+function renderCashReportItems(){
+ const body=document.getElementById('cashReportBody'),count=document.getElementById('cashReportCount');
+ if(!body)return;
+ const q=(document.getElementById('cashReportSearch')?.value||'').trim().toLowerCase();
+ const rows=[...cashReportRows].filter(x=>[x.awb,x.sprinter_name,x.ttd_date].some(v=>String(v??'').toLowerCase().includes(q))).sort((a,b)=>String(b.ttd_date).localeCompare(String(a.ttd_date))||String(a.awb).localeCompare(String(b.awb)));
+ if(count)count.textContent=rows.length+' dari '+cashReportRows.length+' resi';
+ body.innerHTML=rows.length?rows.map(x=>{
+  const cod=Number(x.cod_amount)||0,dfod=Number(x.dfod_amount)||0;
+  return '<tr><td>'+esc(x.awb)+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.ttd_date)+'</td><td class="r">'+money(cod)+'</td><td class="r">'+money(dfod)+'</td><td class="r"><b>'+money(cod+dfod)+'</b></td></tr>';
+ }).join(''):'<tr><td colspan="6" class="empty">Tidak ada resi yang cocok.</td></tr>';
+}
 function renderCashPage(){
  const date=document.getElementById('cashDate')?.value;if(!date)return;
  const useImportedReport=cashReportRows.length>0;
+ renderCashReportItems();
  const daily=useImportedReport?cashReportRows.filter(r=>r.ttd_date===date):allRecords.filter(r=>isTtd(r)&&r.ttdDate===date);
  const expected={};daily.forEach(r=>{const k=useImportedReport?r.sprinter_name:r.sprinter;if(!k)return;if(!expected[k])expected[k]={cod:0,dfod:0};expected[k].cod+=Number(useImportedReport?r.cod_amount:r.cod)||0;expected[k].dfod+=Number(useImportedReport?r.dfod_amount:r.dfod)||0});
  const payments=cashSettlementRows.filter(x=>x.payment_date===date);
