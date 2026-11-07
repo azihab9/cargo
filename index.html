@@ -800,6 +800,13 @@ function initFinancePeriod(){
  document.getElementById('expenseDate').value=today;
  document.getElementById('penaltyDate').value=today;
 }
+async function loadExpenseFundingOptions(){
+ const select=document.getElementById('expenseSourceDate');if(!select)return;
+ try{const {data,error}=await supabaseClient.from('cash_settlements').select('payment_date,amount').eq('status','confirmed').order('payment_date',{ascending:false}).limit(3000);if(error)throw error;
+ const totals={};(data||[]).forEach(x=>{if(x.payment_date)totals[x.payment_date]=(totals[x.payment_date]||0)+(Number(x.amount)||0)});
+ const dates=Object.keys(totals).sort((a,b)=>b.localeCompare(a));select.innerHTML=dates.length?'<option value="">Pilih tanggal setoran</option>'+dates.map(d=>'<option value="'+esc(d)+'">'+esc(d)+' • '+money(totals[d])+'</option>').join(''):'<option value="">Belum ada setoran terkonfirmasi</option>';
+ }catch(e){select.innerHTML='<option value="">Gagal memuat setoran</option>';console.error(e)}
+}
 async function loadFinanceData(){
  const from=document.getElementById('financeFrom').value,to=document.getElementById('financeTo').value;
  const expenseBody=document.getElementById('expenseBody');
@@ -809,6 +816,7 @@ async function loadFinanceData(){
   const {data:expenses,error:expenseError}=await supabaseClient.from('expenses').select('id,expense_date,category,amount,description,source_settlement_date').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false});
   if(expenseError)throw expenseError;
   expenseRows=expenses||[];
+  await loadExpenseFundingOptions();
   const expenseTotal=expenseRows.reduce((sum,x)=>sum+(Number(x.amount)||0),0);
   document.getElementById('financeExpenses').textContent=money(expenseTotal);
   expenseBody.innerHTML=expenseRows.length?expenseRows.map(x=>'<tr><td>'+esc(x.expense_date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.description||'-')+'</td><td class="r">'+money(x.amount)+'</td><td><button class="smallbtn" onclick="editExpense(\''+x.id+'\')">Edit</button> <button class="smallbtn" onclick="deleteExpense(\''+x.id+'\')">Hapus</button></td></tr>').join(''):'<tr><td colspan="5" class="empty">Belum ada pengeluaran pada periode ini.</td></tr>';
