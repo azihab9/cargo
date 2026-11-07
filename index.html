@@ -160,6 +160,7 @@ tbody tr:hover{background:#f7fbfd}
 .tablewrap thead th{position:sticky;top:0;z-index:2;background:#edf6f2;color:#456456;font-size:10px;font-weight:800;letter-spacing:.45px;text-transform:uppercase;padding:14px 13px;border-bottom:1px solid #dcebe3;white-space:nowrap}
 .tablewrap tbody td{padding:13px;border-bottom:1px solid #edf1f4;color:#40576a;vertical-align:middle}
 .tablewrap tbody tr:last-child td{border-bottom:0}
+.tablewrap tbody tr.cash-grand-total td{position:sticky;bottom:0;z-index:1;background:#e5f4eb!important;font-weight:800;border-top:2px solid #9bcdb0;box-shadow:0 -2px 5px rgba(20,80,45,.06)}
 .tablewrap tbody tr{transition:background .15s ease}
 .tablewrap tbody tr:hover{background:#f3faf6}
 .tablewrap tbody td:first-child{font-weight:650;color:#203d50}
@@ -611,7 +612,7 @@ function renderCashPage(){
   return '<tr><td>'+esc(name)+'</td><td class="r">'+money(e.cod)+'</td><td class="r">'+money(e.dfod)+'</td><td class="r"><b>'+money(exp)+'</b></td><td class="r">'+money(rec)+'</td><td class="r">'+money(out)+'</td><td class="r">'+money(held)+'</td><td class="r"><b style="color:'+(gap>0?'#b7791f':gap<0?'#16804d':'inherit')+'">'+money(gap)+'</b></td></tr>';
  }).join(''):'<tr><td colspan="8" class="empty">Tidak ada tagihan atau pembayaran pada periode ini.</td></tr>';
  const totalCod=sum(Object.values(expected),x=>x.cod),totalDfod=sum(Object.values(expected),x=>x.dfod),totalHeld=sum(payments.filter(x=>x.status==='held_by_sprinter'),x=>x.amount),totalGap=expectedTotal-recorded;
- document.getElementById('cashBody').innerHTML+='<tr style="font-weight:800;background:var(--soft);border-top:2px solid var(--line)"><td>TOTAL KESELURUHAN</td><td class="r">'+money(totalCod)+'</td><td class="r">'+money(totalDfod)+'</td><td class="r">'+money(expectedTotal)+'</td><td class="r">'+money(recorded)+'</td><td class="r">'+money(received)+'</td><td class="r">'+money(totalHeld)+'</td><td class="r">'+money(totalGap)+'</td></tr>';
+ document.getElementById('cashBody').innerHTML+='<tr class="cash-grand-total" style="font-weight:800;background:var(--soft);border-top:2px solid var(--line)"><td>TOTAL KESELURUHAN</td><td class="r">'+money(totalCod)+'</td><td class="r">'+money(totalDfod)+'</td><td class="r">'+money(expectedTotal)+'</td><td class="r">'+money(recorded)+'</td><td class="r">'+money(received)+'</td><td class="r">'+money(totalHeld)+'</td><td class="r">'+money(totalGap)+'</td></tr>';
  const canConfirm=['admin','finance'].includes(currentUserRole);
  document.getElementById('cashPaymentBody').innerHTML=payments.length?payments.map(x=>{
   const method={transfer:'Transfer',qris:'QRIS',cash:'Tunai'}[x.payment_method]||x.payment_method;
