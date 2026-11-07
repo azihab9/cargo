@@ -248,12 +248,6 @@ tbody tr:hover{background:#f7fbfd}
   <div class="muted" id="cashReportStatus">Pilih file CSV untuk memeriksa data sebelum diimpor.</div>
   <div class="note">Import akan memperbarui data berdasarkan nomor resi (AWB), bukan menggandakan resi yang sama. Pastikan file merupakan laporan TTD.</div>
  </div>
- <h2 style="margin:18px 0 10px">Daftar Resi COD & DFOD</h2>
- <div class="toolbar" style="margin-bottom:10px">
-  <input id="cashReportSearch" placeholder="Cari nomor resi, sprinter, atau tanggal TTD..." oninput="renderCashReportItems()">
-  <span class="muted" id="cashReportCount">0 resi</span>
- </div>
- <div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th>Tanggal TTD</th><th class="r">COD</th><th class="r">DFOD</th><th class="r">Total</th></tr></thead><tbody id="cashReportBody"><tr><td colspan="6" class="empty">Memuat daftar resi...</td></tr></tbody></table></div>
  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
   <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada tanggal terpilih</div></div>
   <div class="card"><div class="metric-label">Pembayaran tercatat</div><div class="metric" id="cashRecorded">Rp0</div><div class="hint">Termasuk uang yang masih di sprinter</div></div>
@@ -274,6 +268,13 @@ tbody tr:hover{background:#f7fbfd}
  </div>
  <h2 style="margin:18px 0 10px">Ringkasan per Sprinter</h2>
  <div class="tablewrap"><table><thead><tr><th>Sprinter</th><th class="r">COD + DFOD</th><th class="r">Pembayaran tercatat</th><th class="r">Diterima outlet</th><th class="r">Di rekening sprinter</th><th class="r">Belum tercatat</th></tr></thead><tbody id="cashBody"><tr><td colspan="6" class="empty">Memuat rekap...</td></tr></tbody></table></div>
+ <h2 style="margin:18px 0 10px">Daftar Resi COD & DFOD</h2>
+ <div class="toolbar" style="margin-bottom:10px">
+  <input id="cashReportSearch" placeholder="Cari nomor resi, sprinter, atau tanggal TTD..." oninput="renderCashReportItems()">
+  <span class="muted" id="cashReportCount">0 resi</span>
+ </div>
+ <div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th>Tanggal TTD</th><th class="r">COD</th><th class="r">DFOD</th><th class="r">Total</th></tr></thead><tbody id="cashReportBody"><tr><td colspan="6" class="empty">Memuat daftar resi...</td></tr></tbody></table></div>
+ 
  <h2 style="margin:20px 0 10px">Riwayat Pembayaran</h2>
  <div class="tablewrap"><table><thead><tr><th>Waktu input</th><th>Sprinter</th><th>No. Resi</th><th>Metode</th><th>Tujuan awal</th><th class="r">Nominal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="cashPaymentBody"><tr><td colspan="8" class="empty">Belum ada pembayaran.</td></tr></tbody></table></div>
 </div></section><section class="page" data-page="records"><div class="panel" id="records"><h2>Data operasional TTD</h2><div class="desc">Hanya resi TTD yang masuk ke perhitungan payroll dan uang COD/DFOD.</div><div class="toolbar"><input id="search" placeholder="Cari sprinter / nomor resi..." oninput="renderRecords()"><span class="muted" id="rowCount">0 baris</span></div><div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th class="r">Berat kg</th><th class="r">COD</th><th class="r">DFOD</th><th>Tanggal TTD</th></tr></thead><tbody id="recordBody"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div></section>
