@@ -747,7 +747,8 @@ document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const sprinterName=document.getElementById('cashSprinter').value,date=document.getElementById('cashPaymentDate').value,amount=Number(document.getElementById('cashAmount').value),destination=document.getElementById('cashDestination').value;
  if(!sprinterName||!date||!Number.isFinite(amount)||amount<=0){alert('Pilih sprinter, tanggal, dan nominal yang benar.');return}
- if(cashLocks.some(x=>x.settlement_date===date&&x.sprinter_name===sprinterName)){alert('Setoran '+sprinterName+' tanggal '+date+' sudah dikunci. Pembayaran baru tidak dapat ditambahkan.');return}
+ const settlementDate=(document.getElementById('cashDateFrom')?.value||'').slice(0,10);
+ if(cashLocks.some(x=>x.settlement_date===settlementDate&&x.sprinter_name===sprinterName)){alert('Tagihan TTD '+sprinterName+' tanggal '+settlementDate+' sudah dikunci. Pembayaran baru tidak dapat ditambahkan.');return}
  const button=document.getElementById('cashSaveButton');button.disabled=true;
  try{
   const {data:userData}=await supabaseClient.auth.getUser();
