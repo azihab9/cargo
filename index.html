@@ -272,11 +272,13 @@ tbody tr:hover{background:#f7fbfd}
  <div class="toolbar" style="margin-bottom:10px;justify-content:flex-start">
   <input id="cashReportSearch" placeholder="Cari nomor resi..." oninput="renderCashReportItems()">
   <select id="cashReportSprinterFilter" onchange="renderCashReportItems()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px"><option value="">Semua sprinter</option></select>
-  <label style="font-size:10px;color:var(--muted)">Tanggal TTD <input type="date" id="cashReportDateFilter" onchange="renderCashReportItems()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px"></label>
+  <label style="font-size:10px;color:var(--muted)">Dari tanggal <input type="date" id="cashReportDateFrom" onchange="renderCashReportItems()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px"></label>
+  <label style="font-size:10px;color:var(--muted)">Sampai tanggal <input type="date" id="cashReportDateTo" onchange="renderCashReportItems()" style="border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px"></label>
   <button class="smallbtn" type="button" onclick="clearCashReportFilters()">Reset filter</button>
   <span class="muted" id="cashReportCount">0 resi</span>
  </div>
  <div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th>Tanggal TTD</th><th class="r">COD</th><th class="r">DFOD</th><th class="r">Total</th></tr></thead><tbody id="cashReportBody"><tr><td colspan="6" class="empty">Memuat daftar resi...</td></tr></tbody></table></div>
+ <div id="cashReportTotal" class="note" style="margin-top:10px;font-weight:700">Total data terbaca: 0 resi</div>
  
  <h2 style="margin:20px 0 10px">Riwayat Pembayaran</h2>
  <div class="tablewrap"><table><thead><tr><th>Waktu input</th><th>Sprinter</th><th>No. Resi</th><th>Metode</th><th>Tujuan awal</th><th class="r">Nominal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="cashPaymentBody"><tr><td colspan="8" class="empty">Belum ada pembayaran.</td></tr></tbody></table></div>
@@ -535,10 +537,12 @@ function renderCashReportItems(){
  if(!body)return;
  const searchEl=document.getElementById('cashReportSearch');
  const sprinterEl=document.getElementById('cashReportSprinterFilter');
- const dateEl=document.getElementById('cashReportDateFilter');
+ const dateFromEl=document.getElementById('cashReportDateFrom');
+ const dateToEl=document.getElementById('cashReportDateTo');
  const q=(searchEl?.value||'').trim().toLowerCase();
  const selectedSprinter=sprinterEl?.value||'';
- const selectedDate=dateEl?.value||'';
+ const dateFrom=dateFromEl?.value||'';
+ const dateTo=dateToEl?.value||'';
  if(sprinterEl){
   const names=[...new Set(cashReportRows.map(x=>x.sprinter_name).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   sprinterEl.innerHTML='<option value="">Semua sprinter</option>'+names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
@@ -547,18 +551,22 @@ function renderCashReportItems(){
  const rows=[...cashReportRows].filter(x=>
   (!q||String(x.awb??'').toLowerCase().includes(q))&&
   (!selectedSprinter||x.sprinter_name===selectedSprinter)&&
-  (!selectedDate||x.ttd_date===selectedDate)
+  (!dateFrom||String(x.ttd_date||'')>=dateFrom)&&
+  (!dateTo||String(x.ttd_date||'')<=dateTo)
  ).sort((a,b)=>String(b.ttd_date).localeCompare(String(a.ttd_date))||String(a.awb).localeCompare(String(b.awb)));
  if(count)count.textContent=rows.length+' dari '+cashReportRows.length+' resi';
  body.innerHTML=rows.length?rows.map(x=>{
   const cod=Number(x.cod_amount)||0,dfod=Number(x.dfod_amount)||0;
   return '<tr><td>'+esc(x.awb)+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.ttd_date)+'</td><td class="r">'+money(cod)+'</td><td class="r">'+money(dfod)+'</td><td class="r"><b>'+money(cod+dfod)+'</b></td></tr>';
  }).join(''):'<tr><td colspan="6" class="empty">Tidak ada resi yang cocok.</td></tr>';
+ const totalEl=document.getElementById('cashReportTotal');
+ if(totalEl)totalEl.textContent='Total data terbaca: '+cashReportRows.length+' resi • Ditampilkan: '+rows.length+' resi';
 }
 function clearCashReportFilters(){
  document.getElementById('cashReportSearch').value='';
  document.getElementById('cashReportSprinterFilter').value='';
- document.getElementById('cashReportDateFilter').value='';
+ document.getElementById('cashReportDateFrom').value='';
+ document.getElementById('cashReportDateTo').value='';
  renderCashReportItems();
 }
 function renderCashPage(){
