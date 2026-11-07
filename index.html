@@ -753,7 +753,7 @@ document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
  }catch(err){alert('Pembayaran gagal disimpan: '+err.message)}
  finally{button.disabled=false}
 });
-async async function lockCashSettlement(sprinterName){
+async function lockCashSettlement(sprinterName){
  if(!['admin','finance'].includes(currentUserRole)){alert('Hanya admin atau finance yang dapat mengunci setoran.');return}
  const date=document.getElementById('cashDateFrom')?.value||'';
  if(!date){alert('Pilih tanggal setoran terlebih dahulu.');return}
@@ -765,7 +765,7 @@ async async function lockCashSettlement(sprinterName){
  await loadCashSettlements();alert('Setoran '+sprinterName+' tanggal '+date+' berhasil dikunci.');
 }
 
-function confirmCashPayment(id){
+async function confirmCashPayment(id){
  if(!['admin','finance'].includes(currentUserRole)){alert('Hanya admin atau finance yang dapat mengonfirmasi penerimaan outlet.');return}
  const item=cashSettlementRows.find(x=>x.id===id);if(!item)return;
  const label=item.status==='held_by_sprinter'?'sprinter sudah meneruskan uang ke outlet':'uang sudah masuk ke rekening outlet';
