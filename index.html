@@ -254,9 +254,10 @@ tbody tr:hover{background:#f7fbfd}
 <label style="font-size:10px;color:var(--muted)">Kategori<br><select id="expenseCategory" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"><option value="BBM">BBM</option><option value="Tol / Parkir">Tol / Parkir</option><option value="ATK">ATK</option><option value="Konsumsi">Konsumsi</option><option value="Perawatan Armada">Perawatan Armada</option><option value="Operasional Outlet">Operasional Outlet</option><option value="Lainnya">Lainnya</option></select></label>
 <label style="font-size:10px;color:var(--muted)">Nominal (Rp)<br><input id="expenseAmount" type="number" min="1" step="1" required placeholder="Contoh: 150000" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label>
 <label style="font-size:10px;color:var(--muted)">Keterangan<br><input id="expenseDescription" maxlength="250" placeholder="Contoh: Isi BBM kendaraan operasional" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label>
+<label style="font-size:10px;color:var(--muted)">Potong dari setoran tanggal<br><select id="expenseSourceDate" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px;min-width:170px"><option value="">Memuat setoran...</option></select></label>
 <button class="btn" type="submit">Simpan Pengeluaran</button>
 </form>
-<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th class="r">Nominal</th><th>Aksi</th></tr></thead><tbody id="expenseBody"><tr><td colspan="5" class="empty">Memuat pengeluaran...</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Potong setoran</th><th class="r">Nominal</th><th>Aksi</th></tr></thead><tbody id="expenseBody"><tr><td colspan="5" class="empty">Memuat pengeluaran...</td></tr></tbody></table></div>
 <div class="note">Laporan ini belum menghitung pendapatan jasa pengiriman. Total biaya merupakan pengeluaran operasional ditambah payroll yang sudah difinalisasi atau dibayar. Draft payroll tidak dihitung.</div>
 </section></section>
 <section class="page" data-page="cash">
@@ -805,7 +806,7 @@ async function loadFinanceData(){
  if(!from||!to||from>to){alert('Periksa tanggal laporan keuangan.');return}
  expenseBody.innerHTML='<tr><td colspan="4" class="empty">Memuat pengeluaran...</td></tr>';
  try{
-  const {data:expenses,error:expenseError}=await supabaseClient.from('expenses').select('id,expense_date,category,amount,description').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false});
+  const {data:expenses,error:expenseError}=await supabaseClient.from('expenses').select('id,expense_date,category,amount,description,source_settlement_date').gte('expense_date',from).lte('expense_date',to).order('expense_date',{ascending:false});
   if(expenseError)throw expenseError;
   expenseRows=expenses||[];
   const expenseTotal=expenseRows.reduce((sum,x)=>sum+(Number(x.amount)||0),0);
@@ -890,10 +891,11 @@ async function deleteExpense(id){
 document.getElementById('expenseForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const date=document.getElementById('expenseDate').value,category=document.getElementById('expenseCategory').value,amount=Number(document.getElementById('expenseAmount').value),description=document.getElementById('expenseDescription').value.trim();
- if(!date||!category||!Number.isFinite(amount)||amount<=0){alert('Isi tanggal, kategori, dan nominal pengeluaran dengan benar.');return}
+ const sourceDate=document.getElementById('expenseSourceDate').value;
+ if(!date||!category||!sourceDate||!Number.isFinite(amount)||amount<=0){alert('Isi tanggal, kategori, sumber setoran, dan nominal pengeluaran dengan benar.');return}
  const button=e.submitter||e.target.querySelector('button[type="submit"]');button.disabled=true;
  try{
-  const {error}=await supabaseClient.from('expenses').insert({expense_date:date,category,amount,description:description||null});
+  const {error}=await supabaseClient.from('expenses').insert({expense_date:date,category,amount,description:description||null,source_settlement_date:sourceDate});
   if(error)throw error;
   document.getElementById('expenseAmount').value='';
   document.getElementById('expenseDescription').value='';
