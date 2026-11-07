@@ -12,6 +12,25 @@
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:15px}.card,.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 3px 12px #193a2407}.metric-label{font-size:11px;color:var(--muted)}.metric{font-size:23px;font-weight:850;margin:9px 0 4px}.green{color:var(--g)}.hint{font-size:10px;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.panel h2{font-size:14px;margin:0 0 5px}.desc{font-size:11px;color:var(--muted);margin-bottom:14px}
 .upload{background:#f7fcf8;border:1.5px dashed #a8cdb5;border-radius:11px;padding:19px;text-align:center}.upload .ico{font-size:25px;color:var(--g)}.upload strong{font-size:12px;display:block;margin:7px}.upload p{font-size:10px;color:var(--muted)}input,select{font:inherit}input[type=file]{font-size:11px;max-width:100%}.btn{border:0;border-radius:8px;padding:9px 13px;background:var(--g);color:white;font-size:11px;font-weight:750;cursor:pointer}.btn:hover{background:var(--gd)}.btn.light{background:#eaf5ee;color:var(--gd)}.btn.dark{background:#253a2c}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0}.toolbar input,.toolbar select,.datefilters input{border:1px solid var(--line);background:white;border-radius:8px;padding:9px 10px;font-size:11px}.datefilters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.datefilters label{font-size:10px;color:var(--muted)}.pill{display:inline-block;background:#eaf6ee;color:#168345;border-radius:20px;padding:5px 8px;font-size:10px;font-weight:750}.note{background:#fff8e8;border:1px solid #f0e2bc;border-radius:9px;padding:10px 12px;font-size:10px;line-height:1.55;color:#735a23;margin-top:12px}.tablewrap{overflow:auto;max-height:370px}table{border-collapse:collapse;width:100%;font-size:11px}th{position:sticky;top:0;background:#f6faf7;color:#718078;text-align:left;font-size:10px}td,th{padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}.empty{text-align:center;color:var(--muted);padding:25px}.feeinput{width:100px;border:1px solid var(--line);border-radius:7px;padding:7px;font-size:11px;text-align:right}.status{font-size:10px;color:var(--g);font-weight:700}.section{margin-top:14px}.page{display:none}.page.active{display:block}.page>.panel,.page>section{margin-bottom:14px}.smallbtn{border:1px solid var(--line);background:white;padding:7px 9px;border-radius:7px;font-size:10px;cursor:pointer}
+
+/* CargoFlow smooth page transitions and staged content reveal */
+@keyframes cargoPageEnter{from{opacity:0;transform:translate3d(0,22px,0);filter:blur(2px)}to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}}
+@keyframes cargoItemEnter{from{opacity:0;transform:translate3d(0,12px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+.page.active{animation:cargoPageEnter .55s cubic-bezier(.2,.75,.25,1) both}
+.page.active>.panel,.page.active>section,.page.active>.cards,.page.active>.tablewrap,.page.active>h2,.page.active>.toolbar{animation:cargoItemEnter .48s ease both}
+.page.active>.panel{animation-delay:.04s}
+.page.active>.cards{animation-delay:.10s}
+.page.active>h2{animation-delay:.14s}
+.page.active .tablewrap tbody tr{animation:cargoItemEnter .42s ease both}
+.page.active .tablewrap tbody tr:nth-child(1){animation-delay:.06s}
+.page.active .tablewrap tbody tr:nth-child(2){animation-delay:.11s}
+.page.active .tablewrap tbody tr:nth-child(3){animation-delay:.16s}
+.page.active .tablewrap tbody tr:nth-child(4){animation-delay:.21s}
+.page.active .tablewrap tbody tr:nth-child(5){animation-delay:.26s}
+.page.active .tablewrap tbody tr:nth-child(n+6){animation-delay:.30s}
+.page.active .metric{animation:cargoItemEnter .55s ease both;animation-delay:.12s}
+@media(prefers-reduced-motion:reduce){.page.active,.page.active *{animation:none!important;transition:none!important}}
+
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:14px;gap:12px}.nav{display:flex;overflow:auto}.navlabel,.foot{display:none}.nav a{white-space:nowrap;padding:9px}.cards{grid-template-columns:repeat(2,1fr)}main{padding:18px 13px}}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}.top h1{font-size:21px}.metric{font-size:19px}.user{display:none}}
 
