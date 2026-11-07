@@ -261,7 +261,7 @@ tbody tr:hover{background:#f7fbfd}
 </section></section>
 <section class="page" data-page="cash">
 <div class="panel" id="cash">
- <div class="toolbar"><div><h2>Laporan COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Rekap tagihan, pembayaran customer, dan uang yang sudah diterima outlet berdasarkan periode.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><label style="font-size:10px;color:var(--muted)">Tanggal setoran<br><input type="date" id="cashDateFrom" onchange="setCashDate(this.value)" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label><input type="hidden" id="cashDateTo"></div></div>
+ <div class="toolbar"><div><h2>Laporan COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Rekap tagihan, pembayaran customer, dan uang yang sudah diterima outlet berdasarkan periode.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><label style="font-size:10px;color:var(--muted)">Mulai TTD<br><input type="datetime-local" id="cashDateFrom" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label><label style="font-size:10px;color:var(--muted)">Batas akhir TTD<br><input type="datetime-local" id="cashDateTo" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div></div>
  <div class="panel" style="background:#f3fbf7;margin:14px 0">
   <h2>Import Laporan TTD J&T Cargo</h2>
   <div class="desc">Unggah Excel laporan TTD J&T Cargo (.xlsx atau .xls). Tanggal transaksi dibaca dari <b>Waktu tanda terima</b>, COD dari <b>jumlah pembayaran COD</b>, dan DFOD dari <b>Biaya DFOD</b>.</div>
@@ -537,12 +537,13 @@ function payrollPayload(){
 }
 
 
-function setCashDate(value){const to=document.getElementById('cashDateTo');if(to)to.value=value||'';renderCashPage()}
+function setCashDate(value){const from=document.getElementById('cashDateFrom'),to=document.getElementById('cashDateTo');if(from)from.value=value||'';if(to)to.value=value?value+'T23:59':'';renderCashPage()}
 function initCashDate(){
  const from=document.getElementById('cashDateFrom'),to=document.getElementById('cashDateTo'),paymentDate=document.getElementById('cashPaymentDate');
  const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
- if(from&&!from.value)from.value=today;
- if(to)to.value=from?.value||today;
+ const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),nextDay=[tomorrow.getFullYear(),String(tomorrow.getMonth()+1).padStart(2,'0'),String(tomorrow.getDate()).padStart(2,'0')].join('-');
+ if(from&&!from.value)from.value=today+'T00:00';
+ if(to&&!to.value)to.value=nextDay+'T02:00';
  if(paymentDate&&!paymentDate.value)paymentDate.value=today;
  const select=document.getElementById('cashSprinter');
  const names=[...new Set([...Object.keys(sprinterIds),...cashReportRows.map(x=>x.sprinter_name).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
@@ -553,7 +554,7 @@ async function loadCashSettlements(){
  try{
   const {data,error}=await supabaseClient.from('cash_settlements').select('id,payment_date,sprinter_id,sprinter_name,awb,amount,payment_method,destination,status,receipt_note,created_at,confirmed_at').order('created_at',{ascending:false}).limit(1000);
   if(error)throw error;cashSettlementRows=data||[];
-  const report=await supabaseClient.from('cash_report_items').select('id,awb,ttd_date,sprinter_name,cod_amount,dfod_amount').order('ttd_date',{ascending:false}).limit(10000);
+  const report=await supabaseClient.from('cash_report_items').select('id,awb,ttd_date,ttd_at,sprinter_name,cod_amount,dfod_amount').order('ttd_date',{ascending:false}).limit(10000);
   if(report.error)throw report.error;cashReportRows=report.data||[];
   const locks=await supabaseClient.from('cash_settlement_locks').select('id,settlement_date,sprinter_name,locked_at,locked_by');
   if(locks.error)throw locks.error;cashLocks=locks.data||[];
@@ -625,15 +626,17 @@ function renderCashPage(){
  const from=document.getElementById('cashDateFrom')?.value||'';
  const to=document.getElementById('cashDateTo')?.value||'';
  if(from&&to&&from>to){
-  document.getElementById('cashBody').innerHTML='<tr><td colspan="8" class="empty">Tanggal awal tidak boleh melewati tanggal akhir.</td></tr>';
-  document.getElementById('cashPaymentBody').innerHTML='<tr><td colspan="8" class="empty">Periksa rentang tanggal laporan.</td></tr>';
+  document.getElementById('cashBody').innerHTML='<tr><td colspan="9" class="empty">Waktu mulai tidak boleh melewati batas akhir.</td></tr>';
+  document.getElementById('cashPaymentBody').innerHTML='<tr><td colspan="8" class="empty">Periksa rentang waktu laporan.</td></tr>';
   ['cashExpected','cashRecorded','cashReceived'].forEach(id=>document.getElementById(id).textContent='Rp0');
   return;
  }
+ const startDate=from?from.slice(0,10):'',endDate=to?to.slice(0,10):'';
  const inPeriod=value=>(!from||String(value||'')>=from)&&(!to||String(value||'')<=to);
+ const inPaymentPeriod=value=>(!startDate||String(value||'')>=startDate)&&(!endDate||String(value||'')<=endDate);
  const useImportedReport=cashReportRows.length>0;
  renderCashReportItems();
- const daily=useImportedReport?cashReportRows.filter(r=>inPeriod(r.ttd_date)):allRecords.filter(r=>isTtd(r)&&inPeriod(r.ttdDate));
+ const daily=useImportedReport?cashReportRows.filter(r=>inPeriod(r.ttd_at||((r.ttd_date||'')+'T00:00:00'))):allRecords.filter(r=>isTtd(r)&&inPeriod((r.ttdDate||'')+'T00:00:00'));
  const expected={};
  daily.forEach(r=>{
   const k=useImportedReport?r.sprinter_name:r.sprinter;
@@ -642,7 +645,7 @@ function renderCashPage(){
   expected[k].cod+=Number(useImportedReport?r.cod_amount:r.cod)||0;
   expected[k].dfod+=Number(useImportedReport?r.dfod_amount:r.dfod)||0;
  });
- const payments=cashSettlementRows.filter(x=>inPeriod(x.payment_date));
+ const payments=cashSettlementRows.filter(x=>inPaymentPeriod(x.payment_date));
  const sum=(arr,fn)=>arr.reduce((a,x)=>a+(Number(fn(x))||0),0);
  const expectedTotal=sum(Object.values(expected),x=>x.cod+x.dfod);
  const recorded=sum(payments,x=>x.amount);
@@ -655,7 +658,7 @@ function renderCashPage(){
   const e=expected[name]||{cod:0,dfod:0},rows=payments.filter(x=>x.sprinter_name===name);
   const exp=e.cod+e.dfod,rec=sum(rows,x=>x.amount),out=sum(rows.filter(x=>x.status==='confirmed'),x=>x.amount),held=sum(rows.filter(x=>x.status==='held_by_sprinter'),x=>x.amount);
   const gap=exp-rec;
-  const locked=cashLocks.some(x=>x.settlement_date===from&&x.sprinter_name===name);
+  const locked=cashLocks.some(x=>x.settlement_date===startDate&&x.sprinter_name===name);
   const lockArg=JSON.stringify(name).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
   const lockCell=locked?'<span class="state-chip state-paid">SELESAI • TERKUNCI</span>':'<button class="smallbtn" type="button" onclick="lockCashSettlement('+lockArg+')">Kunci setoran</button>';
   return '<tr><td>'+esc(name)+'</td><td class="r">'+money(e.cod)+'</td><td class="r">'+money(e.dfod)+'</td><td class="r"><b>'+money(exp)+'</b></td><td class="r">'+money(rec)+'</td><td class="r">'+money(out)+'</td><td class="r">'+money(held)+'</td><td class="r"><b style="color:'+(gap>0?'#b7791f':gap<0?'#16804d':'inherit')+'">'+money(gap)+'</b></td><td>'+lockCell+'</td></tr>';
@@ -680,19 +683,27 @@ function parseCashReportMatrix(matrix){
  const awbCol=find('No. Resi'),sprinterCol=find('Sprinter delivery'),ttdCol=find('Waktu tanda terima'),codCol=find('jumlah pembayaran COD'),dfodCol=find('Biaya DFOD');
  if(!awbCol||!sprinterCol||!ttdCol||!codCol||!dfodCol)throw Error('Kolom wajib tidak lengkap. Periksa No. Resi, Sprinter delivery, Waktu tanda terima, jumlah pembayaran COD, dan Biaya DFOD.');
  const amount=(v)=>{if(typeof v==='number')return Number.isFinite(v)?v:0;let x=String(v??'').trim().replace(/[^\d,.-]/g,'');if(!x)return 0;if(x.includes(',')&&x.includes('.')){if(x.lastIndexOf('.')>x.lastIndexOf(','))x=x.replace(/,/g,'');else x=x.replace(/\./g,'').replace(',','.')}else if(x.includes(',')){x=x.replace(',','.')}return Number(x)||0};
- const date=(v)=>{
-  if(v instanceof Date&&!isNaN(v))return dateKey(v);
-  if(typeof v==='number'){const d=XLSX.SSF.parse_date_code(v);if(d)return dateKey(new Date(d.y,d.m-1,d.d))}
-  const s=String(v??'').trim(),iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(iso)return iso[1]+'-'+iso[2]+'-'+iso[3];
-  const dmy=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);if(dmy)return dmy[3]+'-'+dmy[2].padStart(2,'0')+'-'+dmy[1].padStart(2,'0');
-  return '';
+ const dateTime=(v)=>{
+  const pad=n=>String(n).padStart(2,'0');
+  const make=(y,m,d,h=0,mi=0,se=0)=>({date:String(y)+'-'+pad(m)+'-'+pad(d),time:String(y)+'-'+pad(m)+'-'+pad(d)+'T'+pad(h)+':'+pad(mi)+':'+pad(se)});
+  if(v instanceof Date&&!isNaN(v))return make(v.getFullYear(),v.getMonth()+1,v.getDate(),v.getHours(),v.getMinutes(),v.getSeconds());
+  if(typeof v==='number'){
+   const d=XLSX.SSF.parse_date_code(v);
+   if(d)return make(d.y,d.m,d.d,d.H||0,d.M||0,Math.floor(d.S||0));
+  }
+  const s=String(v??'').trim();
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m)return make(m[1],m[2],m[3],m[4]||0,m[5]||0,m[6]||0);
+  m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if(m)return make(m[3],m[2],m[1],m[4]||0,m[5]||0,m[6]||0);
+  return null;
  };
  const out=[];
  for(const cells of matrix.slice(headerIndex+1)){
   const obj=Object.fromEntries(headers.map((h,i)=>[h,cells[i]??'']));
-  const awb=String(obj[awbCol]||'').trim(),sprinter=String(obj[sprinterCol]||'').trim(),ttdDate=date(obj[ttdCol]);
-  if(!awb||!sprinter||!ttdDate)continue;
-  out.push({awb,ttd_date:ttdDate,sprinter_name:sprinter,cod_amount:amount(obj[codCol]),dfod_amount:amount(obj[dfodCol])});
+  const awb=String(obj[awbCol]||'').trim(),sprinter=String(obj[sprinterCol]||'').trim(),ttd=dateTime(obj[ttdCol]);
+  if(!awb||!sprinter||!ttd)continue;
+  out.push({awb,ttd_date:ttd.date,ttd_at:ttd.time,sprinter_name:sprinter,cod_amount:amount(obj[codCol]),dfod_amount:amount(obj[dfodCol])});
  }
  if(!out.length)throw Error('Tidak ada baris dengan AWB, sprinter, dan Waktu tanda terima yang valid.');
  const unique=new Map();out.forEach(x=>unique.set(x.awb,x));
@@ -755,8 +766,8 @@ document.getElementById('cashPaymentForm').addEventListener('submit',async e=>{
 });
 async function lockCashSettlement(sprinterName){
  if(!['admin','finance'].includes(currentUserRole)){alert('Hanya admin atau finance yang dapat mengunci setoran.');return}
- const date=document.getElementById('cashDateFrom')?.value||'';
- if(!date){alert('Pilih tanggal setoran terlebih dahulu.');return}
+ const date=(document.getElementById('cashDateFrom')?.value||'').slice(0,10);
+ if(!date){alert('Pilih waktu mulai TTD terlebih dahulu.');return}
  if(cashLocks.some(x=>x.settlement_date===date&&x.sprinter_name===sprinterName)){alert('Setoran sprinter ini sudah terkunci.');return}
  if(!confirm('Kunci setoran '+sprinterName+' untuk tanggal '+date+'? Setelah dikunci, status tanggal ini dianggap selesai.'))return;
  const {data:userData}=await supabaseClient.auth.getUser();
