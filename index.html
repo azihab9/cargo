@@ -30,6 +30,10 @@
 .page.active .tablewrap tbody tr:nth-child(n+6){animation-delay:.30s}
 .page.active .metric{animation:cargoItemEnter .55s ease both;animation-delay:.12s}
 @media(prefers-reduced-motion:reduce){.page.active,.page.active *{animation:none!important;transition:none!important}}
+@keyframes cargoTypeReveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.typewriter-data{display:inline-block;white-space:pre;clip-path:inset(0 100% 0 0);animation-name:cargoTypeReveal;animation-timing-function:steps(var(--typing-steps,12),end);animation-fill-mode:both}
+@media(prefers-reduced-motion:reduce){.typewriter-data{animation:none!important;clip-path:none!important}}
+
 
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{padding:14px;gap:12px}.nav{display:flex;overflow:auto}.navlabel,.foot{display:none}.nav a{white-space:nowrap;padding:9px}.cards{grid-template-columns:repeat(2,1fr)}main{padding:18px 13px}}
 @media(max-width:560px){.grid2{grid-template-columns:1fr}.top h1{font-size:21px}.metric{font-size:19px}.user{display:none}}
@@ -594,6 +598,27 @@ function clearCashReportFilters(){
  document.getElementById('cashReportDateTo').value='';
  renderCashReportItems();
 }
+function animateCashDataTypewriter(){
+ const ids=['cashExpected','cashRecorded','cashReceived','cashBody','cashPaymentBody'];
+ let sequence=0;
+ ids.forEach(id=>{
+  const root=document.getElementById(id);if(!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+   const value=node.nodeValue;if(!value||!value.trim())return;
+   const parent=node.parentElement;if(!parent||parent.closest('.typewriter-data'))return;
+   const span=document.createElement('span');span.className='typewriter-data';span.textContent=value;
+   const chars=Math.max(1,Math.min(value.length,48));
+   const duration=Math.min(1.25,Math.max(.28,chars*.035));
+   span.style.setProperty('--typing-steps',chars);
+   span.style.animationDuration=duration+'s';
+   span.style.animationDelay=Math.min(sequence*.025,.45)+'s';
+   sequence++;
+   node.parentNode.replaceChild(span,node);
+  });
+ });
+}
 function renderCashPage(){
  const from=document.getElementById('cashDateFrom')?.value||'';
  const to=document.getElementById('cashDateTo')?.value||'';
@@ -640,6 +665,7 @@ function renderCashPage(){
   const action=x.status==='confirmed'?'<span class="muted">Selesai</span>':canConfirm?'<button class="smallbtn" onclick="confirmCashPayment(\''+x.id+'\')">'+(x.status==='held_by_sprinter'?'Konfirmasi diteruskan':'Konfirmasi masuk outlet')+'</button>':'<span class="muted">Menunggu admin</span>';
   return '<tr><td>'+esc(new Date(x.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.awb||'Tanpa resi')+'</td><td>'+method+'</td><td>'+dest+'</td><td class="r">'+money(x.amount)+'</td><td>'+status+'</td><td>'+action+'</td></tr>';
  }).join(''):'<tr><td colspan="8" class="empty">Belum ada pembayaran pada periode ini.</td></tr>';
+ animateCashDataTypewriter();
 }
 function parseCashReportMatrix(matrix){
  const headerIndex=matrix.findIndex(r=>r.some(v=>norm(v)==='noresi'));
