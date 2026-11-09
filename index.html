@@ -841,7 +841,7 @@ function toggleSprinterDetail(encodedName){
 function renderSprinterEligibility(){
  const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
  const grouped={};
- (deliveryAttempts.length?deliveryAttempts:allRecords).filter(r=>r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to)).forEach(r=>{
+ (()=>{const attemptAwbs=new Set(deliveryAttempts.map(r=>r.awb).filter(Boolean));return [...deliveryAttempts,...allRecords.filter(r=>r.awb&&!attemptAwbs.has(r.awb))]})().filter(r=>r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to)).forEach(r=>{
   const name=String(r.sprinter||'Tanpa nama').trim(),day=r.deliveryDate,month=day.slice(0,7);
   if(!grouped[name])grouped[name]={name,months:{}};
   if(!grouped[name].months[month])grouped[name].months[month]={month,total:0,success:0,failed:0,days:{}};
