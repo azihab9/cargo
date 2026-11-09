@@ -950,7 +950,7 @@ function initCashDate(){
  if(to&&!to.value)to.value=nextDay+'T02:00';
  if(paymentDate&&!paymentDate.value)paymentDate.value=today;
  const select=document.getElementById('cashSprinter');
- const names=[...new Set([...Object.keys(sprinterIds),...cashReportRows.map(x=>x.sprinter_name).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+ const names=[...new Set([...Object.keys(sprinterIds),...allRecords.map(x=>x.sprinter).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
  if(select)select.innerHTML=names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
 }
 let cashReportRows=[];let pendingCashReportRows=[];
@@ -958,8 +958,7 @@ async function loadCashSettlements(){
  try{
   const {data,error}=await supabaseClient.from('cash_settlements').select('id,payment_date,sprinter_id,sprinter_name,awb,amount,payment_method,destination,status,receipt_note,created_at,confirmed_at').order('created_at',{ascending:false}).limit(1000);
   if(error)throw error;cashSettlementRows=data||[];
-  const report=await supabaseClient.from('cash_report_items').select('id,awb,ttd_date,ttd_at,sprinter_name,cod_amount,dfod_amount').order('ttd_date',{ascending:false}).limit(10000);
-  if(report.error)throw report.error;cashReportRows=report.data||[];
+  cashReportRows=[];
   const locks=await supabaseClient.from('cash_settlement_locks').select('id,settlement_date,sprinter_name,locked_at,locked_by').order('locked_at',{ascending:false});
   if(locks.error)throw locks.error;cashLocks=locks.data||[];
   const history=document.getElementById('cashLockHistoryBody');if(history)history.innerHTML=cashLocks.length?cashLocks.map(x=>'<tr><td>'+esc(x.settlement_date)+'</td><td>'+esc(x.sprinter_name)+'</td><td>'+esc(x.locked_at?new Date(x.locked_at).toLocaleString('id-ID'):'-')+'</td><td><small>'+esc(x.locked_by||'-')+'</small></td></tr>').join(''):'<tr><td colspan="4" class="empty">Belum ada setoran yang dikunci.</td></tr>';
