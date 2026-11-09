@@ -499,7 +499,7 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
 </section>
 <section class="top-sprinters eligibility-panel">
  <div class="trend-head"><h3>Sprinter Performance &amp; Eligibility</h3><span class="metric-icon icon-green">✓</span></div>
- <div class="trend-sub">Evaluasi harian berdasarkan seluruh resi pada tanggal delivery. Hanya label “Penerimaan Normal” dihitung berhasil TTD; label lainnya dihitung belum berhasil.</div>
+ <div class="trend-sub">Evaluasi harian berdasarkan seluruh resi pada tanggal delivery. Label “TTD Normal” dihitung berhasil TTD; label lainnya (termasuk “未签收”) dihitung belum berhasil.</div>
  <div id="sprinterEligibility"><div class="trend-empty">Memuat evaluasi sprinter...</div></div>
 </section>
 </section>
@@ -595,7 +595,7 @@ function col(headers,type){let h=headers.find(x=>aliases[type].some(a=>norm(x)==
 function n(v){if(typeof v==='number')return v;let s=String(v??'').trim().replace(/[^\d,.-]/g,'');if(!s)return 0;if(s.includes('.')&&s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');return Number(s)||0}
 function dateVal(v){if(v instanceof Date&&!isNaN(v))return v;if(typeof v==='number'){let d=XLSX.SSF.parse_date_code(v);if(d)return new Date(d.y,d.m-1,d.d,d.H,d.M,d.S)}if(v){let d=new Date(v);if(!isNaN(d))return d}return null}
 function dateKey(d){if(!d)return '';return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
-function isTtd(r){return String(r.label||'').trim().toLowerCase()==='penerimaan normal'}
+function isTtd(r){const label=String(r.label||'').trim().replace(/\\s+/g,' ').toLowerCase();return label==='ttd normal'||label==='penerimaan normal'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function money(v){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v||0)}
 function kg(v){return new Intl.NumberFormat('id-ID',{maximumFractionDigits:2}).format(v||0)}
