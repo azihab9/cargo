@@ -416,6 +416,32 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
 }
 
 
+
+/* CargoFlow login full-screen visibility fix */
+/* Mobile .app display rules must never reveal the app before authentication. */
+#cargoApp[style*="display:none"],
+#cargoApp[style*="display: none"]{
+  display:none!important;
+}
+.auth-screen{
+  position:fixed!important;
+  inset:0!important;
+  z-index:9999!important;
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+  min-height:100vh!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  background:linear-gradient(135deg,#e4f4ef,#f4f8fb)!important;
+}
+@supports (padding: max(0px)){
+  .auth-screen{
+    padding-top:max(18px,env(safe-area-inset-top))!important;
+    padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
+  }
+}
+
 /* CargoFlow Android device-width fallback */
 @media only screen and (max-device-width:700px){
   html,body{width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
