@@ -828,7 +828,9 @@ function toggleSprinterDetail(encodedName){
  if(!row||!content)return;
  if(row.style.display!=='none'){row.style.display='none';return}
  const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
- const records=allRecords.filter(r=>String(r.sprinter||'').trim()===name&&r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to));
+ const attemptAwbs=new Set(deliveryAttempts.map(r=>r.awb).filter(Boolean));
+ const source=[...deliveryAttempts,...allRecords.filter(r=>r.awb&&!attemptAwbs.has(r.awb))];
+ const records=source.filter(r=>String(r.sprinter||'').trim()===name&&r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to));
  const failed=records.filter(r=>!isTtd(r)).sort((a,b)=>(b.deliveryDate||'').localeCompare(a.deliveryDate||''));
  const daily={};records.forEach(r=>{const d=r.deliveryDate;if(!daily[d])daily[d]={total:0,success:0,failed:0};daily[d].total++;if(isTtd(r))daily[d].success++;else daily[d].failed++});
  let html='<div class="sprinter-detail-title">Rincian '+esc(name)+'</div><div class="sprinter-detail-sub">Rekap harian dan daftar resi yang belum berhasil TTD pada periode terpilih.</div>';
