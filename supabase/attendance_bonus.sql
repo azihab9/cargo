@@ -92,6 +92,7 @@ begin
     left join public.attendance_bonus_rules rule
       on rule.active = true
      and rule.person_types @> array[s.person_type]::text[]
+     and s.present_days > 0
      and s.present_days >= rule.min_present_days
      and s.late_days <= rule.max_late_days
      and s.izin_days <= rule.max_izin_days
@@ -156,6 +157,7 @@ begin
     from stats s
     left join public.attendance_bonus_rules rule
       on rule.active=true and rule.person_types @> array[s.person_type]::text[]
+     and s.present_days>0
      and s.present_days>=rule.min_present_days
      and s.late_days<=rule.max_late_days
      and s.izin_days<=rule.max_izin_days
