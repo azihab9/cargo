@@ -226,6 +226,7 @@ tbody tr:hover{background:#f7fbfd}
 /* Dashboard daily trend */
 .top-sprinters{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #173d2410}
 .top-sprinters-list{display:grid;gap:13px;margin-top:14px}
+.sprinter-detail-toggle{border:0;background:transparent;padding:0;color:#168456;font:inherit;font-weight:800;cursor:pointer;text-align:left}.sprinter-detail-toggle span{font-size:9px;color:var(--muted);font-weight:600;margin-left:5px}.sprinter-detail-box{padding:12px;background:#f8fbf9;border-radius:12px;text-align:left}.sprinter-detail-title{font-size:12px;font-weight:800;color:#183b30}.sprinter-detail-sub{font-size:10px;color:var(--muted);margin:5px 0 10px}
 .eligibility-table-wrap{overflow-x:auto;margin-top:12px}.eligibility-table{width:100%;border-collapse:collapse;min-width:620px;font-size:11px}.eligibility-table th,.eligibility-table td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.eligibility-table th:first-child,.eligibility-table td:first-child{text-align:left}.eligibility-table th{color:var(--muted);font-size:10px;font-weight:700;background:#f8fbf9}.eligibility-rate{font-weight:800;color:#168456}.eligibility-low{color:#c66a27}.eligibility-status{display:inline-block;padding:4px 7px;border-radius:7px;background:#edf7f1;color:#168456;font-size:9px;font-weight:800}.eligibility-status.review{background:#fff4e8;color:#b66a24}
 .top-sprinter-row{display:grid;grid-template-columns:30px minmax(100px,1fr) minmax(90px,2fr) auto;align-items:center;gap:12px}
 .top-sprinter-rank{width:28px;height:28px;border-radius:9px;background:#edf7f1;color:#168456;display:grid;place-items:center;font-size:11px;font-weight:800}
@@ -567,6 +568,22 @@ function renderTopSprinters(records){
  const max=top[0].count||1;
  el.innerHTML='<div class="top-sprinters-list">'+top.map((x,i)=>'<div class="top-sprinter-row"><div class="top-sprinter-rank">'+(i+1)+'</div><div><div class="top-sprinter-name">'+esc(x.name)+'</div><div class="top-sprinter-meta">'+kg(x.weight)+' kg</div></div><div class="top-sprinter-track"><div class="top-sprinter-fill" style="width:'+Math.max(4,x.count/max*100)+'%"></div></div><div class="top-sprinter-value">'+x.count.toLocaleString('id-ID')+' TTD</div></div>').join('')+'</div>';
 }
+function toggleSprinterDetail(encodedName){
+ const name=decodeURIComponent(encodedName),key=encodeURIComponent(name).replace(/'/g,'%27');
+ const row=document.getElementById('sprinterDetail_'+key),content=document.getElementById('sprinterDetailContent_'+key);
+ if(!row||!content)return;
+ if(row.style.display!=='none'){row.style.display='none';return}
+ const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
+ const records=allRecords.filter(r=>String(r.sprinter||'').trim()===name&&r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to));
+ const failed=records.filter(r=>!isTtd(r)).sort((a,b)=>(b.deliveryDate||'').localeCompare(a.deliveryDate||''));
+ const daily={};records.forEach(r=>{const d=r.deliveryDate;if(!daily[d])daily[d]={total:0,success:0,failed:0};daily[d].total++;if(isTtd(r))daily[d].success++;else daily[d].failed++});
+ let html='<div class="sprinter-detail-title">Rincian '+esc(name)+'</div><div class="sprinter-detail-sub">Rekap harian dan daftar resi yang belum berhasil TTD pada periode terpilih.</div>';
+ html+='<div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal</th><th>Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
+ Object.keys(daily).sort((a,b)=>b.localeCompare(a)).forEach(d=>{const x=daily[d],rate=x.total?x.success/x.total*100:0;html+='<tr><td>'+new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})+'</td><td>'+x.total+'</td><td>'+x.success+'</td><td>'+x.failed+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'});
+ html+='</tbody></table></div><div class="sprinter-detail-title" style="margin-top:16px">Daftar resi belum berhasil TTD ('+failed.length+')</div>';
+ if(failed.length){html+='<div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal Delivery</th><th>No. Resi</th><th>Label TTD</th><th>Berat (kg)</th></tr></thead><tbody>';failed.forEach(r=>{html+='<tr><td>'+esc(r.deliveryDate||'—')+'</td><td>'+esc(r.awb||'—')+'</td><td>'+esc(r.label||'Label kosong')+'</td><td>'+kg(r.weight)+'</td></tr>'});html+='</tbody></table></div>'}else html+='<div class="trend-empty">Semua resi pada periode ini berhasil TTD. Mantap!</div>';
+ content.innerHTML=html;row.style.display='table-row';
+}
 function renderSprinterEligibility(){
  const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
  const grouped={};
@@ -582,7 +599,7 @@ function renderSprinterEligibility(){
  const people=Object.values(grouped).filter(x=>x.name&&x.name!=='Tanpa nama'&&!freelancerRows.some(f=>norm(f.name)===norm(x.name))).sort((a,b)=>(b.success/b.total)-(a.success/a.total)||b.total-a.total);
  if(!people.length){el.innerHTML='<div class="trend-empty">Belum ada data delivery pada periode ini. Pastikan file Excel memiliki kolom Waktu Delivery.</div>';return}
  let html='<div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th><th>Evaluasi</th></tr></thead><tbody>';
- people.forEach(x=>{const rate=x.total?x.success/x.total*100:0;html+='<tr><td><b>'+esc(x.name)+'</b></td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td><span class="eligibility-status '+(rate<90?'review':'')+'">'+(rate<90?'Perlu Evaluasi':'Performa Baik')+'</span></td></tr>'});
+ people.forEach(x=>{const rate=x.total?x.success/x.total*100:0;const key=encodeURIComponent(x.name).replace(/'/g,'%27');html+='<tr><td><button type="button" class="sprinter-detail-toggle" onclick="toggleSprinterDetail(\''+key+'\')">'+esc(x.name)+' <span>⌄ Detail</span></button></td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td><span class="eligibility-status '+(rate<90?'review':'')+'">'+(rate<90?'Perlu Evaluasi':'Performa Baik')+'</span></td></tr><tr id="sprinterDetail_'+key+'" style="display:none"><td colspan="6"><div class="sprinter-detail-box" id="sprinterDetailContent_'+key+'"></div></td></tr>'});
  html+='</tbody></table></div><div class="trend-sub" style="margin-top:14px">Rincian harian</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal Delivery</th><th>Sprinter</th><th>Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
  people.forEach(x=>Object.values(x.days).sort((a,b)=>b.date.localeCompare(a.date)).forEach(d=>{const rate=d.total?d.success/d.total*100:0;const date=new Date(d.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});html+='<tr><td>'+date+'</td><td>'+esc(x.name)+'</td><td>'+d.total+'</td><td>'+d.success+'</td><td>'+d.failed+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'}));
  html+='</tbody></table></div>';
