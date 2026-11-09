@@ -317,7 +317,7 @@ async function loadBonusRules(){
  attendanceBonusRules=data||[];
  const body=$('bonusRulesBody');body.innerHTML='';
  if(!attendanceBonusRules.length){body.innerHTML='<tr><td colspan="6">Belum ada aturan bonus. Tambahkan aturan pertama.</td></tr>';return;}
- const categoryLabel=v=>v.length===3?'Semua':v.map(x=>({sprinter:'Sprinter',admin:'Admin',warehouse:'Gudang',freelance:'Freelance'}[x]||x)).join(', ');
+ const categoryLabel=v=>v.length===3?'Semua':v.map(x=>({sprinter:'Sprinter',admin:'Admin',warehouse:'Gudang'}[x]||x)).join(', ');
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID');
  attendanceBonusRules.forEach(rule=>{
   const tr=document.createElement('tr');
