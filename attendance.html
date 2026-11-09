@@ -164,13 +164,23 @@ $('loginForm').addEventListener('submit',async e=>{
  catch(err){alertBox(err.message||'Login gagal.','error')}finally{busy(b,false,'Masuk ke Attendance')}
 });
 $('logoutBtn').onclick=async()=>{await db.auth.signOut();activeMember=null;await refresh();showTab('login')};
-$('selfieFile').addEventListener('change',()=>{const file=$('selfieFile').files[0];if(!file)return;if(!file.type.startsWith('image/')){alertBox('File harus berupa gambar.','error');$('selfieFile').value='';return;}if(file.size>5*1024*1024){alertBox('Ukuran selfie maksimal 5 MB.','error');$('selfieFile').value='';return;}const img=$('selfiePreview');img.src=URL.createObjectURL(file);img.classList.remove('hidden')});
+$('selfieFile').addEventListener('change',()=>{const file=$('selfieFile').files[0];if(!file)return;if(!file.type.startsWith('image/')){alertBox('File harus berupa gambar.','error');$('selfieFile').value='';return;}if(file.size>5*1024*1024){alertBox('Ukuran selfie asli maksimal 5 MB.','error');$('selfieFile').value='';return;}const img=$('selfiePreview');if(img.dataset.previewUrl)URL.revokeObjectURL(img.dataset.previewUrl);img.dataset.previewUrl=URL.createObjectURL(file);img.src=img.dataset.previewUrl;img.classList.remove('hidden')});
+async function compressSelfie(file){
+ const bitmap=await createImageBitmap(file);
+ const maxSide=1280,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
+ const ctx=canvas.getContext('2d',{alpha:false});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ let quality=.78,blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+ while(blob&&blob.size>450*1024&&quality>.5){quality-=.07;blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));}
+ if(!blob)throw new Error('Foto gagal diproses. Coba ambil selfie ulang.');
+ return blob;
+}
 $('checkInBtn').onclick=async()=>{
  clearAlert();const b=$('checkInBtn'),file=$('selfieFile').files[0];if(!file){alertBox('Ambil selfie terlebih dahulu.','warn');return;}
  busy(b,true);let uploadedPath=null;
  try{
-  const coords=await getPosition();const path=activeSession.user.id+'/'+today()+'-'+Date.now()+'.'+(file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg');
-  const {error:uploadError}=await db.storage.from('attendance-selfies').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;uploadedPath=path;
+  const coords=await getPosition();const compressedPhoto=await compressSelfie(file);const path=activeSession.user.id+'/'+today()+'-'+Date.now()+'.jpg';
+  const {error:uploadError}=await db.storage.from('attendance-selfies').upload(path,compressedPhoto,{contentType:'image/jpeg',upsert:false});if(uploadError)throw uploadError;uploadedPath=path;
   const {error}=await db.rpc('attendance_check_in',{p_latitude:coords.latitude,p_longitude:coords.longitude,p_photo_path:path});if(error)throw error;
   alertBox('Check In berhasil. Lokasi dan selfie sudah tercatat.');$('selfieFile').value='';$('selfiePreview').classList.add('hidden');await loadTodayRecord();
  }catch(err){if(uploadedPath)await db.storage.from('attendance-selfies').remove([uploadedPath]);alertBox(err.message||'Check In gagal.','error')}
