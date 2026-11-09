@@ -325,6 +325,95 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
  .trend-card,.top-sprinters{padding:14px}
 }
 
+
+
+/* CargoFlow Android / mobile app layout */
+@media(max-width:700px){
+  html,body{width:100%;min-width:320px;overflow-x:hidden}
+  body{font-size:14px;-webkit-text-size-adjust:100%;padding-bottom:env(safe-area-inset-bottom)}
+  .app{display:block;min-height:100vh}
+  .side{
+    position:sticky;top:0;z-index:50;width:100%;height:auto;min-height:0;
+    padding:12px 13px 9px;gap:9px;border-radius:0 0 17px 17px;
+    box-shadow:0 7px 22px #102b3f20;
+  }
+  .brand{font-size:21px;line-height:1.1}
+  .tag{font-size:9px;letter-spacing:1px;margin-top:3px}
+  .nav{
+    display:flex;flex-wrap:nowrap;gap:7px;overflow-x:auto;overflow-y:hidden;
+    margin:0 -2px;padding:2px 2px 7px;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  }
+  .nav::-webkit-scrollbar{display:none}
+  .navlabel,.foot{display:none}
+  .nav a{
+    flex:0 0 auto;white-space:nowrap;min-height:38px;display:flex;
+    align-items:center;padding:9px 12px;margin:0;border-radius:11px;
+    font-size:11px;font-weight:750;letter-spacing:.05px;
+  }
+  main{width:100%;max-width:none;margin:0;padding:16px 13px 28px}
+  .top{align-items:flex-start;gap:10px;margin:3px 0 17px}
+  .top h1{font-size:21px;line-height:1.2;margin:5px 0}
+  .eyebrow{font-size:9px;letter-spacing:1px}
+  .muted{font-size:10px}
+  .main-user{gap:6px;flex-shrink:0}
+  .user{display:none}
+  .logout{padding:9px 11px;font-size:10px;white-space:nowrap}
+  .dashboard-welcome{padding:18px 17px;margin:0 0 13px;border-radius:18px;gap:10px}
+  .dashboard-welcome h2{font-size:18px;line-height:1.25}
+  .dashboard-welcome p{font-size:10px;line-height:1.5;max-width:245px}
+  .welcome-kicker{font-size:9px;letter-spacing:1.1px}
+  .welcome-mark{width:46px;height:46px;min-width:46px;border-radius:14px;font-size:16px}
+  .cards,.dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}
+  .card,.panel{min-width:0;padding:14px;border-radius:16px}
+  .cards .card,.metric-card{min-height:116px;padding:13px}
+  .metric-top{gap:7px;align-items:center}
+  .metric-icon{width:30px;height:30px;min-width:30px;border-radius:10px;font-size:13px}
+  .metric-label{font-size:10px;line-height:1.3}
+  .metric,.metric-card .metric{font-size:19px;line-height:1.2;margin:11px 0 4px;overflow-wrap:anywhere}
+  .hint{font-size:9px;line-height:1.35}
+  .dashboard-footnote{padding:10px 12px;margin:0 0 12px;border-radius:12px;font-size:9px;line-height:1.45}
+  .dashboard-trends,.grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:11px}
+  .trend-card,.panel{min-width:0}
+  .trend-card{padding:14px;border-radius:16px}
+  .trend-head h3{font-size:13px}
+  .toolbar{align-items:stretch;gap:9px}
+  .toolbar>div{min-width:0}
+  .datefilters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .datefilters label{display:flex;flex-direction:column;gap:5px;font-size:10px}
+  .datefilters input{width:100%;min-width:0}
+  .datefilters button{width:100%;min-height:39px}
+  .btn,.smallbtn{min-height:38px;padding:9px 12px;font-size:11px}
+  input,select,textarea{max-width:100%;font-size:16px!important}
+  input[type=file]{font-size:12px!important;width:100%}
+  .upload{padding:18px 13px;border-radius:15px}
+  .upload p{line-height:1.5}
+  .tablewrap{width:100%;max-width:100%;overflow:auto;overscroll-behavior-x:contain;border-radius:13px}
+  .tablewrap table{min-width:600px;font-size:11px}
+  .tablewrap thead th{padding:11px 10px;font-size:9px}
+  .tablewrap tbody td{padding:11px 10px;font-size:10px}
+  .tablewrap button.smallbtn,.tablewrap .smallbtn{min-height:34px;padding:7px 9px}
+  .page>.panel,.page>section{margin-bottom:11px}
+  .section{margin-top:11px}
+  .auth-screen{min-height:100svh;padding:18px}
+  .auth-card{max-width:420px;padding:23px 20px;border-radius:21px}
+  .auth-card h1{font-size:20px}
+}
+@media(max-width:380px){
+  main{padding-left:10px;padding-right:10px}
+  .cards,.dashboard-metrics{gap:7px}
+  .cards .card,.metric-card{padding:11px;min-height:110px}
+  .metric,.metric-card .metric{font-size:17px}
+  .metric-label{font-size:9px}
+  .dashboard-welcome{padding:16px 14px}
+  .welcome-mark{width:40px;height:40px;min-width:40px}
+  .top h1{font-size:19px}
+}
+@media(min-width:701px) and (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;top:0;z-index:40}
+  main{padding:20px 18px}
+}
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
