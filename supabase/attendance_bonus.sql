@@ -6,7 +6,7 @@ create table if not exists public.attendance_bonus_rules (
   id uuid primary key default gen_random_uuid(),
   bonus_name text not null,
   amount numeric(14,2) not null default 0 check (amount >= 0),
-  person_types text[] not null default array['sprinter','admin','warehouse','freelance']::text[],
+  person_types text[] not null default array['sprinter','admin','warehouse']::text[],
   min_present_days integer not null default 0 check (min_present_days >= 0),
   max_late_days integer not null default 999 check (max_late_days >= 0),
   max_izin_days integer not null default 999 check (max_izin_days >= 0),
@@ -17,7 +17,7 @@ create table if not exists public.attendance_bonus_rules (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint attendance_bonus_rules_person_types_check
-    check (person_types <@ array['sprinter','admin','warehouse','freelance']::text[] and cardinality(person_types) > 0)
+    check (person_types <@ array['sprinter','admin','warehouse']::text[] and cardinality(person_types) > 0)
 );
 
 create index if not exists attendance_bonus_rules_active_idx
@@ -83,6 +83,7 @@ begin
      and r.person_type = m.person_type
      and r.attendance_date between v_run.period_start and v_run.period_end
     where m.active = true
+      and m.person_type in ('sprinter','admin','warehouse')
     group by m.person_name,m.person_type,m.person_ref_id
   ),
   awards as (
@@ -150,6 +151,7 @@ begin
       on r.person_name=m.person_name and r.person_type=m.person_type
      and r.attendance_date between v_run.period_start and v_run.period_end
     where m.active=true
+      and m.person_type in ('sprinter','admin','warehouse')
     group by m.person_name,m.person_type
   ),
   awards as (
