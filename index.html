@@ -226,6 +226,7 @@ tbody tr:hover{background:#f7fbfd}
 /* Dashboard daily trend */
 .top-sprinters{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #173d2410}
 .top-sprinters-list{display:grid;gap:13px;margin-top:14px}
+.eligibility-table-wrap{overflow-x:auto;margin-top:12px}.eligibility-table{width:100%;border-collapse:collapse;min-width:620px;font-size:11px}.eligibility-table th,.eligibility-table td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.eligibility-table th:first-child,.eligibility-table td:first-child{text-align:left}.eligibility-table th{color:var(--muted);font-size:10px;font-weight:700;background:#f8fbf9}.eligibility-rate{font-weight:800;color:#168456}.eligibility-low{color:#c66a27}.eligibility-status{display:inline-block;padding:4px 7px;border-radius:7px;background:#edf7f1;color:#168456;font-size:9px;font-weight:800}.eligibility-status.review{background:#fff4e8;color:#b66a24}
 .top-sprinter-row{display:grid;grid-template-columns:30px minmax(100px,1fr) minmax(90px,2fr) auto;align-items:center;gap:12px}
 .top-sprinter-rank{width:28px;height:28px;border-radius:9px;background:#edf7f1;color:#168456;display:grid;place-items:center;font-size:11px;font-weight:800}
 .top-sprinter-name{font-size:11px;font-weight:700;color:#254238;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -282,6 +283,11 @@ tbody tr:hover{background:#f7fbfd}
  <div class="trend-sub">Peringkat berdasarkan jumlah resi TTD pada periode terpilih</div>
  <div id="topSprinters"><div class="trend-empty">Memuat peringkat sprinter...</div></div>
 </section>
+</section>
+<section class="top-sprinters eligibility-panel">
+ <div class="trend-head"><h3>Sprinter Performance &amp; Eligibility</h3><span class="metric-icon icon-green">✓</span></div>
+ <div class="trend-sub">Evaluasi harian berdasarkan seluruh resi pada tanggal delivery. Hanya label “Penerimaan Normal” dihitung berhasil TTD; label lainnya dihitung belum berhasil.</div>
+ <div id="sprinterEligibility"><div class="trend-empty">Memuat evaluasi sprinter...</div></div>
 </section>
 <section class="page" data-page="import"><div class="panel" id="import"><h2>Import data Excel</h2><div class="desc">Format ekspor waybill Delivery J&T Cargo (.xlsx, .xls, .csv).</div><div class="upload"><div class="ico">⇧</div><strong>Pilih file laporan delivery</strong><p>Data akan dipetakan berdasarkan nama kolom pada file sumber.</p><input type="file" id="file" accept=".xlsx,.xls,.csv"></div><div class="toolbar"><span class="muted" id="fileStatus">Belum ada file diimpor</span><button class="btn light" onclick="resetData()">Sinkronkan dari cloud</button></div><div class="note">File yang sama tidak dapat diimpor dua kali. File berbeda akan ditambahkan sebagai batch baru; pastikan periode/resinya tidak tumpang tindih. Data impor dan tarif fee disimpan di database cloud CargoFlow.</div></div></section><section class="page" data-page="fees"><div class="panel" id="fees"><h2>Pengaturan fee sprinter</h2><div class="desc">Kelola sprinter yang tersimpan di database cloud, termasuk gaji pokok dan fee per kg.</div><form id="sprinterForm" class="toolbar" style="justify-content:flex-start"><input id="newSprinterName" placeholder="Nama sprinter baru" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"><button class="btn" type="submit">Tambah sprinter</button></form><div class="tablewrap"><table><thead><tr><th>Nama sprinter</th><th class="r">Gaji pokok (Rp)</th><th class="r">Fee / kg (Rp)</th></tr></thead><tbody id="feeBody"><tr><td colspan="3" class="empty">Memuat data sprinter...</td></tr></tbody></table></div><div class="toolbar"><span class="muted">Gaji pokok dan fee disimpan ke Supabase.</span><button class="btn light" onclick="resetFees()">Reset fee ke Rp100</button></div></div></section>
 <section class="page" data-page="import"><section class="panel section" id="koliUpdate"><div class="toolbar"><div><h2>Perbarui Jumlah Koli dari CSV</h2><div class="desc" style="margin:4px 0 0">Cocokkan No. Resi dengan data yang sudah ada. Tidak membuat batch atau resi baru.</div></div></div><div class="toolbar" style="justify-content:flex-start"><input type="file" id="koliFile" accept=".csv,text/csv"><button class="btn" id="koliUpdateButton" type="button" disabled onclick="applyKoliUpdate()">Perbarui koli di database</button></div><div class="muted" id="koliStatus">Pilih CSV yang berisi kolom No. Resi dan Jumlah Koli.</div><div class="note">Untuk keamanan, sistem hanya mengisi package_count yang masih 0. Data koli yang sudah terisi tidak akan ditimpa. AWB yang tidak ditemukan atau muncul ganda akan dilewati.</div></section></section>
@@ -561,6 +567,27 @@ function renderTopSprinters(records){
  const max=top[0].count||1;
  el.innerHTML='<div class="top-sprinters-list">'+top.map((x,i)=>'<div class="top-sprinter-row"><div class="top-sprinter-rank">'+(i+1)+'</div><div><div class="top-sprinter-name">'+esc(x.name)+'</div><div class="top-sprinter-meta">'+kg(x.weight)+' kg</div></div><div class="top-sprinter-track"><div class="top-sprinter-fill" style="width:'+Math.max(4,x.count/max*100)+'%"></div></div><div class="top-sprinter-value">'+x.count.toLocaleString('id-ID')+' TTD</div></div>').join('')+'</div>';
 }
+function renderSprinterEligibility(){
+ const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
+ const grouped={};
+ allRecords.filter(r=>r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to)).forEach(r=>{
+  const name=String(r.sprinter||'Tanpa nama').trim(),day=r.deliveryDate;
+  if(!grouped[name])grouped[name]={name,total:0,success:0,failed:0,days:{}};
+  const x=grouped[name];x.total++;
+  if(isTtd(r))x.success++;else x.failed++;
+  if(!x.days[day])x.days[day]={date:day,total:0,success:0,failed:0};
+  x.days[day].total++;if(isTtd(r))x.days[day].success++;else x.days[day].failed++;
+ });
+ const el=document.getElementById('sprinterEligibility');if(!el)return;
+ const people=Object.values(grouped).filter(x=>x.name&&x.name!=='Tanpa nama'&&!freelancerRows.some(f=>norm(f.name)===norm(x.name))).sort((a,b)=>(b.success/b.total)-(a.success/a.total)||b.total-a.total);
+ if(!people.length){el.innerHTML='<div class="trend-empty">Belum ada data delivery pada periode ini. Pastikan file Excel memiliki kolom Waktu Delivery.</div>';return}
+ let html='<div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th><th>Evaluasi</th></tr></thead><tbody>';
+ people.forEach(x=>{const rate=x.total?x.success/x.total*100:0;html+='<tr><td><b>'+esc(x.name)+'</b></td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td><span class="eligibility-status '+(rate<90?'review':'')+'">'+(rate<90?'Perlu Evaluasi':'Performa Baik')+'</span></td></tr>'});
+ html+='</tbody></table></div><div class="trend-sub" style="margin-top:14px">Rincian harian</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal Delivery</th><th>Sprinter</th><th>Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
+ people.forEach(x=>Object.values(x.days).sort((a,b)=>b.date.localeCompare(a.date)).forEach(d=>{const rate=d.total?d.success/d.total*100:0;const date=new Date(d.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});html+='<tr><td>'+date+'</td><td>'+esc(x.name)+'</td><td>'+d.total+'</td><td>'+d.success+'</td><td>'+d.failed+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'}));
+ html+='</tbody></table></div>';
+ el.innerHTML=html;
+}
 function renderDashboardTrends(records){
 const grouped={};records.forEach(r=>{const day=r.ttdDate;if(!day)return;if(!grouped[day])grouped[day]={date:day,count:0,weight:0};grouped[day].count++;grouped[day].weight+=Number(r.weight)||0});
 const dates=Object.keys(grouped).sort();
@@ -584,6 +611,7 @@ function render(){activeRecords=selected();let g=aggregate(),pg=aggregatePayroll
 document.getElementById('mTtd').textContent=activeRecords.length.toLocaleString('id-ID');document.getElementById('mWeight').textContent=kg(totalWeight)+' kg';document.getElementById('mCash').textContent=money(cod+dfod);document.getElementById('mPayroll').textContent=money(pay);
 renderDashboardTrends(activeRecords);
  renderTopSprinters(activeRecords);
+ renderSprinterEligibility();
 document.getElementById('payBody').innerHTML=(pg.sprinters.length+pg.freelancers.length)?pg.sprinters.map(x=>`<tr><td>${esc(x.name)}</td><td>Sprinter</td><td class="r">${x.count}</td><td class="r">${kg(x.weight)}</td><td class="r">—</td><td class="r">${money(x.basicSalary)}</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">${money(x.loanDeduction)}</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`).concat(pg.freelancers.map(x=>`<tr><td>${esc(x.name)}</td><td>Freelance</td><td class="r">${x.count}</td><td class="r">—</td><td class="r">${x.koli}</td><td class="r">—</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">Rp0</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`)).join(''):'<tr><td colspan="10" class="empty">Tidak ada resi TTD pada periode ini.</td></tr>';
 if(document.getElementById('cashDate')&&!document.getElementById('cashDate').value) initCashDate();
 let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getElementById('feeBody').innerHTML=names.length?names.map(x=>`<tr><td>${esc(x)}</td><td class="r"><input class="feeinput" aria-label="Gaji pokok ${esc(x)}" type="number" min="0" step="1000" value="${Number(basicSalaries[x]??0)}" onchange="setBasicSalary('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td><td class="r"><input class="feeinput" aria-label="Fee per kg ${esc(x)}" type="number" min="0" step="1" value="${Number(fees[x]??100)}" onchange="setFee('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td></tr>`).join(''):'<tr><td colspan="3" class="empty">Belum ada data sprinter.</td></tr>';renderRecords()}
