@@ -660,6 +660,7 @@ async function loadCloudData(){
   penaltyRows=penalties||[];
   save();
   restorePayrollPeriod();
+  await refreshPayrollAttendanceBonuses();
   document.getElementById('fileStatus').textContent=allRecords.length+' baris tersinkron dari Supabase';
   render();
   await loadCashSettlements();
@@ -797,8 +798,8 @@ async function refreshPayrollStatus(){
   else if(run.status==='paid'){el.textContent='Status: SUDAH DIBAYAR • '+start+' sampai '+end+'.';save.disabled=true;fin.disabled=true;paid.disabled=true}
  }catch(e){el.textContent='Gagal membaca status payroll: '+e.message}
 }
-function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}persistPayrollPeriod();render();refreshPayrollStatus()}
-function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';localStorage.removeItem('cargoflow_payroll_period');render();refreshPayrollStatus()}
+async function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}persistPayrollPeriod();try{await refreshPayrollAttendanceBonuses()}catch(e){console.error('Gagal memuat bonus payroll:',e);payrollAttendanceBonuses={};payrollAttendanceBonusPeriod=''}render();refreshPayrollStatus()}
+function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';localStorage.removeItem('cargoflow_payroll_period');payrollAttendanceBonuses={};payrollAttendanceBonusPeriod='';render();refreshPayrollStatus()}
 function selected(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;return allRecords.filter(r=>isTtd(r)&&r.ttdDate&&(!from||r.ttdDate>=from)&&(!to||r.ttdDate<=to))}
 function aggregate(){let g={};selected().forEach(r=>{let k=r.sprinter;if(!g[k])g[k]={name:k,count:0,weight:0,cod:0,dfod:0};g[k].count++;g[k].weight+=r.weight;g[k].cod+=r.cod;g[k].dfod+=r.dfod});return Object.values(g).sort((a,b)=>a.name.localeCompare(b.name))}
 function aggregatePayroll(){
@@ -967,6 +968,13 @@ async function loadPayrollAttendanceBonuses(runId,period){
  if(error)throw error;
  payrollAttendanceBonuses={};payrollAttendanceBonusPeriod=period.start+'|'+period.end;
  (data||[]).forEach(x=>{payrollAttendanceBonuses[payrollBonusKey(x.person_name,x.pay_type)]=Number(x.attendance_bonus)||0});
+}
+async function refreshPayrollAttendanceBonuses(){
+ const start=document.getElementById('fromDate').value,end=document.getElementById('toDate').value;
+ payrollAttendanceBonuses={};payrollAttendanceBonusPeriod='';
+ if(!start||!end||start>end)return;
+ const run=await findPayrollRun({start,end});
+ if(run)await loadPayrollAttendanceBonuses(run.id,{start,end});
 }
 function render(){activeRecords=selected();let g=aggregate(),pg=aggregatePayroll(),totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0)+pg.officeStaff.reduce((a,x)=>a+x.total,0);
 const periodStart=document.getElementById('fromDate').value,periodEnd=document.getElementById('toDate').value;payrollSlipRows=[...pg.sprinters.map(x=>({...x,type:'Sprinter',periodStart,periodEnd})),...pg.freelancers.map(x=>({...x,type:'Freelance',periodStart,periodEnd})),...pg.officeStaff.map(x=>({...x,type:x.staffRole==='warehouse'?'Staff Gudang':'Admin',periodStart,periodEnd}))];
