@@ -245,6 +245,86 @@ tbody tr:hover{background:#f7fbfd}
 .trend-empty{padding:34px 10px;text-align:center;color:var(--muted);font-size:11px;background:#f8fbf9;border-radius:12px}
 @media(max-width:760px){.dashboard-trends{grid-template-columns:1fr}.trend-card{padding:14px}}
 
+
+/* CargoFlow UI refresh — visual only, no HTML/JS or data logic changes */
+:root{
+  --g:#08a66a;--gd:#087c52;--bg:#eef7f5;--ink:#1d2b3b;
+  --muted:#82909d;--line:#e9eef2;--white:#fff;--nav:#fff;
+}
+html{scroll-behavior:smooth}
+body{background:linear-gradient(135deg,#dff2ef 0%,#f2f8f7 55%,#eaf5f2 100%);color:#1d2b3b}
+.app{grid-template-columns:270px minmax(0,1fr);gap:0;max-width:1800px;margin:0 auto;min-height:100vh;background:#fff;box-shadow:0 12px 55px #244e4310}
+.side{background:#fff;color:#26384a;border-right:1px solid #edf1f3;padding:30px 19px;gap:27px}
+.brand{font-size:25px;letter-spacing:-1px;color:#1b3040}
+.brand span{color:#08a66a}
+.tag{color:#91a0a9;letter-spacing:1.05px;font-size:9px}
+.nav{display:flex;flex-direction:column;gap:5px}
+.navlabel{color:#a1adb5;font-size:9px;font-weight:800;letter-spacing:1.5px;padding:0 13px;margin:0 0 7px}
+.nav a{display:flex;align-items:center;gap:10px;color:#667684;border:1px solid transparent;border-radius:11px;padding:12px 13px;margin:0;font-size:12px;font-weight:650;transition:all .18s ease}
+.nav a:hover{background:#f2faf6;color:#087c52;transform:translateX(2px)}
+.nav a.active{background:#08a66a;color:#fff;border-color:#08a66a;box-shadow:0 6px 15px #08a66a2b}
+.nav a.active:before{display:none}
+.foot{color:#9aa8af;border-top:1px solid #edf1f3;padding:15px 10px 0;font-size:9px}
+main{max-width:1600px;padding:34px 38px;margin:0 auto}
+.top{padding-bottom:19px;border-bottom:1px solid #edf1f3;margin-bottom:23px}
+.eyebrow{color:#08a66a;font-size:9px;letter-spacing:1.6px}
+.top h1{font-size:26px;letter-spacing:-.8px;color:#1e3345}
+.muted{color:#8795a1}
+.user,.logout{border:1px solid #e8eef0;border-radius:10px;background:#fff;color:#516474}
+.card,.panel,.trend-card,.top-sprinters{background:#fff;border:1px solid #edf1f3;border-radius:16px;box-shadow:0 4px 16px #1d39490a}
+.card:hover,.panel:hover{box-shadow:0 8px 22px #1d394910}
+.cards{gap:14px}
+.cards .card{background:#fff!important;border:1px solid #edf1f3!important;border-radius:16px;min-height:126px;padding:18px}
+.cards .card:after{width:76px;height:76px;right:-25px;top:-25px;background:#f0faf5}
+.metric-label{color:#788895;font-size:11px}
+.metric{color:#1d3445!important;font-size:25px;letter-spacing:-.6px}
+.cards .card:nth-child(1) .metric{color:#07965e!important}
+.cards .card:nth-child(2) .metric{color:#2676b9!important}
+.cards .card:nth-child(3) .metric{color:#c27624!important}
+.cards .card:nth-child(4) .metric{color:#7658bf!important}
+.metric-icon{border-radius:11px}
+.dashboard-welcome{border-radius:17px;background:linear-gradient(110deg,#078e61 0%,#0eaa70 65%,#32bd89 100%);box-shadow:0 9px 22px #078e6120;padding:22px 25px}
+.dashboard-welcome h2{font-size:21px}
+.welcome-mark{border-radius:17px}
+.dashboard-footnote{background:#f0faf5;border:1px solid #dff2e7;color:#527764;border-radius:12px}
+.trend-card,.top-sprinters{padding:19px;border-radius:16px}
+.trend-head h3,.panel h2{color:#253c4e}
+.upload{background:#f7fcf9;border-color:#a9ddc1;border-radius:14px}
+.btn{background:#08a66a;box-shadow:0 4px 10px #08a66a20;border-radius:9px}
+.btn:hover{background:#087c52}
+.btn.light{background:#eaf8f1;color:#087c52;box-shadow:none}
+.btn.dark{background:#294456}
+.toolbar input,.toolbar select,.datefilters input,.auth-card input,.feeinput{border-color:#e2eaed;border-radius:9px}
+.tablewrap{border-color:#edf1f3;border-radius:13px;box-shadow:none}
+.tablewrap thead th{background:#f6faf8;color:#71858a}
+.tablewrap tbody tr:hover{background:#f5fbf8}
+.status{background:#eaf8f1;color:#087c52}
+.auth-screen{background:linear-gradient(135deg,#e4f4ef,#f4f8fb)}
+.auth-card{border-radius:20px;box-shadow:0 18px 50px #1d394916}
+@media(min-width:901px){
+ .side{position:sticky;top:0;height:100vh;min-height:100vh;overflow-y:auto}
+}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}
+ .side{position:sticky;top:0;z-index:30;background:#fff;border-right:0;border-bottom:1px solid #e9eef0;padding:13px 15px;gap:10px;box-shadow:0 4px 15px #183b2910}
+ .nav{flex-direction:row;overflow-x:auto;scrollbar-width:thin}
+ .nav a{flex:0 0 auto;color:#657785;background:#f7faf9;padding:9px 11px}
+ .nav a.active{background:#08a66a;color:#fff}
+ .navlabel,.foot{display:none}
+ main{padding:23px 18px}
+}
+@media(max-width:560px){
+ main{padding:16px 12px}
+ .top{align-items:flex-start}
+ .top h1{font-size:21px}
+ .cards{gap:9px}
+ .cards .card{padding:13px;min-height:112px}
+ .metric{font-size:20px}
+ .dashboard-welcome{padding:18px;border-radius:15px}
+ .dashboard-welcome h2{font-size:18px}
+ .trend-card,.top-sprinters{padding:14px}
+}
+
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
