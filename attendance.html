@@ -95,8 +95,15 @@ footer{text-align:center;color:#849188;font-size:12px;margin-top:18px}
       <div id="requestsList"><p class="note">Memuat pengajuan...</p></div>
     </div>
     <div class="card">
-      <div class="row"><h2>Rekap absensi hari ini</h2><button id="reloadRecordsBtn" class="secondary" type="button">Muat ulang</button></div>
-      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Terlambat</th></tr></thead><tbody id="recordsBody"><tr><td colspan="4">Memuat...</td></tr></tbody></table></div>
+      <div class="row"><h2>Monitoring & Rekap Absensi</h2><span class="pill">Admin</span></div>
+      <p class="sub">Pilih tanggal dan cari nama karyawan untuk memeriksa kehadiran serta bukti selfie Check In.</p>
+      <div class="grid">
+        <div><label for="recordsDate">Tanggal absensi</label><input id="recordsDate" type="date"></div>
+        <div><label for="recordsSearch">Cari nama karyawan</label><input id="recordsSearch" type="search" placeholder="Ketik nama..."></div>
+      </div>
+      <div class="actions"><button id="reloadRecordsBtn" class="secondary" type="button">Muat ulang</button><button id="exportRecordsBtn" class="primary" type="button">Unduh Rekap CSV</button></div>
+      <p id="recordsSummary" class="note">Memuat rekap...</p>
+      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Terlambat</th><th>Bukti</th></tr></thead><tbody id="recordsBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
     </div>
   </section>
   <footer>Attendance CargoFlow • J&T Cargo KPG003A</footer>
@@ -106,7 +113,7 @@ const SUPABASE_URL = "https://vvzezmnohflnhqykydsc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VZb5sqNmiwBCXQl2z__E3Q_po1aH24T";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
-let activeMember = null, activeSession = null, currentSettings = null;
+let activeMember = null, activeSession = null, currentSettings = null, adminRecords = [];
 const today = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function alertBox(message,type='info'){const el=$('alert');el.textContent=message;el.className='alert show '+type;window.scrollTo({top:0,behavior:'smooth'})}
 function clearAlert(){$('alert').className='alert'}
@@ -217,11 +224,38 @@ async function loadRequests(){
  }
 }
 async function loadRecords(){
- const {data,error}=await db.from('attendance_records').select('person_name,check_in_at,check_out_at,late_minutes').eq('attendance_date',today()).order('check_in_at',{ascending:true});if(error)throw error;
- const body=$('recordsBody');body.innerHTML='';if(!data?.length){body.innerHTML='<tr><td colspan="4">Belum ada absensi hari ini.</td></tr>';return;}
- data.forEach(r=>{const tr=document.createElement('tr');[r.person_name,clock(r.check_in_at),clock(r.check_out_at),r.late_minutes? r.late_minutes+' menit':'Tepat waktu'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});body.appendChild(tr)});
+ const selectedDate=$('recordsDate').value||today(),search=$('recordsSearch').value.trim().toLocaleLowerCase('id-ID');
+ const {data,error}=await db.from('attendance_records').select('person_name,check_in_at,check_out_at,late_minutes,check_in_photo_path').eq('attendance_date',selectedDate).order('check_in_at',{ascending:true});
+ if(error)throw error;
+ adminRecords=data||[];
+ const filtered=adminRecords.filter(r=>(r.person_name||'').toLocaleLowerCase('id-ID').includes(search));
+ const body=$('recordsBody');body.innerHTML='';
+ $('recordsSummary').textContent=filtered.length+' dari '+adminRecords.length+' karyawan tercatat • '+new Date(selectedDate+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ if(!filtered.length){body.innerHTML='<tr><td colspan="5">Tidak ada data absensi yang cocok.</td></tr>';return;}
+ for(const r of filtered){
+  const tr=document.createElement('tr');
+  [r.person_name,clock(r.check_in_at),clock(r.check_out_at),r.late_minutes? r.late_minutes+' menit':'Tepat waktu'].forEach(v=>{const td=document.createElement('td');td.textContent=v??'-';tr.appendChild(td)});
+  const proof=document.createElement('td');
+  if(r.check_in_photo_path){
+   const view=document.createElement('button');view.className='secondary';view.type='button';view.textContent='Lihat selfie';
+   view.onclick=async()=>{view.disabled=true;try{const {data,error}=await db.storage.from('attendance-selfies').createSignedUrl(r.check_in_photo_path,60);if(error)throw error;window.open(data.signedUrl,'_blank','noopener');}catch(e){alertBox('Bukti selfie gagal dibuka: '+e.message,'error')}finally{view.disabled=false}};
+   proof.appendChild(view);
+  }else proof.textContent='Tidak tersedia';
+  tr.appendChild(proof);body.appendChild(tr);
+ }
 }
+$('recordsDate').value=today();
 $('reloadRecordsBtn').onclick=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('recordsDate').onchange=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('recordsSearch').oninput=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('exportRecordsBtn').onclick=()=>{
+ const selectedDate=$('recordsDate').value||today(),search=$('recordsSearch').value.trim().toLocaleLowerCase('id-ID');
+ const rows=adminRecords.filter(r=>(r.person_name||'').toLocaleLowerCase('id-ID').includes(search));
+ const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const csv=[['Tanggal','Nama','Check In','Check Out','Terlambat (menit)','Bukti Selfie'] ,...rows.map(r=>[selectedDate,r.person_name,clock(r.check_in_at),clock(r.check_out_at),r.late_minutes||0,r.check_in_photo_path?'Tersimpan':'Tidak tersedia'])].map(row=>row.map(quote).join(';')).join('\r\n');
+ const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Rekap-Absensi-KPG003A-'+selectedDate+'.csv';a.click();URL.revokeObjectURL(url);
+};
 db.auth.onAuthStateChange(()=>{setTimeout(()=>refresh().catch(e=>alertBox(e.message,'error')),0)});
 refresh().catch(e=>alertBox(e.message||'Gagal memuat Attendance.','error'));
 </script>
