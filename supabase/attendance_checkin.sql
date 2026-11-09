@@ -29,6 +29,14 @@ with check (
   and (storage.foldername(name))[1] = auth.uid()::text
 );
 
+drop policy if exists "attendance selfie delete own" on storage.objects;
+create policy "attendance selfie delete own"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'attendance-selfies'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
 drop policy if exists "attendance selfie read own or admin" on storage.objects;
 create policy "attendance selfie read own or admin"
 on storage.objects for select to authenticated
