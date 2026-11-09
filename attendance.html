@@ -106,6 +106,20 @@ footer{text-align:center;color:#849188;font-size:12px;margin-top:18px}
       <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Terlambat</th><th>Bukti</th></tr></thead><tbody id="recordsBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
     </div>
 
+
+    <div class="card">
+      <h2>Pencatatan Izin, Sakit & Alpha</h2>
+      <p class="sub">Admin mencatat status karyawan yang tidak melakukan Check In. Catatan ini menjadi dasar evaluasi bonus kehadiran.</p>
+      <form id="absenceForm">
+        <label for="absenceMember">Karyawan</label><select id="absenceMember" required><option value="">Memuat daftar karyawan...</option></select>
+        <div class="grid">
+          <div><label for="absenceDate">Tanggal</label><input id="absenceDate" type="date" required></div>
+          <div><label for="absenceStatus">Status</label><select id="absenceStatus"><option value="izin">Izin</option><option value="sakit">Sakit</option><option value="alpha">Alpha</option><option value="libur">Libur</option></select></div>
+        </div>
+        <label for="absenceNote">Catatan (opsional)</label><input id="absenceNote" maxlength="250" placeholder="Keterangan tambahan">
+        <button class="primary" type="submit">Simpan Status Absensi</button>
+      </form>
+    </div>
     <div class="card">
       <div class="row"><h2>Aturan Bonus Kehadiran</h2><span class="pill">Bisa diatur</span></div>
       <p class="sub">Buat bonus berdasarkan kategori, jumlah hari hadir, keterlambatan, izin, sakit, dan alpha. Nominal bonus dihitung terpisah dari fee delivery.</p>
@@ -145,7 +159,7 @@ const SUPABASE_URL = "https://vvzezmnohflnhqykydsc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VZb5sqNmiwBCXQl2z__E3Q_po1aH24T";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
-let activeMember = null, activeSession = null, currentSettings = null, adminRecords = [], attendanceBonusRules = [];
+let activeMember = null, activeSession = null, currentSettings = null, adminRecords = [], attendanceBonusRules = [], attendanceBonusMembers = [];
 const today = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function alertBox(message,type='info'){const el=$('alert');el.textContent=message;el.className='alert show '+type;window.scrollTo({top:0,behavior:'smooth'})}
 function clearAlert(){$('alert').className='alert'}
@@ -229,7 +243,7 @@ $('checkOutBtn').onclick=async()=>{clearAlert();const b=$('checkOutBtn');busy(b,
 async function loadAdminData(){
  const {data:settings,error}=await db.from('attendance_settings').select('*').eq('id',true).maybeSingle();if(error)throw error;currentSettings=settings;
  if(settings){$('radiusInput').value=settings.allowed_radius_m;$('startTimeInput').value=String(settings.work_start_time||'08:00').slice(0,5);$('graceInput').value=settings.grace_minutes||0;$('officeLocationText').textContent=settings.office_latitude==null?'Koordinat kantor belum diatur.':'Lokasi kantor tersimpan: '+settings.office_latitude+', '+settings.office_longitude;}
- await loadRequests();await loadRecords();await loadBonusRules();
+ await loadRequests();await loadRecords();await loadBonusMembers();await loadBonusRules();
 }
 $('setOfficeLocationBtn').onclick=async()=>{const b=$('setOfficeLocationBtn');busy(b,true);try{const p=await getPosition();$('officeLocationText').dataset.lat=p.latitude;$('officeLocationText').dataset.lon=p.longitude;$('officeLocationText').textContent='Lokasi HP admin siap disimpan: '+p.latitude.toFixed(6)+', '+p.longitude.toFixed(6);}catch(e){alertBox(e.message,'error')}finally{busy(b,false,'Gunakan GPS HP ini sebagai lokasi kantor')}};
 $('saveSettingsBtn').onclick=async()=>{const b=$('saveSettingsBtn');busy(b,true);try{
@@ -277,6 +291,26 @@ async function loadRecords(){
  }
 }
 
+async function loadBonusMembers(){
+ const {data,error}=await db.from('attendance_members').select('id,person_name,person_type').eq('active',true).order('person_name');
+ if(error)throw error;attendanceBonusMembers=data||[];
+ const select=$('absenceMember');select.innerHTML='<option value="">Pilih karyawan</option>';
+ attendanceBonusMembers.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=m.person_name+' • '+({sprinter:'Sprinter',admin:'Admin',warehouse:'Staff Gudang',freelance:'Freelance'}[m.person_type]||m.person_type);select.appendChild(opt)});
+}
+$('absenceDate').value=today();
+$('absenceForm').addEventListener('submit',async e=>{
+ e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');busy(b,true);
+ try{
+  const member=attendanceBonusMembers.find(m=>m.id===$('absenceMember').value),date=$('absenceDate').value,status=$('absenceStatus').value;
+  if(!member||!date)throw new Error('Pilih karyawan dan tanggal absensi.');
+  const {data:existing,error:checkError}=await db.from('attendance_records').select('id,check_in_at').eq('person_name',member.person_name).eq('attendance_date',date).maybeSingle();
+  if(checkError)throw checkError;
+  if(existing?.check_in_at)throw new Error('Karyawan sudah Check In pada tanggal tersebut. Status tidak dapat menggantikan kehadiran.');
+  const {error}=await db.from('attendance_records').upsert({person_name:member.person_name,person_type:member.person_type,attendance_date:date,attendance_status:status,note:$('absenceNote').value.trim()||null,created_by:activeSession.user.id},{onConflict:'person_name,attendance_date'});
+  if(error)throw error;
+  $('absenceNote').value='';alertBox('Status '+status+' berhasil dicatat untuk '+member.person_name+'.');await loadRecords();
+ }catch(err){alertBox(err.message||'Gagal mencatat status absensi.','error')}finally{busy(b,false,'Simpan Status Absensi')}
+});
 async function loadBonusRules(){
  const {data,error}=await db.from('attendance_bonus_rules').select('*').order('created_at',{ascending:false});
  if(error)throw new Error('Aturan bonus belum siap. Jalankan SQL attendance_bonus.sql di Supabase. '+error.message);
