@@ -369,7 +369,7 @@ $('calculateBonusBtn').onclick=async()=>{
   const rows=[...stats.values()].map(x=>{
    rules.forEach(rule=>{
     if(!rule.person_types.includes(x.type))return;
-    if(x.present>=rule.min_present_days&&x.late<=rule.max_late_days&&x.izin<=rule.max_izin_days&&x.sakit<=rule.max_sakit_days&&x.alpha<=rule.max_alpha_days){x.bonus+=Number(rule.amount)||0;x.qualified.push(rule.bonus_name);}
+    if(x.present>0&&x.present>=rule.min_present_days&&x.late<=rule.max_late_days&&x.izin<=rule.max_izin_days&&x.sakit<=rule.max_sakit_days&&x.alpha<=rule.max_alpha_days){x.bonus+=Number(rule.amount)||0;x.qualified.push(rule.bonus_name);}
    });
    return x;
   }).sort((a,b)=>a.name.localeCompare(b.name,'id'));
