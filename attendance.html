@@ -122,12 +122,12 @@ footer{text-align:center;color:#849188;font-size:12px;margin-top:18px}
     </div>
     <div class="card">
       <div class="row"><h2>Aturan Bonus Kehadiran</h2><span class="pill">Bisa diatur</span></div>
-      <p class="sub">Buat bonus berdasarkan kategori, jumlah hari hadir, keterlambatan, izin, sakit, dan alpha. Nominal bonus dihitung terpisah dari fee delivery.</p>
+      <p class="sub">Buat bonus untuk Sprinter, Admin, dan Staff Gudang berdasarkan kehadiran. Freelance tidak termasuk program bonus ini. Nominal bonus dihitung terpisah dari fee delivery.</p>
       <form id="bonusRuleForm">
         <label for="bonusName">Nama bonus</label><input id="bonusName" required maxlength="100" placeholder="Contoh: Bonus Kehadiran Penuh">
         <div class="grid">
           <div><label for="bonusAmount">Nominal bonus (Rp)</label><input id="bonusAmount" type="number" min="0" step="1000" value="100000" required></div>
-          <div><label for="bonusCategory">Kategori karyawan</label><select id="bonusCategory"><option value="all">Semua kategori</option><option value="sprinter">Sprinter</option><option value="admin">Admin</option><option value="warehouse">Staff Gudang</option><option value="freelance">Freelance</option></select></div>
+          <div><label for="bonusCategory">Kategori karyawan</label><select id="bonusCategory"><option value="all">Semua kategori</option><option value="sprinter">Sprinter</option><option value="admin">Admin</option><option value="warehouse">Staff Gudang</option></select></div>
         </div>
         <div class="grid">
           <div><label for="bonusMinPresent">Minimal hari hadir</label><input id="bonusMinPresent" type="number" min="0" value="0"></div>
@@ -317,7 +317,7 @@ async function loadBonusRules(){
  attendanceBonusRules=data||[];
  const body=$('bonusRulesBody');body.innerHTML='';
  if(!attendanceBonusRules.length){body.innerHTML='<tr><td colspan="6">Belum ada aturan bonus. Tambahkan aturan pertama.</td></tr>';return;}
- const categoryLabel=v=>v.length===4?'Semua':v.map(x=>({sprinter:'Sprinter',admin:'Admin',warehouse:'Gudang',freelance:'Freelance'}[x]||x)).join(', ');
+ const categoryLabel=v=>v.length===3?'Semua':v.map(x=>({sprinter:'Sprinter',admin:'Admin',warehouse:'Gudang',freelance:'Freelance'}[x]||x)).join(', ');
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID');
  attendanceBonusRules.forEach(rule=>{
   const tr=document.createElement('tr');
@@ -335,7 +335,7 @@ $('bonusRuleForm').addEventListener('submit',async e=>{
  e.preventDefault();const form=e.currentTarget;const b=form.querySelector('button[type=submit]');busy(b,true);
  try{
   const category=$('bonusCategory').value;
-  const types=category==='all'?['sprinter','admin','warehouse','freelance']:[category];
+  const types=category==='all'?['sprinter','admin','warehouse']:[category];
   const payload={bonus_name:$('bonusName').value.trim(),amount:Number($('bonusAmount').value),person_types:types,min_present_days:Number($('bonusMinPresent').value||0),max_late_days:Number($('bonusMaxLate').value||0),max_izin_days:Number($('bonusMaxIzin').value||0),max_sakit_days:Number($('bonusMaxSakit').value||0),max_alpha_days:Number($('bonusMaxAlpha').value||0),created_by:activeSession.user.id};
   if(!payload.bonus_name||payload.amount<0)throw new Error('Nama dan nominal bonus harus diisi dengan benar.');
   const {error}=await db.from('attendance_bonus_rules').insert(payload);if(error)throw error;
@@ -357,8 +357,9 @@ $('calculateBonusBtn').onclick=async()=>{
   ]);
   if(memberErr)throw memberErr;if(recordErr)throw recordErr;
   const rules=attendanceBonusRules.filter(x=>x.active),stats=new Map();
-  (members||[]).forEach(m=>stats.set(m.person_type+'|'+m.person_name,{name:m.person_name,type:m.person_type,present:0,late:0,izin:0,sakit:0,alpha:0,bonus:0,qualified:[]}));
+  (members||[]).filter(m=>m.person_type!=='freelance').forEach(m=>stats.set(m.person_type+'|'+m.person_name,{name:m.person_name,type:m.person_type,present:0,late:0,izin:0,sakit:0,alpha:0,bonus:0,qualified:[]}));
   (records||[]).forEach(r=>{
+   if(r.person_type==='freelance')return;
    const key=r.person_type+'|'+r.person_name;
    if(!stats.has(key))stats.set(key,{name:r.person_name,type:r.person_type,present:0,late:0,izin:0,sakit:0,alpha:0,bonus:0,qualified:[]});
    const x=stats.get(key),status=r.attendance_status;
