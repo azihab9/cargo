@@ -180,12 +180,9 @@ grant execute on function public.attendance_check_out() to authenticated;
 -- Check-in dan check-out hanya melalui fungsi di atas; admin tetap dapat mengelola catatan.
 drop policy if exists "authorized insert attendance records" on public.attendance_records;
 drop policy if exists "attendance employee insert own" on public.attendance_records;
-create policy "attendance employee insert own"
+create policy "authorized insert attendance records"
 on public.attendance_records for insert to authenticated
-with check (
-  public.has_role(array['admin','operations'])
-  or user_id = auth.uid()
-);
+with check (public.has_role(array['admin','operations']));
 
 drop policy if exists "authorized update attendance records" on public.attendance_records;
 drop policy if exists "attendance employee update own checkout" on public.attendance_records;
