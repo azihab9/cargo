@@ -540,14 +540,14 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
 <div class="panel" id="cash">
  <div class="toolbar"><div><h2>Laporan COD & DFOD</h2><div class="desc" style="margin:4px 0 0">Rekap tagihan, pembayaran customer, dan uang yang sudah diterima outlet berdasarkan periode.</div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><label style="font-size:10px;color:var(--muted)">Mulai TTD<br><input type="datetime-local" id="cashDateFrom" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label><label style="font-size:10px;color:var(--muted)">Batas akhir TTD<br><input type="datetime-local" id="cashDateTo" onchange="renderCashPage()" style="border:1px solid var(--line);border-radius:10px;padding:10px"></label></div></div>
  <div class="panel" style="background:#f3fbf7;margin:14px 0">
-  <h2>Import Laporan TTD J&T Cargo</h2>
-  <div class="desc">Unggah Excel laporan TTD J&T Cargo (.xlsx atau .xls). Tanggal transaksi dibaca dari <b>Waktu tanda terima</b>, COD dari <b>jumlah pembayaran COD</b>, dan DFOD dari <b>Biaya DFOD</b>.</div>
-  <div class="toolbar" style="justify-content:flex-start;align-items:center;margin-top:10px">
+  <h2>Sumber Data COD & DFOD</h2>
+  <div class="desc">Daftar resi dan ringkasan COD & DFOD sekarang otomatis mengambil data dari menu <b>Upload Excel</b> utama. Cukup unggah laporan harian satu kali di sana.</div>
+  <div class="toolbar" style="display:none;justify-content:flex-start;align-items:center;margin-top:10px">
    <input type="file" id="cashReportFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
    <button class="btn" id="cashReportImportButton" type="button" disabled onclick="importCashReport()">Import laporan</button>
   </div>
-  <div class="muted" id="cashReportStatus">Pilih file CSV untuk memeriksa data sebelum diimpor.</div>
-  <div class="note">Import akan memperbarui data berdasarkan nomor resi (AWB), bukan menggandakan resi yang sama. Pastikan file merupakan laporan TTD.</div>
+  <div class="muted" id="cashReportStatus">Sumber data: Upload Excel utama.</div>
+  <div class="note">AWB yang sudah pernah diunggah akan diperbarui; AWB baru akan ditambahkan. Data hari sebelumnya tetap tersimpan.</div>
  </div>
  <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0">
   <div class="card"><div class="metric-label">Total tagihan COD + DFOD</div><div class="metric" id="cashExpected">Rp0</div><div class="hint">Resi TTD pada periode terpilih</div></div>
@@ -981,7 +981,7 @@ function renderCashReportItems(){
  const dateFrom=dateFromEl?.value||'';
  const dateTo=dateToEl?.value||'';
  if(sprinterEl){
-  const names=[...new Set(cashReportRows.map(x=>x.sprinter_name).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const names=[...new Set(allRecords.map(x=>x.sprinter).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   sprinterEl.innerHTML='<option value="">Semua sprinter</option>'+names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('');
   sprinterEl.value=selectedSprinter;
  }
