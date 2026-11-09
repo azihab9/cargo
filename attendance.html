@@ -119,6 +119,9 @@ async function refresh(){
  const {data:{session},error}=await db.auth.getSession();if(error)throw error;activeSession=session;
  if(!session){setSignedIn(false);$('adminArea').classList.add('hidden');return}
  setSignedIn(true);$('adminArea').classList.add('hidden');$('employeePanel').classList.add('hidden');$('pendingBox').classList.add('hidden');
+ const {data:role,error:roleErr}=await db.rpc('current_role');if(roleErr)throw roleErr;
+ const isAdmin=['admin','operations'].includes(role);
+ if(isAdmin){$('adminArea').classList.remove('hidden');await loadAdminData();}
  const {data:member,error:memberErr}=await db.from('attendance_members').select('person_name,person_type,active').eq('user_id',session.user.id).maybeSingle();
  if(memberErr)throw memberErr;
  if(!member||!member.active){
@@ -126,15 +129,13 @@ async function refresh(){
   if(reqErr)throw reqErr;
   $('pendingBox').classList.remove('hidden');
   $('pendingTitle').textContent=req?.status==='rejected'?'Pengajuan perlu diperbaiki':'Menunggu verifikasi admin';
-  $('pendingText').textContent=req?req.requested_name+' • '+req.requested_type+(req.admin_note?' — Catatan admin: '+req.admin_note:''):'Akun sudah dibuat. Silakan lengkapi pengajuan pendaftaran.';
-  if(!req){$('pendingBox').classList.add('hidden');$('authArea').classList.remove('hidden');$('memberArea').classList.add('hidden');showTab('register');}
+  $('pendingText').textContent=req?req.requested_name+' • '+req.requested_type+(req.admin_note?' — Catatan admin: '+req.admin_note:''):'Akun sudah dibuat. Lengkapi pengajuan pendaftaran di tab Daftar.';
+  if(!req&&!isAdmin){$('pendingBox').classList.add('hidden');$('authArea').classList.remove('hidden');$('memberArea').classList.add('hidden');showTab('register');}
   return;
  }
  activeMember=member;$('welcomeTitle').textContent='Halo, '+member.person_name+' 👋';$('memberSub').textContent=({sprinter:'Sprinter',admin:'Admin',warehouse:'Staff Gudang',freelance:'Freelance'}[member.person_type]||member.person_type)+' • J&T Cargo KPG003A';
  $('employeePanel').classList.remove('hidden');$('todayLabel').textContent=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'short',year:'numeric'});
  await loadTodayRecord();
- const {data:role}=await db.rpc('current_role');
- if(['admin','operations'].includes(role)){ $('adminArea').classList.remove('hidden');await loadAdminData(); }
 }
 async function loadTodayRecord(){
  const {data,error}=await db.from('attendance_records').select('check_in_at,check_out_at,late_minutes,attendance_status').eq('user_id',activeSession.user.id).eq('attendance_date',today()).maybeSingle();
@@ -148,8 +149,11 @@ $('registerForm').addEventListener('submit',async e=>{
  e.preventDefault();clearAlert();const b=e.currentTarget.querySelector('button[type=submit]');busy(b,true);
  const name=$('fullName').value.trim(),type=$('registerType').value,email=$('registerEmail').value.trim(),password=$('registerPassword').value;
  try{
-  const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:'attendance'}}});if(error)throw error;
-  if(!data.session){alertBox('Akun berhasil dibuat. Verifikasi email terlebih dahulu, lalu login dan kirim pengajuan verifikasi.');showTab('login');return;}
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){
+   const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:'attendance'}}});if(error)throw error;
+   if(!data.session){alertBox('Akun berhasil dibuat. Verifikasi email terlebih dahulu, lalu login kembali dan kirim pengajuan verifikasi.');showTab('login');return;}
+  }
   const {error:requestError}=await db.rpc('attendance_submit_registration',{p_requested_name:name,p_requested_type:type});if(requestError)throw requestError;
   alertBox('Pengajuan berhasil dikirim. Tunggu persetujuan admin.');await refresh();
  }catch(err){alertBox(err.message||'Pendaftaran gagal.','error')}finally{busy(b,false,'Buat Akun')}
