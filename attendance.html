@@ -80,21 +80,23 @@ async function refreshAccount(){
   $("accountText").textContent=req.requested_name+" • "+req.requested_type+(req.admin_note?" — Catatan admin: "+req.admin_note:"");
   return;
  }
- $("accountTitle").textContent="Lengkapi pendaftaran";
- $("accountText").textContent="Akun berhasil masuk. Silakan ajukan data karyawan untuk diverifikasi.";
+ $("accountArea").classList.add("hidden");$("authArea").classList.remove("hidden");
+ showTab("register");
+ alertBox("Akun sudah aktif. Lengkapi nama dan kategori pekerjaan untuk mengirim pengajuan verifikasi.","info");
 }
 $("registerForm").addEventListener("submit",async e=>{
  e.preventDefault();clearAlert();const f=e.currentTarget;setBusy(f,true);
  const name=$("fullName").value.trim(),type=$("registerType").value,email=$("registerEmail").value.trim(),password=$("registerPassword").value;
  try{
-  const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:"attendance"}}});
-  if(error)throw error;
-  if(!data.session){alertBox("Akun berhasil dibuat. Buka email untuk verifikasi, lalu kembali ke halaman ini dan masuk menggunakan akun tadi.");showTab("login");}
-  else{
-   const {error:requestError}=await db.rpc("attendance_submit_registration",{p_requested_name:name,p_requested_type:type});
-   if(requestError)throw requestError;
-   alertBox("Pendaftaran berhasil dikirim. Tunggu persetujuan admin ya.","info");await refreshAccount();
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){
+   const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:"attendance"}}});
+   if(error)throw error;
+   if(!data.session){alertBox("Akun berhasil dibuat. Buka email untuk verifikasi, lalu kembali ke halaman ini dan masuk menggunakan akun tadi. Setelah login, lengkapi pengajuan verifikasi.");showTab("login");return;}
   }
+  const {error:requestError}=await db.rpc("attendance_submit_registration",{p_requested_name:name,p_requested_type:type});
+  if(requestError)throw requestError;
+  alertBox("Pendaftaran berhasil dikirim. Tunggu persetujuan admin ya.","info");await refreshAccount();
  }catch(err){alertBox(err.message||"Pendaftaran gagal. Coba lagi.","error")}finally{setBusy(f,false)}
 });
 $("loginForm").addEventListener("submit",async e=>{
