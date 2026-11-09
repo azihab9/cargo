@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CargoFlow | Area KPG003A</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -413,6 +413,24 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
   .app{grid-template-columns:1fr}
   .side{position:sticky;top:0;z-index:40}
   main{padding:20px 18px}
+}
+
+
+/* CargoFlow Android device-width fallback */
+@media only screen and (max-device-width:700px){
+  html,body{width:100%!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
+  .app{display:block!important;width:100%!important;max-width:100%!important;min-height:100vh;grid-template-columns:minmax(0,1fr)!important;margin:0!important}
+  .side{position:sticky!important;top:0!important;z-index:50!important;width:100%!important;height:auto!important;min-height:0!important;padding:12px 13px 9px!important;gap:9px!important}
+  .nav{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:7px!important;overflow-x:auto!important;overflow-y:hidden!important;width:100%!important}
+  .nav a{flex:0 0 auto!important;white-space:nowrap!important;font-size:11px!important;padding:9px 12px!important}
+  .navlabel,.foot{display:none!important}
+  main{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:16px 13px 28px!important}
+  .cards,.dashboard-metrics{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+  .grid2,.dashboard-trends{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:11px!important}
+  .card,.panel,.trend-card{min-width:0!important;max-width:100%!important}
+  .tablewrap{width:100%!important;max-width:100%!important;overflow-x:auto!important}
+  .auth-screen{min-height:100svh!important;padding:18px!important}
+  .auth-card{width:100%!important;max-width:420px!important}
 }
 </style></head>
 <body>
