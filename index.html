@@ -1437,8 +1437,27 @@ document.getElementById('expenseForm').addEventListener('submit',async e=>{
  finally{button.disabled=false}
 });
 
-function printPayrollSlip(index,fromHistory=false){
- const x=fromHistory?payrollHistorySlipRows[index]:payrollSlipRows[index];if(!x){alert('Data slip gaji tidak ditemukan.');return}
+async function printPayrollSlip(index,fromHistory=false){
+ let x=fromHistory?payrollHistorySlipRows[index]:payrollSlipRows[index];if(!x){alert('Data slip gaji tidak ditemukan.');return}
+ x={...x};
+ if(!fromHistory){
+  try{
+   const {data:run,error:runError}=await supabaseClient.from('payroll_runs').select('id').eq('period_start',x.periodStart).eq('period_end',x.periodEnd).maybeSingle();
+   if(runError)throw runError;
+   if(run){
+    const payType=x.type==='Sprinter'?'sprinter':x.type==='Admin'?'admin':x.type==='Staff Gudang'?'warehouse':'freelance';
+    const {data:item,error:itemError}=await supabaseClient.from('payroll_items').select('attendance_bonus,net_amount,gross_amount,loan_deduction,penalty_deduction').eq('payroll_run_id',run.id).eq('person_name',x.name).eq('pay_type',payType).maybeSingle();
+    if(itemError)throw itemError;
+    if(item){
+     x.attendanceBonus=Number(item.attendance_bonus)||0;
+     x.total=Number(item.net_amount)||0;
+     x.gross=Number(item.gross_amount)||0;
+     x.loanDeduction=Number(item.loan_deduction)||0;
+     x.penaltyDeduction=Number(item.penalty_deduction)||0;
+    }
+   }
+  }catch(err){alert('Data bonus payroll gagal dibaca: '+err.message);return}
+ }
  const fmt=v=>money(Number(v)||0),dateLabel=v=>v?new Date(v+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
  const isSp=x.type==='Sprinter',isOffice=x.type==='Admin'||x.type==='Staff Gudang';
  const detail=isSp
