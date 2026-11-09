@@ -1,6 +1,6 @@
 -- CargoFlow KPG003A: aturan bonus kehadiran yang dapat diatur admin
--- Jalankan di Supabase SQL Editor setelah attendance.sql, attendance_registration.sql,
--- dan attendance_checkin.sql.
+-- Jalankan setelah schema.sql, office_staff_payroll.sql, attendance.sql,
+-- attendance_registration.sql, dan attendance_checkin.sql.
 
 create table if not exists public.attendance_bonus_rules (
   id uuid primary key default gen_random_uuid(),
