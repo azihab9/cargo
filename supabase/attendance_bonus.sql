@@ -36,9 +36,10 @@ create policy "attendance bonus rules manage admin"
   using (public.has_role(array['admin','operations']))
   with check (public.has_role(array['admin','operations']));
 
--- Kolom bonus terpisah agar tidak bercampur dengan fee delivery.
+-- Kolom bonus dan jumlah TTD disimpan terpisah agar tidak bercampur dengan fee delivery.
 alter table public.payroll_items
-  add column if not exists attendance_bonus numeric(14,2) not null default 0;
+  add column if not exists attendance_bonus numeric(14,2) not null default 0,
+  add column if not exists ttd_count integer not null default 0;
 
 
 -- Terapkan bonus absensi ke draft payroll secara idempoten (tidak menggandakan bonus saat dijalankan ulang).
