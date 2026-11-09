@@ -522,16 +522,28 @@ function aggregatePayroll(){const sp={},fr={};Object.keys(sprinterIds).forEach(n
 
 function buildTrendSvg(rows,key,color,suffix){
 if(!rows.length)return '<div class="trend-empty">Belum ada data TTD pada periode ini.</div>';
-const W=640,H=210,left=38,right=12,top=18,bottom=38,plotW=W-left-right,plotH=H-top-bottom;
-const max=Math.max(1,...rows.map(x=>Number(x[key])||0)),step=plotW/rows.length,bw=Math.max(5,Math.min(28,step*.58));
+const W=640,H=230,left=42,right=12,top=28,bottom=42,plotW=W-left-right,plotH=H-top-bottom;
+const max=Math.max(1,...rows.map(x=>Number(x[key])||0)),step=plotW/rows.length,bw=Math.max(3,Math.min(28,step*.58));
 let out='<svg class="trend-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Grafik '+(key==='count'?'jumlah resi TTD':'berat TTD')+' per hari">';
-for(let i=0;i<=4;i++){const y=top+plotH*i/4,val=max*(1-i/4);out+='<line x1="'+left+'" y1="'+y+'" x2="'+(W-right)+'" y2="'+y+'" stroke="#e8efeb" stroke-width="1"/><text x="'+(left-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#82938a">'+(key==='weight'?val.toFixed(0):Math.round(val))+'</text>'}
-rows.forEach((d,i)=>{const v=Math.max(0,Number(d[key])||0),bh=v/max*plotH,x=left+i*step+(step-bw)/2,y=top+plotH-bh;out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,bh).toFixed(1)+'" rx="5" fill="'+color+'"><title>'+d.label+': '+(key==='weight'?v.toLocaleString('id-ID',{maximumFractionDigits:2})+' kg':v+' resi')+'</title></rect>';if(rows.length<=14||i%Math.ceil(rows.length/14)===0)out+='<text x="'+(left+i*step+step/2).toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" font-size="9" fill="#82938a">'+d.short+'</text>'});
+for(let i=0;i<=4;i++){const y=top+plotH*i/4,val=max*(1-i/4);out+='<line x1="'+left+'" y1="'+y+'" x2="'+(W-right)+'" y2="'+y+'" stroke="#e8efeb" stroke-width="1"/><text x="'+(left-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#82938a">'+(key==='weight'?val.toLocaleString('id-ID',{maximumFractionDigits:0}):Math.round(val))+'</text>'}
+rows.forEach((d,i)=>{const v=Math.max(0,Number(d[key])||0),bh=v/max*plotH,x=left+i*step+(step-bw)/2,y=top+plotH-bh,cx=left+i*step+step/2;out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,bh).toFixed(1)+'" rx="5" fill="'+color+'"><title>'+d.label+': '+(key==='weight'?v.toLocaleString('id-ID',{maximumFractionDigits:2})+' kg':v+' resi')+'</title></rect>';if(rows.length<=20|| (v>0&&i%Math.ceil(rows.length/20)===0)){const valueText=key==='weight'?v.toLocaleString('id-ID',{maximumFractionDigits:1}):String(v);out+='<text x="'+cx.toFixed(1)+'" y="'+Math.max(13,y-7).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#425b50">'+valueText+'</text>'}if(rows.length<=14||i%Math.ceil(rows.length/14)===0)out+='<text x="'+cx.toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" font-size="9" fill="#82938a">'+d.short+'</text>'});
 out+='</svg>';return out;
 }
 function renderDashboardTrends(records){
 const grouped={};records.forEach(r=>{const day=r.ttdDate;if(!day)return;if(!grouped[day])grouped[day]={date:day,count:0,weight:0};grouped[day].count++;grouped[day].weight+=Number(r.weight)||0});
-const rows=Object.values(grouped).sort((a,b)=>a.date.localeCompare(b.date)).map(x=>{const d=new Date(x.date+'T00:00:00');return {...x,label:d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),short:d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}});
+const dates=Object.keys(grouped).sort();
+const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
+const start=from||(dates[0]||''),end=to||(dates[dates.length-1]||'');
+const rows=[];
+if(start&&end&&start<=end){
+ const cursor=new Date(start+'T00:00:00'),last=new Date(end+'T00:00:00');
+ while(cursor<=last&&rows.length<366){
+  const key=cursor.getFullYear()+'-'+String(cursor.getMonth()+1).padStart(2,'0')+'-'+String(cursor.getDate()).padStart(2,'0');
+  const x=grouped[key]||{date:key,count:0,weight:0};
+  rows.push({...x,label:cursor.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),short:cursor.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})});
+  cursor.setDate(cursor.getDate()+1);
+ }
+}
 document.getElementById('trendTtd').innerHTML=buildTrendSvg(rows,'count','#159b67','resi');
 document.getElementById('trendWeight').innerHTML=buildTrendSvg(rows,'weight','#3989d4','kg');
 }
