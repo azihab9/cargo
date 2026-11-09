@@ -339,7 +339,7 @@ $('bonusRuleForm').addEventListener('submit',async e=>{
   const payload={bonus_name:$('bonusName').value.trim(),amount:Number($('bonusAmount').value),person_types:types,min_present_days:Number($('bonusMinPresent').value||0),max_late_days:Number($('bonusMaxLate').value||0),max_izin_days:Number($('bonusMaxIzin').value||0),max_sakit_days:Number($('bonusMaxSakit').value||0),max_alpha_days:Number($('bonusMaxAlpha').value||0),created_by:activeSession.user.id};
   if(!payload.bonus_name||payload.amount<0)throw new Error('Nama dan nominal bonus harus diisi dengan benar.');
   const {error}=await db.from('attendance_bonus_rules').insert(payload);if(error)throw error;
-  form.reset();$('bonusAmount').value=100000;$('bonusMaxLate').value=999;$('bonusMaxIzin').value=999;$('bonusMaxSakit').value=999;$('bonusMaxAlpha').value=0;
+  $('bonusName').value='';$('bonusCategory').value='all';$('bonusAmount').value=100000;$('bonusMinPresent').value=0;$('bonusMaxLate').value=999;$('bonusMaxIzin').value=999;$('bonusMaxSakit').value=999;$('bonusMaxAlpha').value=0;
   await loadBonusRules();alertBox('Aturan bonus berhasil disimpan.');
  }catch(err){alertBox(err.message||'Gagal menyimpan aturan bonus.','error')}finally{busy(b,false,'Simpan Aturan Bonus')}
 });
