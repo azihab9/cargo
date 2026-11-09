@@ -588,21 +588,43 @@ function renderSprinterEligibility(){
  const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;
  const grouped={};
  allRecords.filter(r=>r.deliveryDate&&(!from||r.deliveryDate>=from)&&(!to||r.deliveryDate<=to)).forEach(r=>{
-  const name=String(r.sprinter||'Tanpa nama').trim(),day=r.deliveryDate;
-  if(!grouped[name])grouped[name]={name,total:0,success:0,failed:0,days:{}};
-  const x=grouped[name];x.total++;
+  const name=String(r.sprinter||'Tanpa nama').trim(),day=r.deliveryDate,month=day.slice(0,7);
+  if(!grouped[name])grouped[name]={name,months:{}};
+  if(!grouped[name].months[month])grouped[name].months[month]={month,total:0,success:0,failed:0,days:{}};
+  const x=grouped[name].months[month];x.total++;
   if(isTtd(r))x.success++;else x.failed++;
   if(!x.days[day])x.days[day]={date:day,total:0,success:0,failed:0};
   x.days[day].total++;if(isTtd(r))x.days[day].success++;else x.days[day].failed++;
  });
  const el=document.getElementById('sprinterEligibility');if(!el)return;
- const people=Object.values(grouped).filter(x=>x.name&&x.name!=='Tanpa nama'&&!freelancerRows.some(f=>norm(f.name)===norm(x.name))).sort((a,b)=>(b.success/b.total)-(a.success/a.total)||b.total-a.total);
+ const people=Object.values(grouped).filter(x=>x.name&&x.name!=='Tanpa nama'&&!freelancerRows.some(f=>norm(f.name)===norm(x.name)));
  if(!people.length){el.innerHTML='<div class="trend-empty">Belum ada data delivery pada periode ini. Pastikan file Excel memiliki kolom Waktu Delivery.</div>';return}
- let html='<div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th><th>Evaluasi</th></tr></thead><tbody>';
- people.forEach(x=>{const rate=x.total?x.success/x.total*100:0;const key=encodeURIComponent(x.name).replace(/'/g,'%27');html+='<tr><td><button type="button" class="sprinter-detail-toggle" onclick="toggleSprinterDetail(\''+key+'\')">'+esc(x.name)+' <span>⌄ Detail</span></button></td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td><span class="eligibility-status '+(rate<90?'review':'')+'">'+(rate<90?'Perlu Evaluasi':'Performa Baik')+'</span></td></tr><tr id="sprinterDetail_'+key+'" style="display:none"><td colspan="6"><div class="sprinter-detail-box" id="sprinterDetailContent_'+key+'"></div></td></tr>'});
- html+='</tbody></table></div><div class="trend-sub" style="margin-top:14px">Rincian harian</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal Delivery</th><th>Sprinter</th><th>Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
- people.forEach(x=>Object.values(x.days).sort((a,b)=>b.date.localeCompare(a.date)).forEach(d=>{const rate=d.total?d.success/d.total*100:0;const date=new Date(d.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});html+='<tr><td>'+date+'</td><td>'+esc(x.name)+'</td><td>'+d.total+'</td><td>'+d.success+'</td><td>'+d.failed+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'}));
- html+='</tbody></table></div>';
+ const monthNames=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+ const months=[...new Set(people.flatMap(p=>Object.keys(p.months)))].sort((a,b)=>b.localeCompare(a));
+ let html='<div class="trend-sub" style="margin-bottom:10px">Evaluasi dipisahkan per bulan kalender. Skor adalah rata-rata persentase keberhasilan harian agar hari dengan volume besar tidak mendominasi penilaian.</div>';
+ months.forEach(month=>{
+  const [year,mm]=month.split('-'),monthLabel=monthNames[Number(mm)-1]+' '+year;
+  const rows=people.map(p=>{
+   const x=p.months[month];if(!x)return null;
+   const days=Object.values(x.days),workDays=days.length;
+   const avgDaily=workDays?days.reduce((sum,d)=>sum+(d.total?d.success/d.total*100:0),0)/workDays:0;
+   let status='Data Belum Cukup',statusClass='review',score='—';
+   if(workDays>=10){score=avgDaily.toFixed(1).replace('.',',')+'%';
+    if(avgDaily>=95){status='Sangat Baik';statusClass=''}
+    else if(avgDaily>=90){status='Baik';statusClass=''}
+    else if(avgDaily>=80){status='Perlu Pembinaan';statusClass='review'}
+    else{status='Evaluasi Khusus';statusClass='review'}
+   }
+   return {...x,name:p.name,workDays,avgDaily,status,statusClass,score};
+  }).filter(Boolean).sort((a,b)=>b.avgDaily-a.avgDaily||b.total-a.total);
+  if(!rows.length)return;
+  html+='<div class="trend-sub" style="margin:16px 0 8px;font-weight:800">'+monthLabel+'</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Hari Aktif</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>TTD Total</th><th>Skor Rata-rata Harian</th><th>Evaluasi</th></tr></thead><tbody>';
+  rows.forEach(x=>{const rate=x.total?x.success/x.total*100:0;const key=encodeURIComponent(x.name).replace(/'/g,'%27');html+='<tr><td><button type="button" class="sprinter-detail-toggle" onclick="toggleSprinterDetail(\''+key+'\')">'+esc(x.name)+' <span>⌄ Detail</span></button></td><td>'+x.workDays+'</td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td class="eligibility-rate '+(x.avgDaily<90?'eligibility-low':'')+'">'+x.score+'</td><td><span class="eligibility-status '+x.statusClass+'">'+x.status+'</span></td></tr>'});
+  html+='</tbody></table></div><div class="trend-sub" style="margin:10px 0 6px">Rincian harian — '+monthLabel+'</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal Delivery</th><th>Sprinter</th><th>Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
+  rows.forEach(x=>Object.values(x.days).sort((a,b)=>b.date.localeCompare(a.date)).forEach(d=>{const rate=d.total?d.success/d.total*100:0;const date=new Date(d.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});html+='<tr><td>'+date+'</td><td>'+esc(x.name)+'</td><td>'+d.total+'</td><td>'+d.success+'</td><td>'+d.failed+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'}));
+  html+='</tbody></table></div>';
+ });
+ html+='<div class="trend-sub" style="margin-top:12px">Kategori: ≥95% Sangat Baik · ≥90% Baik · ≥80% Perlu Pembinaan · <80% Evaluasi Khusus. Minimal 10 hari aktif per bulan; jika kurang, status Data Belum Cukup.</div>';
  el.innerHTML=html;
 }
 function renderDashboardTrends(records){
