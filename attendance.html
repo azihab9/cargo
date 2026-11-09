@@ -4,112 +4,402 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#087f45">
-<title>Absensi KPG003A</title>
+<title>Attendance | CargoFlow KPG003A</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#17251d;background:#f3f7f4}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#e5f4ea,#f7faf8 52%,#e9f3ec)}
-.wrap{width:min(100% - 28px,460px);margin:0 auto;padding:34px 0 48px}
-.brand{display:flex;align-items:center;gap:12px;margin:8px 0 24px}.mark{width:48px;height:48px;border-radius:15px;background:#078345;color:white;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 8px 20px #087f4530}.brand strong{display:block;font-size:17px}.brand small{color:#6d7b72}
-.card{background:#fff;border:1px solid #e5ece7;border-radius:22px;padding:24px;box-shadow:0 16px 45px #163b2510}
-h1{font-size:24px;margin:0 0 7px;letter-spacing:-.5px}.sub{color:#6b786f;font-size:14px;line-height:1.5;margin:0 0 22px}
-.tabs{display:flex;background:#f0f5f1;padding:4px;border-radius:12px;margin-bottom:20px}.tabs button{flex:1;border:0;background:transparent;padding:10px;border-radius:9px;font-weight:700;color:#6b786f;cursor:pointer}.tabs button.active{background:white;color:#087f45;box-shadow:0 2px 8px #0000000d}
-label{display:block;font-size:13px;font-weight:700;margin:14px 0 7px}input,select{width:100%;padding:13px 14px;border:1px solid #dce6df;border-radius:11px;font:inherit;background:#fff;outline:none}input:focus,select:focus{border-color:#078345;box-shadow:0 0 0 3px #07834518}
-button.primary{width:100%;margin-top:20px;padding:14px;border:0;border-radius:12px;background:#078345;color:#fff;font-weight:800;font-size:15px;cursor:pointer}button:disabled{opacity:.55;cursor:wait}
-.note{font-size:12px;color:#78847c;line-height:1.5;margin-top:14px}.alert{display:none;padding:12px 14px;border-radius:11px;margin:0 0 16px;font-size:13px;line-height:1.5}.alert.show{display:block}.alert.error{background:#fff0ef;color:#a32e27}.alert.info{background:#edf7f0;color:#17653a}.status{border:1px solid #e2ebe4;border-radius:14px;padding:16px;background:#f8fbf9;margin-top:16px}.status strong{display:block;margin-bottom:5px}.hidden{display:none!important}
+.wrap{width:min(100% - 28px,760px);margin:0 auto;padding:24px 0 48px}
+.brand{display:flex;align-items:center;gap:12px;margin:8px 0 22px}.mark{width:46px;height:46px;border-radius:15px;background:#078345;color:white;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 8px 20px #087f4530}.brand strong{display:block;font-size:16px}.brand small{color:#6d7b72}
+.card{background:#fff;border:1px solid #e5ece7;border-radius:20px;padding:20px;box-shadow:0 16px 45px #163b2510;margin-bottom:14px}
+h1{font-size:23px;margin:0 0 7px;letter-spacing:-.5px}h2{font-size:17px;margin:0 0 8px}.sub{color:#6b786f;font-size:13px;line-height:1.5;margin:0 0 18px}
+.tabs{display:flex;background:#f0f5f1;padding:4px;border-radius:12px;margin:18px 0}.tabs button{flex:1;border:0;background:transparent;padding:10px;border-radius:9px;font-weight:700;color:#6b786f;cursor:pointer}.tabs button.active{background:white;color:#087f45;box-shadow:0 2px 8px #0000000d}
+label{display:block;font-size:13px;font-weight:700;margin:13px 0 7px}input,select{width:100%;padding:12px 13px;border:1px solid #dce6df;border-radius:11px;font:inherit;background:#fff;outline:none;min-width:0}input:focus,select:focus{border-color:#078345;box-shadow:0 0 0 3px #07834518}
+button.primary,button.secondary,button.danger{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+button.primary{width:100%;margin-top:16px;background:#078345;color:#fff}button.secondary{background:#eaf5ee;color:#087f45}button.danger{background:#fff0ef;color:#a32e27}button:disabled{opacity:.55;cursor:wait}
+.note{font-size:12px;color:#78847c;line-height:1.5;margin-top:12px}.alert{display:none;padding:12px 14px;border-radius:11px;margin:0 0 15px;font-size:13px;line-height:1.5}.alert.show{display:block}.alert.error{background:#fff0ef;color:#a32e27}.alert.info{background:#edf7f0;color:#17653a}.alert.warn{background:#fff7e8;color:#875a08}
+.status{border:1px solid #e2ebe4;border-radius:14px;padding:15px;background:#f8fbf9;margin-top:12px}.status strong{display:block;margin-bottom:5px}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.stat{background:#f5f8f6;border:1px solid #e8efea;border-radius:13px;padding:13px}.stat small{color:#748078;font-size:11px}.stat strong{display:block;font-size:20px;margin-top:5px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.actions button{margin:0}.camera{display:block;width:100%;margin-top:12px}.camera input{padding:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.pill{display:inline-block;padding:5px 9px;border-radius:99px;background:#eaf5ee;color:#087f45;font-size:11px;font-weight:800}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid #edf1ee;vertical-align:middle}th{color:#718077;font-size:11px}
+.request{border:1px solid #e5ece7;border-radius:13px;padding:13px;margin-top:10px}.request select{margin-top:9px}
 footer{text-align:center;color:#849188;font-size:12px;margin-top:18px}
+@media(max-width:520px){.wrap{padding-top:16px}.card{padding:17px}.grid{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.row{align-items:flex-start}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="brand"><div class="mark">CF</div><div><strong>J&T CARGO KPG003A</strong><small>Portal Absensi Karyawan</small></div></div>
-  <main class="card">
+  <div class="brand"><div class="mark">CF</div><div><strong>J&T CARGO KPG003A</strong><small>Attendance • Portal Karyawan</small></div></div>
+  <div id="alert" class="alert"></div>
+  <main id="authArea" class="card">
     <h1>Absensi Karyawan</h1>
-    <p class="sub">Daftar dengan akun pribadi. Admin akan mencocokkan data kamu dengan master karyawan sebelum akun diaktifkan.</p>
-    <div id="alert" class="alert"></div>
-    <div id="authArea">
-      <div class="tabs"><button id="loginTab" class="active" type="button">Masuk</button><button id="registerTab" type="button">Daftar</button></div>
-      <form id="loginForm">
-        <label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="nama@email.com">
-        <label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Masukkan password">
-        <button class="primary" type="submit">Masuk ke Absensi</button>
-      </form>
-      <form id="registerForm" class="hidden">
-        <label for="fullName">Nama lengkap</label><input id="fullName" autocomplete="name" required maxlength="100" placeholder="Sesuai data karyawan">
-        <label for="registerType">Kategori pekerjaan</label>
-        <select id="registerType" required>
-          <option value="">Pilih kategori</option><option value="sprinter">Sprinter</option><option value="admin">Admin</option><option value="warehouse">Staff Gudang</option><option value="freelance">Freelance</option>
-        </select>
-        <label for="registerEmail">Email pribadi</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="nama@email.com">
-        <label for="registerPassword">Buat password</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Minimal 8 karakter">
-        <button class="primary" type="submit">Buat Akun</button>
-        <p class="note">Gunakan email yang bisa kamu akses untuk verifikasi dan pemulihan password. Nama dan kategori akan diverifikasi admin.</p>
+    <p class="sub">Masuk menggunakan akun pribadi atau daftar akun baru. Pendaftaran akan diverifikasi admin sebelum absensi dapat digunakan.</p>
+    <div class="tabs"><button id="loginTab" class="active" type="button">Masuk</button><button id="registerTab" type="button">Daftar</button></div>
+    <form id="loginForm">
+      <label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="nama@email.com">
+      <label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Masukkan password">
+      <button class="primary" type="submit">Masuk ke Attendance</button>
+    </form>
+    <form id="registerForm" class="hidden">
+      <label for="fullName">Nama lengkap sesuai master karyawan</label><input id="fullName" autocomplete="name" required maxlength="100" placeholder="Nama lengkap">
+      <label for="registerType">Kategori pekerjaan</label>
+      <select id="registerType" required><option value="">Pilih kategori</option><option value="sprinter">Sprinter</option><option value="admin">Admin</option><option value="warehouse">Staff Gudang</option><option value="freelance">Freelance</option></select>
+      <label for="registerEmail">Email pribadi</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="nama@email.com">
+      <label for="registerPassword">Buat password</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Minimal 8 karakter">
+      <button class="primary" type="submit">Buat Akun</button>
+      <p class="note">Gunakan email yang aktif. Admin akan mencocokkan nama dan kategori dengan data master.</p>
+    </form>
+  </main>
+
+  <section id="memberArea" class="hidden">
+    <div class="card">
+      <div class="row"><div><h1 id="welcomeTitle">Attendance</h1><p id="memberSub" class="sub" style="margin:4px 0 0"></p></div><button id="logoutBtn" class="secondary" type="button">Keluar</button></div>
+      <div id="pendingBox" class="status hidden"><strong id="pendingTitle">Menunggu verifikasi admin</strong><div id="pendingText" class="sub" style="margin:0"></div></div>
+      <div id="employeePanel" class="hidden">
+        <div class="grid" style="margin-top:18px">
+          <div class="stat"><small>Tanggal</small><strong id="todayLabel">-</strong></div>
+          <div class="stat"><small>Status hari ini</small><strong id="todayStatus">Belum Check In</strong></div>
+        </div>
+        <div class="status" style="margin-top:14px">
+          <div class="row"><strong>Absensi masuk</strong><span id="checkInTime" class="pill">Belum tercatat</span></div>
+          <label class="camera" for="selfieFile">Selfie saat Check In (wajib)</label>
+          <input id="selfieFile" type="file" accept="image/*" capture="user">
+          <img id="selfiePreview" class="hidden" alt="Preview selfie" style="width:100%;max-height:230px;object-fit:cover;border-radius:12px;margin-top:10px">
+          <button id="checkInBtn" class="primary" type="button">📍 Check In + GPS + Selfie</button>
+          <p class="note">Check In hanya dapat dilakukan dalam radius kantor yang ditetapkan. Pastikan izin lokasi dan kamera aktif.</p>
+        </div>
+        <div class="status">
+          <div class="row"><strong>Absensi pulang</strong><span id="checkOutTime" class="pill">Belum tercatat</span></div>
+          <button id="checkOutBtn" class="primary" type="button">Check Out</button>
+          <p class="note">Check Out bebas dilakukan dari lokasi mana saja dan tidak memerlukan selfie.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="adminArea" class="hidden">
+    <div class="card">
+      <div class="row"><h2>Pengaturan Attendance</h2><span class="pill">Admin</span></div>
+      <p class="sub">Atur titik kantor, radius, dan jam mulai kerja. Titik kantor dapat disimpan dari lokasi HP admin saat berada di kantor.</p>
+      <div class="grid">
+        <div><label for="radiusInput">Radius kantor (meter)</label><input id="radiusInput" type="number" min="10" max="2000" value="100"></div>
+        <div><label for="startTimeInput">Jam masuk</label><input id="startTimeInput" type="time" value="08:00"></div>
+      </div>
+      <label for="graceInput">Toleransi keterlambatan (menit)</label><input id="graceInput" type="number" min="0" max="180" value="0">
+      <div id="officeLocationText" class="note">Koordinat kantor belum dibaca.</div>
+      <div class="actions"><button id="setOfficeLocationBtn" class="secondary" type="button">Gunakan GPS HP ini sebagai lokasi kantor</button><button id="saveSettingsBtn" class="primary" type="button">Simpan Pengaturan</button></div>
+    </div>
+    <div class="card">
+      <h2>Pengajuan akun karyawan</h2><p class="sub">Cocokkan nama pengaju dengan master data sebelum menyetujui akun.</p>
+      <div id="requestsList"><p class="note">Memuat pengajuan...</p></div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>Monitoring & Rekap Absensi</h2><span class="pill">Admin</span></div>
+      <p class="sub">Pilih tanggal dan cari nama karyawan untuk memeriksa kehadiran serta bukti selfie Check In.</p>
+      <div class="grid">
+        <div><label for="recordsDate">Tanggal absensi</label><input id="recordsDate" type="date"></div>
+        <div><label for="recordsSearch">Cari nama karyawan</label><input id="recordsSearch" type="search" placeholder="Ketik nama..."></div>
+      </div>
+      <div class="actions"><button id="reloadRecordsBtn" class="secondary" type="button">Muat ulang</button><button id="exportRecordsBtn" class="primary" type="button">Unduh Rekap CSV</button></div>
+      <p id="recordsSummary" class="note">Memuat rekap...</p>
+      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Terlambat</th><th>Bukti</th></tr></thead><tbody id="recordsBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
+    </div>
+
+
+    <div class="card">
+      <h2>Pencatatan Izin, Sakit & Alpha</h2>
+      <p class="sub">Admin mencatat status karyawan yang tidak melakukan Check In. Catatan ini menjadi dasar evaluasi bonus kehadiran.</p>
+      <form id="absenceForm">
+        <label for="absenceMember">Karyawan</label><select id="absenceMember" required><option value="">Memuat daftar karyawan...</option></select>
+        <div class="grid">
+          <div><label for="absenceDate">Tanggal</label><input id="absenceDate" type="date" required></div>
+          <div><label for="absenceStatus">Status</label><select id="absenceStatus"><option value="izin">Izin</option><option value="sakit">Sakit</option><option value="alpha">Alpha</option><option value="libur">Libur</option></select></div>
+        </div>
+        <label for="absenceNote">Catatan (opsional)</label><input id="absenceNote" maxlength="250" placeholder="Keterangan tambahan">
+        <button class="primary" type="submit">Simpan Status Absensi</button>
       </form>
     </div>
-    <section id="accountArea" class="hidden">
-      <div class="status"><strong id="accountTitle">Akun terhubung</strong><div id="accountText" class="sub" style="margin:0"></div></div>
-      <button id="logoutBtn" class="primary" type="button">Keluar</button>
-    </section>
-  </main>
-  <footer>Absensi terintegrasi dengan CargoFlow • KPG003A</footer>
+    <div class="card">
+      <div class="row"><h2>Aturan Bonus Kehadiran</h2><span class="pill">Bisa diatur</span></div>
+      <p class="sub">Buat bonus untuk Sprinter, Admin, dan Staff Gudang berdasarkan kehadiran. Freelance tidak termasuk program bonus ini. Nominal bonus dihitung terpisah dari fee delivery.</p>
+      <form id="bonusRuleForm">
+        <label for="bonusName">Nama bonus</label><input id="bonusName" required maxlength="100" placeholder="Contoh: Bonus Kehadiran Penuh">
+        <div class="grid">
+          <div><label for="bonusAmount">Nominal bonus (Rp)</label><input id="bonusAmount" type="number" min="0" step="1000" value="100000" required></div>
+          <div><label for="bonusCategory">Kategori karyawan</label><select id="bonusCategory"><option value="all">Semua kategori</option><option value="sprinter">Sprinter</option><option value="admin">Admin</option><option value="warehouse">Staff Gudang</option></select></div>
+        </div>
+        <div class="grid">
+          <div><label for="bonusMinPresent">Minimal hari hadir</label><input id="bonusMinPresent" type="number" min="0" value="0"></div>
+          <div><label for="bonusMaxLate">Maksimal hari terlambat</label><input id="bonusMaxLate" type="number" min="0" value="999"></div>
+          <div><label for="bonusMaxIzin">Maksimal hari izin</label><input id="bonusMaxIzin" type="number" min="0" value="999"></div>
+          <div><label for="bonusMaxSakit">Maksimal hari sakit</label><input id="bonusMaxSakit" type="number" min="0" value="999"></div>
+        </div>
+        <label for="bonusMaxAlpha">Maksimal hari alpha</label><input id="bonusMaxAlpha" type="number" min="0" value="0">
+        <button class="primary" type="submit">Simpan Aturan Bonus</button>
+      </form>
+      <div class="tablewrap" style="margin-top:16px"><table><thead><tr><th>Nama Bonus</th><th>Nominal</th><th>Kategori</th><th>Syarat</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="bonusRulesBody"><tr><td colspan="6">Memuat aturan...</td></tr></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Simulasi Bonus Bulanan</h2>
+      <p class="sub">Pilih periode untuk menghitung bonus berdasarkan catatan absensi. Hasil simulasi belum mengubah payroll.</p>
+      <div class="grid">
+        <div><label for="bonusPeriodStart">Dari tanggal</label><input id="bonusPeriodStart" type="date"></div>
+        <div><label for="bonusPeriodEnd">Sampai tanggal</label><input id="bonusPeriodEnd" type="date"></div>
+      </div>
+      <button id="calculateBonusBtn" class="primary" type="button">Hitung Simulasi Bonus</button>
+      <p id="bonusSummary" class="note">Pilih periode lalu hitung simulasi.</p>
+      <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Kategori</th><th>Hadir</th><th>Terlambat</th><th>Izin</th><th>Sakit</th><th>Alpha</th><th>Bonus</th></tr></thead><tbody id="bonusPreviewBody"><tr><td colspan="8">Belum ada simulasi.</td></tr></tbody></table></div>
+    </div>
+  </section>
+  <footer>Attendance CargoFlow • J&T Cargo KPG003A</footer>
 </div>
 <script>
 const SUPABASE_URL = "https://vvzezmnohflnhqykydsc.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VZb5sqNmiwBCXQl2z__E3Q_po1aH24T";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
-function alertBox(message,type="info"){const el=$("alert");el.textContent=message;el.className="alert show "+type}
-function clearAlert(){$("alert").className="alert"}
-function setBusy(form,busy){const b=form.querySelector("button[type=submit]");b.disabled=busy;b.textContent=busy?"Memproses...":(form.id==="loginForm"?"Masuk ke Absensi":"Buat Akun")}
-function showTab(tab){const login=tab==="login";$("loginForm").classList.toggle("hidden",!login);$("registerForm").classList.toggle("hidden",login);$("loginTab").classList.toggle("active",login);$("registerTab").classList.toggle("active",!login);clearAlert()}
-$("loginTab").onclick=()=>showTab("login");$("registerTab").onclick=()=>showTab("register");
-async function refreshAccount(){
- const {data:{session}}=await db.auth.getSession();
- if(!session){$("authArea").classList.remove("hidden");$("accountArea").classList.add("hidden");return}
- $("authArea").classList.add("hidden");$("accountArea").classList.remove("hidden");
- const {data:member,error:memberError}=await db.from("attendance_members").select("person_name,person_type,active").eq("user_id",session.user.id).maybeSingle();
- if(member&&member.active){
-  $("accountTitle").textContent="Akun sudah disetujui ✓";
-  $("accountText").textContent=member.person_name+" • "+({sprinter:"Sprinter",admin:"Admin",warehouse:"Staff Gudang",freelance:"Freelance"}[member.person_type]||member.person_type)+". Fitur absensi akan tersedia setelah pengaturan lokasi kantor diselesaikan.";
+let activeMember = null, activeSession = null, currentSettings = null, adminRecords = [], attendanceBonusRules = [], attendanceBonusMembers = [];
+const today = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+function alertBox(message,type='info'){const el=$('alert');el.textContent=message;el.className='alert show '+type;window.scrollTo({top:0,behavior:'smooth'})}
+function clearAlert(){$('alert').className='alert'}
+function busy(button,on,label){button.disabled=on;if(label)button.textContent=on?'Memproses...':label}
+function showTab(tab){const login=tab==='login';$('loginForm').classList.toggle('hidden',!login);$('registerForm').classList.toggle('hidden',login);$('loginTab').classList.toggle('active',login);$('registerTab').classList.toggle('active',!login);clearAlert()}
+function getPosition(){return new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(new Error('Browser tidak mendukung GPS.'));navigator.geolocation.getCurrentPosition(p=>resolve(p.coords),e=>reject(new Error(e.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi untuk Chrome.':e.code===2?'Lokasi tidak tersedia. Coba aktifkan GPS.':'GPS terlalu lama merespons. Coba lagi.')),{enableHighAccuracy:true,timeout:20000,maximumAge:0})})}
+function clock(v){return v?new Date(v).toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}):'Belum tercatat'}
+function setSignedIn(show){$('authArea').classList.toggle('hidden',show);$('memberArea').classList.toggle('hidden',!show)}
+async function refresh(){
+ const {data:{session},error}=await db.auth.getSession();if(error)throw error;activeSession=session;
+ if(!session){setSignedIn(false);$('adminArea').classList.add('hidden');return}
+ setSignedIn(true);$('adminArea').classList.add('hidden');$('employeePanel').classList.add('hidden');$('pendingBox').classList.add('hidden');
+ const {data:role,error:roleErr}=await db.rpc('current_role');if(roleErr)throw roleErr;
+ const isAdmin=['admin','operations'].includes(role);
+ if(isAdmin){$('adminArea').classList.remove('hidden');await loadAdminData();}
+ const {data:member,error:memberErr}=await db.from('attendance_members').select('person_name,person_type,active').eq('user_id',session.user.id).maybeSingle();
+ if(memberErr)throw memberErr;
+ if(!member||!member.active){
+  const {data:req,error:reqErr}=await db.from('attendance_registration_requests').select('status,requested_name,requested_type,admin_note').eq('user_id',session.user.id).maybeSingle();
+  if(reqErr)throw reqErr;
+  $('pendingBox').classList.remove('hidden');
+  $('pendingTitle').textContent=req?.status==='rejected'?'Pengajuan perlu diperbaiki':'Menunggu verifikasi admin';
+  $('pendingText').textContent=req?req.requested_name+' • '+req.requested_type+(req.admin_note?' — Catatan admin: '+req.admin_note:''):'Akun sudah dibuat. Lengkapi pengajuan pendaftaran di tab Daftar.';
+  if(!req&&!isAdmin){$('pendingBox').classList.add('hidden');$('authArea').classList.remove('hidden');$('memberArea').classList.add('hidden');showTab('register');}
   return;
  }
- const {data:req,error:reqError}=await db.from("attendance_registration_requests").select("status,requested_name,requested_type,admin_note").eq("user_id",session.user.id).maybeSingle();
- if(req){
-  const labels={pending:"Menunggu verifikasi admin",approved:"Pengajuan disetujui",rejected:"Pengajuan perlu diperbaiki"};
-  $("accountTitle").textContent=labels[req.status]||"Status pendaftaran";
-  $("accountText").textContent=req.requested_name+" • "+req.requested_type+(req.admin_note?" — Catatan admin: "+req.admin_note:"");
-  return;
- }
- $("accountArea").classList.add("hidden");$("authArea").classList.remove("hidden");
- showTab("register");
- alertBox("Akun sudah aktif. Lengkapi nama dan kategori pekerjaan untuk mengirim pengajuan verifikasi.","info");
+ activeMember=member;$('welcomeTitle').textContent='Halo, '+member.person_name+' 👋';$('memberSub').textContent=({sprinter:'Sprinter',admin:'Admin',warehouse:'Staff Gudang',freelance:'Freelance'}[member.person_type]||member.person_type)+' • J&T Cargo KPG003A';
+ $('employeePanel').classList.remove('hidden');$('todayLabel').textContent=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'short',year:'numeric'});
+ await loadTodayRecord();
 }
-$("registerForm").addEventListener("submit",async e=>{
- e.preventDefault();clearAlert();const f=e.currentTarget;setBusy(f,true);
- const name=$("fullName").value.trim(),type=$("registerType").value,email=$("registerEmail").value.trim(),password=$("registerPassword").value;
+async function loadTodayRecord(){
+ const {data,error}=await db.from('attendance_records').select('check_in_at,check_out_at,late_minutes,attendance_status').eq('user_id',activeSession.user.id).eq('attendance_date',today()).maybeSingle();
+ if(error)throw error;
+ $('checkInTime').textContent=clock(data?.check_in_at);$('checkOutTime').textContent=clock(data?.check_out_at);
+ $('todayStatus').textContent=data?.check_in_at?(data.late_minutes>0?'Terlambat '+data.late_minutes+' mnt':'Hadir'):'Belum Check In';
+ $('checkInBtn').disabled=!!data?.check_in_at;$('checkOutBtn').disabled=!data?.check_in_at||!!data?.check_out_at;
+}
+$('loginTab').onclick=()=>showTab('login');$('registerTab').onclick=()=>showTab('register');
+$('registerForm').addEventListener('submit',async e=>{
+ e.preventDefault();clearAlert();const b=e.currentTarget.querySelector('button[type=submit]');busy(b,true);
+ const name=$('fullName').value.trim(),type=$('registerType').value,email=$('registerEmail').value.trim(),password=$('registerPassword').value;
  try{
   const {data:{session}}=await db.auth.getSession();
   if(!session){
-   const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:"attendance"}}});
-   if(error)throw error;
-   if(!data.session){alertBox("Akun berhasil dibuat. Buka email untuk verifikasi, lalu kembali ke halaman ini dan masuk menggunakan akun tadi. Setelah login, lengkapi pengajuan verifikasi.");showTab("login");return;}
+   const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name,app_context:'attendance'}}});if(error)throw error;
+   if(!data.session){alertBox('Akun berhasil dibuat. Verifikasi email terlebih dahulu, lalu login kembali dan kirim pengajuan verifikasi.');showTab('login');return;}
   }
-  const {error:requestError}=await db.rpc("attendance_submit_registration",{p_requested_name:name,p_requested_type:type});
-  if(requestError)throw requestError;
-  alertBox("Pendaftaran berhasil dikirim. Tunggu persetujuan admin ya.","info");await refreshAccount();
- }catch(err){alertBox(err.message||"Pendaftaran gagal. Coba lagi.","error")}finally{setBusy(f,false)}
+  const {error:requestError}=await db.rpc('attendance_submit_registration',{p_requested_name:name,p_requested_type:type});if(requestError)throw requestError;
+  alertBox('Pengajuan berhasil dikirim. Tunggu persetujuan admin.');await refresh();
+ }catch(err){alertBox(err.message||'Pendaftaran gagal.','error')}finally{busy(b,false,'Buat Akun')}
 });
-$("loginForm").addEventListener("submit",async e=>{
- e.preventDefault();clearAlert();const f=e.currentTarget;setBusy(f,true);
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();clearAlert();const b=e.currentTarget.querySelector('button[type=submit]');busy(b,true);
+ try{const {error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;await refresh();}
+ catch(err){alertBox(err.message||'Login gagal.','error')}finally{busy(b,false,'Masuk ke Attendance')}
+});
+$('logoutBtn').onclick=async()=>{await db.auth.signOut();activeMember=null;await refresh();showTab('login')};
+$('selfieFile').addEventListener('change',()=>{const file=$('selfieFile').files[0];if(!file)return;if(!file.type.startsWith('image/')){alertBox('File harus berupa gambar.','error');$('selfieFile').value='';return;}if(file.size>5*1024*1024){alertBox('Ukuran selfie asli maksimal 5 MB.','error');$('selfieFile').value='';return;}const img=$('selfiePreview');if(img.dataset.previewUrl)URL.revokeObjectURL(img.dataset.previewUrl);img.dataset.previewUrl=URL.createObjectURL(file);img.src=img.dataset.previewUrl;img.classList.remove('hidden')});
+async function compressSelfie(file){
+ const bitmap=await createImageBitmap(file);
+ const maxSide=1280,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);
+ const ctx=canvas.getContext('2d',{alpha:false});ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ let quality=.78,blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+ while(blob&&blob.size>450*1024&&quality>.5){quality-=.07;blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));}
+ if(!blob)throw new Error('Foto gagal diproses. Coba ambil selfie ulang.');
+ return blob;
+}
+$('checkInBtn').onclick=async()=>{
+ clearAlert();const b=$('checkInBtn'),file=$('selfieFile').files[0];if(!file){alertBox('Ambil selfie terlebih dahulu.','warn');return;}
+ busy(b,true);let uploadedPath=null;
  try{
-  const {error}=await db.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});
+  const coords=await getPosition();const compressedPhoto=await compressSelfie(file);const path=activeSession.user.id+'/'+today()+'-'+Date.now()+'.jpg';
+  const {error:uploadError}=await db.storage.from('attendance-selfies').upload(path,compressedPhoto,{contentType:'image/jpeg',upsert:false});if(uploadError)throw uploadError;uploadedPath=path;
+  const {error}=await db.rpc('attendance_check_in',{p_latitude:coords.latitude,p_longitude:coords.longitude,p_photo_path:path});if(error)throw error;
+  alertBox('Check In berhasil. Lokasi dan selfie sudah tercatat.');$('selfieFile').value='';$('selfiePreview').classList.add('hidden');await loadTodayRecord();
+ }catch(err){if(uploadedPath)await db.storage.from('attendance-selfies').remove([uploadedPath]);alertBox(err.message||'Check In gagal.','error')}
+ finally{busy(b,false,'📍 Check In + GPS + Selfie')}
+};
+$('checkOutBtn').onclick=async()=>{clearAlert();const b=$('checkOutBtn');busy(b,true);try{const {error}=await db.rpc('attendance_check_out');if(error)throw error;alertBox('Check Out berhasil. Terima kasih, hati-hati di perjalanan!');await loadTodayRecord();}catch(err){alertBox(err.message||'Check Out gagal.','error')}finally{busy(b,false,'Check Out')}};
+async function loadAdminData(){
+ const {data:settings,error}=await db.from('attendance_settings').select('*').eq('id',true).maybeSingle();if(error)throw error;currentSettings=settings;
+ if(settings){$('radiusInput').value=settings.allowed_radius_m;$('startTimeInput').value=String(settings.work_start_time||'08:00').slice(0,5);$('graceInput').value=settings.grace_minutes||0;$('officeLocationText').textContent=settings.office_latitude==null?'Koordinat kantor belum diatur.':'Lokasi kantor tersimpan: '+settings.office_latitude+', '+settings.office_longitude;}
+ await loadRequests();await loadRecords();await loadBonusMembers();await loadBonusRules();
+}
+$('setOfficeLocationBtn').onclick=async()=>{const b=$('setOfficeLocationBtn');busy(b,true);try{const p=await getPosition();$('officeLocationText').dataset.lat=p.latitude;$('officeLocationText').dataset.lon=p.longitude;$('officeLocationText').textContent='Lokasi HP admin siap disimpan: '+p.latitude.toFixed(6)+', '+p.longitude.toFixed(6);}catch(e){alertBox(e.message,'error')}finally{busy(b,false,'Gunakan GPS HP ini sebagai lokasi kantor')}};
+$('saveSettingsBtn').onclick=async()=>{const b=$('saveSettingsBtn');busy(b,true);try{
+ const lat=$('officeLocationText').dataset.lat??currentSettings?.office_latitude,lon=$('officeLocationText').dataset.lon??currentSettings?.office_longitude;
+ if(lat==null||lon==null)throw new Error('Ambil GPS di kantor terlebih dahulu untuk mengatur koordinat.');
+ const {error}=await db.from('attendance_settings').update({office_latitude:lat,office_longitude:lon,allowed_radius_m:Number($('radiusInput').value),work_start_time:$('startTimeInput').value,grace_minutes:Number($('graceInput').value),updated_by:activeSession.user.id,updated_at:new Date().toISOString()}).eq('id',true);if(error)throw error;
+ alertBox('Pengaturan Attendance berhasil disimpan.');await loadAdminData();
+ }catch(e){alertBox(e.message||'Gagal menyimpan pengaturan.','error')}finally{busy(b,false,'Simpan Pengaturan')}};
+async function loadRequests(){
+ const box=$('requestsList');const {data:reqs,error}=await db.from('attendance_registration_requests').select('id,user_id,requested_name,requested_type,created_at').eq('status','pending').order('created_at',{ascending:true});if(error)throw error;
+ if(!reqs?.length){box.innerHTML='<p class="note">Tidak ada pengajuan yang menunggu persetujuan.</p>';return;}
+ box.innerHTML='';
+ for(const req of reqs){
+  const div=document.createElement('div');div.className='request';const title=document.createElement('strong');title.textContent=req.requested_name+' • '+req.requested_type;div.appendChild(title);
+  const sel=document.createElement('select');sel.innerHTML='<option value="">Pilih data master yang cocok</option>';
+  let table=req.requested_type==='sprinter'?'sprinters':req.requested_type==='freelance'?'freelancers':'office_staff';
+  let query=db.from(table).select('id,name').eq('active',true).order('name');
+  if(table==='office_staff')query=query.eq('staff_role',req.requested_type);
+  const {data:people,error:peopleErr}=await query;if(peopleErr){const opt=document.createElement('option');opt.textContent='Gagal memuat master data';sel.appendChild(opt);}else (people||[]).forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.name;sel.appendChild(opt)});
+  div.appendChild(sel);const actions=document.createElement('div');actions.className='actions';
+  const approve=document.createElement('button');approve.className='primary';approve.textContent='Setujui';approve.onclick=async()=>{if(!sel.value){alertBox('Pilih data master yang sesuai.','warn');return;}approve.disabled=true;try{const {error}=await db.rpc('attendance_approve_registration',{p_request_id:req.id,p_person_ref_id:sel.value});if(error)throw error;alertBox('Akun '+req.requested_name+' berhasil disetujui.');await loadRequests();}catch(e){alertBox(e.message,'error');approve.disabled=false}};
+  const reject=document.createElement('button');reject.className='danger';reject.textContent='Tolak';reject.onclick=async()=>{const note=prompt('Alasan penolakan (opsional):')||null;reject.disabled=true;try{const {error}=await db.rpc('attendance_reject_registration',{p_request_id:req.id,p_note:note});if(error)throw error;alertBox('Pengajuan ditolak.');await loadRequests();}catch(e){alertBox(e.message,'error');reject.disabled=false}};
+  actions.append(approve,reject);div.appendChild(actions);box.appendChild(div);
+ }
+}
+async function loadRecords(){
+ const selectedDate=$('recordsDate').value||today(),search=$('recordsSearch').value.trim().toLocaleLowerCase('id-ID');
+ const {data,error}=await db.from('attendance_records').select('person_name,check_in_at,check_out_at,late_minutes,check_in_photo_path').eq('attendance_date',selectedDate).order('check_in_at',{ascending:true});
+ if(error)throw error;
+ adminRecords=data||[];
+ const filtered=adminRecords.filter(r=>(r.person_name||'').toLocaleLowerCase('id-ID').includes(search));
+ const body=$('recordsBody');body.innerHTML='';
+ $('recordsSummary').textContent=filtered.length+' dari '+adminRecords.length+' karyawan tercatat • '+new Date(selectedDate+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ if(!filtered.length){body.innerHTML='<tr><td colspan="5">Tidak ada data absensi yang cocok.</td></tr>';return;}
+ for(const r of filtered){
+  const tr=document.createElement('tr');
+  [r.person_name,clock(r.check_in_at),clock(r.check_out_at),r.late_minutes? r.late_minutes+' menit':'Tepat waktu'].forEach(v=>{const td=document.createElement('td');td.textContent=v??'-';tr.appendChild(td)});
+  const proof=document.createElement('td');
+  if(r.check_in_photo_path){
+   const view=document.createElement('button');view.className='secondary';view.type='button';view.textContent='Lihat selfie';
+   view.onclick=async()=>{view.disabled=true;try{const {data,error}=await db.storage.from('attendance-selfies').createSignedUrl(r.check_in_photo_path,60);if(error)throw error;window.open(data.signedUrl,'_blank','noopener');}catch(e){alertBox('Bukti selfie gagal dibuka: '+e.message,'error')}finally{view.disabled=false}};
+   proof.appendChild(view);
+  }else proof.textContent='Tidak tersedia';
+  tr.appendChild(proof);body.appendChild(tr);
+ }
+}
+
+async function loadBonusMembers(){
+ const {data,error}=await db.from('attendance_members').select('id,person_name,person_type').eq('active',true).order('person_name');
+ if(error)throw error;attendanceBonusMembers=data||[];
+ const select=$('absenceMember');select.innerHTML='<option value="">Pilih karyawan</option>';
+ attendanceBonusMembers.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=m.person_name+' • '+({sprinter:'Sprinter',admin:'Admin',warehouse:'Staff Gudang',freelance:'Freelance'}[m.person_type]||m.person_type);select.appendChild(opt)});
+}
+$('absenceDate').value=today();
+$('absenceForm').addEventListener('submit',async e=>{
+ e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');busy(b,true);
+ try{
+  const member=attendanceBonusMembers.find(m=>m.id===$('absenceMember').value),date=$('absenceDate').value,status=$('absenceStatus').value;
+  if(!member||!date)throw new Error('Pilih karyawan dan tanggal absensi.');
+  const {data:existing,error:checkError}=await db.from('attendance_records').select('id,check_in_at').eq('person_name',member.person_name).eq('attendance_date',date).maybeSingle();
+  if(checkError)throw checkError;
+  if(existing?.check_in_at)throw new Error('Karyawan sudah Check In pada tanggal tersebut. Status tidak dapat menggantikan kehadiran.');
+  const {error}=await db.from('attendance_records').upsert({person_name:member.person_name,person_type:member.person_type,attendance_date:date,attendance_status:status,note:$('absenceNote').value.trim()||null,created_by:activeSession.user.id},{onConflict:'person_name,attendance_date'});
   if(error)throw error;
-  await refreshAccount();
- }catch(err){alertBox(err.message||"Login gagal.","error")}finally{setBusy(f,false)}
+  $('absenceNote').value='';alertBox('Status '+status+' berhasil dicatat untuk '+member.person_name+'.');await loadRecords();
+ }catch(err){alertBox(err.message||'Gagal mencatat status absensi.','error')}finally{busy(b,false,'Simpan Status Absensi')}
 });
-$("logoutBtn").onclick=async()=>{await db.auth.signOut();await refreshAccount();showTab("login")};
-db.auth.onAuthStateChange(()=>{setTimeout(refreshAccount,0)});
-refreshAccount();
+async function loadBonusRules(){
+ const {data,error}=await db.from('attendance_bonus_rules').select('*').order('created_at',{ascending:false});
+ if(error)throw new Error('Aturan bonus belum siap. Jalankan SQL attendance_bonus.sql di Supabase. '+error.message);
+ attendanceBonusRules=data||[];
+ const body=$('bonusRulesBody');body.innerHTML='';
+ if(!attendanceBonusRules.length){body.innerHTML='<tr><td colspan="6">Belum ada aturan bonus. Tambahkan aturan pertama.</td></tr>';return;}
+ const categoryLabel=v=>v.length===3?'Semua':v.map(x=>({sprinter:'Sprinter',admin:'Admin',warehouse:'Gudang'}[x]||x)).join(', ');
+ const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID');
+ attendanceBonusRules.forEach(rule=>{
+  const tr=document.createElement('tr');
+  const cond='Hadir ≥ '+rule.min_present_days+' • Telat ≤ '+rule.max_late_days+' • Izin ≤ '+rule.max_izin_days+' • Sakit ≤ '+rule.max_sakit_days+' • Alpha ≤ '+rule.max_alpha_days;
+  [rule.bonus_name,money(rule.amount),categoryLabel(rule.person_types),cond,rule.active?'Aktif':'Nonaktif'].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td');
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='secondary';toggle.textContent=rule.active?'Nonaktifkan':'Aktifkan';
+  toggle.onclick=async()=>{toggle.disabled=true;const {error}=await db.from('attendance_bonus_rules').update({active:!rule.active,updated_at:new Date().toISOString()}).eq('id',rule.id);if(error){alertBox(error.message,'error');toggle.disabled=false;return;}await loadBonusRules();};
+  const del=document.createElement('button');del.type='button';del.className='danger';del.style.marginLeft='6px';del.textContent='Hapus';
+  del.onclick=async()=>{if(!confirm('Hapus aturan '+rule.bonus_name+'?'))return;del.disabled=true;const {error}=await db.from('attendance_bonus_rules').delete().eq('id',rule.id);if(error){alertBox(error.message,'error');del.disabled=false;return;}await loadBonusRules();};
+  td.append(toggle,del);tr.appendChild(td);body.appendChild(tr);
+ });
+}
+$('bonusRuleForm').addEventListener('submit',async e=>{
+ e.preventDefault();const form=e.currentTarget;const b=form.querySelector('button[type=submit]');busy(b,true);
+ try{
+  const category=$('bonusCategory').value;
+  const types=category==='all'?['sprinter','admin','warehouse']:[category];
+  const payload={bonus_name:$('bonusName').value.trim(),amount:Number($('bonusAmount').value),person_types:types,min_present_days:Number($('bonusMinPresent').value||0),max_late_days:Number($('bonusMaxLate').value||0),max_izin_days:Number($('bonusMaxIzin').value||0),max_sakit_days:Number($('bonusMaxSakit').value||0),max_alpha_days:Number($('bonusMaxAlpha').value||0),created_by:activeSession.user.id};
+  if(!payload.bonus_name||payload.amount<0)throw new Error('Nama dan nominal bonus harus diisi dengan benar.');
+  const {error}=await db.from('attendance_bonus_rules').insert(payload);if(error)throw error;
+  $('bonusName').value='';$('bonusCategory').value='all';$('bonusAmount').value=100000;$('bonusMinPresent').value=0;$('bonusMaxLate').value=999;$('bonusMaxIzin').value=999;$('bonusMaxSakit').value=999;$('bonusMaxAlpha').value=0;
+  await loadBonusRules();alertBox('Aturan bonus berhasil disimpan.');
+ }catch(err){alertBox(err.message||'Gagal menyimpan aturan bonus.','error')}finally{busy(b,false,'Simpan Aturan Bonus')}
+});
+function dateOnly(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+const bonusNow=new Date(),bonusMonthStart=new Date(bonusNow.getFullYear(),bonusNow.getMonth(),1),bonusMonthEnd=new Date(bonusNow.getFullYear(),bonusNow.getMonth()+1,0);
+$('bonusPeriodStart').value=dateOnly(bonusMonthStart);$('bonusPeriodEnd').value=dateOnly(bonusMonthEnd);
+$('calculateBonusBtn').onclick=async()=>{
+ const button=$('calculateBonusBtn');busy(button,true);
+ try{
+  const start=$('bonusPeriodStart').value,end=$('bonusPeriodEnd').value;
+  if(!start||!end||start>end)throw new Error('Periksa tanggal periode bonus.');
+  const [{data:members,error:memberErr},{data:records,error:recordErr}]=await Promise.all([
+   db.from('attendance_members').select('person_name,person_type,active').eq('active',true).order('person_name'),
+   db.from('attendance_records').select('person_name,person_type,attendance_date,attendance_status,late_minutes').gte('attendance_date',start).lte('attendance_date',end)
+  ]);
+  if(memberErr)throw memberErr;if(recordErr)throw recordErr;
+  const rules=attendanceBonusRules.filter(x=>x.active),stats=new Map();
+  (members||[]).filter(m=>m.person_type!=='freelance').forEach(m=>stats.set(m.person_type+'|'+m.person_name,{name:m.person_name,type:m.person_type,present:0,late:0,izin:0,sakit:0,alpha:0,bonus:0,qualified:[]}));
+  (records||[]).forEach(r=>{
+   if(r.person_type==='freelance')return;
+   const key=r.person_type+'|'+r.person_name;
+   if(!stats.has(key))stats.set(key,{name:r.person_name,type:r.person_type,present:0,late:0,izin:0,sakit:0,alpha:0,bonus:0,qualified:[]});
+   const x=stats.get(key),status=r.attendance_status;
+   if(status==='hadir'){x.present++;if(Number(r.late_minutes)>0)x.late++;}
+   else if(['izin','sakit','alpha'].includes(status))x[status]++;
+  });
+  const typesLabel={sprinter:'Sprinter',admin:'Admin',warehouse:'Staff Gudang',freelance:'Freelance'};
+  const rows=[...stats.values()].map(x=>{
+   rules.forEach(rule=>{
+    if(!rule.person_types.includes(x.type))return;
+    if(x.present>0&&x.present>=rule.min_present_days&&x.late<=rule.max_late_days&&x.izin<=rule.max_izin_days&&x.sakit<=rule.max_sakit_days&&x.alpha<=rule.max_alpha_days){x.bonus+=Number(rule.amount)||0;x.qualified.push(rule.bonus_name);}
+   });
+   return x;
+  }).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+  const body=$('bonusPreviewBody');body.innerHTML='';
+  if(!rows.length){body.innerHTML='<tr><td colspan="8">Belum ada karyawan terdaftar.</td></tr>';}
+  rows.forEach(x=>{
+   const tr=document.createElement('tr');
+   [x.name,typesLabel[x.type]||x.type,x.present,x.late,x.izin,x.sakit,x.alpha,'Rp'+x.bonus.toLocaleString('id-ID')].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});
+   if(x.qualified.length)tr.title='Memenuhi: '+x.qualified.join(', ');
+   body.appendChild(tr);
+  });
+  const total=rows.reduce((s,x)=>s+x.bonus,0),qualified=rows.filter(x=>x.bonus>0).length;
+  $('bonusSummary').textContent=rows.length+' karyawan • '+qualified+' menerima bonus • Total simulasi Rp'+total.toLocaleString('id-ID')+' • Periode '+start+' s/d '+end+'. Alpha/izin/sakit dihitung dari status yang sudah dicatat admin.';
+ }catch(err){alertBox(err.message||'Simulasi bonus gagal dihitung.','error')}finally{busy(button,false,'Hitung Simulasi Bonus')}
+};
+
+$('recordsDate').value=today();
+$('reloadRecordsBtn').onclick=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('recordsDate').onchange=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('recordsSearch').oninput=()=>loadRecords().catch(e=>alertBox(e.message,'error'));
+$('exportRecordsBtn').onclick=()=>{
+ const selectedDate=$('recordsDate').value||today(),search=$('recordsSearch').value.trim().toLocaleLowerCase('id-ID');
+ const rows=adminRecords.filter(r=>(r.person_name||'').toLocaleLowerCase('id-ID').includes(search));
+ const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const csv=[['Tanggal','Nama','Check In','Check Out','Terlambat (menit)','Bukti Selfie'] ,...rows.map(r=>[selectedDate,r.person_name,clock(r.check_in_at),clock(r.check_out_at),r.late_minutes||0,r.check_in_photo_path?'Tersimpan':'Tidak tersedia'])].map(row=>row.map(quote).join(';')).join('\r\n');
+ const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Rekap-Absensi-KPG003A-'+selectedDate+'.csv';a.click();URL.revokeObjectURL(url);
+};
+db.auth.onAuthStateChange(()=>{setTimeout(()=>refresh().catch(e=>alertBox(e.message,'error')),0)});
+refresh().catch(e=>alertBox(e.message||'Gagal memuat Attendance.','error'));
 </script>
-</body>
-</html>
+</body></html>
