@@ -1504,21 +1504,22 @@ async function savePayrollDraft(){
   if(error)throw error;
   const savedRun=await findPayrollRun(period);
   if(!savedRun){
-   status.textContent='Draft payroll berhasil disimpan, tetapi bonus belum diterapkan karena data periode tidak ditemukan.';
-   await refreshPayrollStatus();await loadPayrollHistory();
+   const bonusStatus='Draft payroll berhasil disimpan, tetapi bonus belum diterapkan karena data periode tidak ditemukan.';
+   await refreshPayrollStatus();status.textContent=bonusStatus;await loadPayrollHistory();
    alert('Draft payroll tersimpan. Bonus kehadiran belum diterapkan; periksa data periode payroll.');
    return;
   }
   const {data:bonusResult,error:bonusError}=await supabaseClient.rpc('apply_attendance_bonus_to_payroll',{p_run_id:savedRun.id});
   if(bonusError){
-   status.textContent='Draft payroll berhasil disimpan, tetapi bonus kehadiran belum diterapkan: '+bonusError.message;
-   await refreshPayrollStatus();await loadPayrollHistory();
+   const bonusStatus='Draft payroll berhasil disimpan, tetapi bonus kehadiran belum diterapkan: '+bonusError.message;
+   await refreshPayrollStatus();status.textContent=bonusStatus;await loadPayrollHistory();
    alert('Draft payroll tersimpan, tetapi bonus kehadiran gagal diterapkan: '+bonusError.message);
    return;
   }
   const bonusTotal=Array.isArray(bonusResult)?Number(bonusResult[0]?.total_bonus)||0:0;
-  status.textContent='Draft tersimpan untuk periode '+period.start+' sampai '+period.end+'. Bonus kehadiran terhitung '+money(bonusTotal)+'.';
+  const bonusStatus='Draft tersimpan untuk periode '+period.start+' sampai '+period.end+'. Bonus kehadiran terhitung '+money(bonusTotal)+'.';
   await refreshPayrollStatus();
+  status.textContent=bonusStatus;
   await loadPayrollHistory();
   alert('Draft payroll berhasil disimpan.');
  }catch(e){status.textContent='Draft gagal disimpan: '+e.message;alert('Draft gagal disimpan: '+e.message)}
