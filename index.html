@@ -224,6 +224,16 @@ tbody tr:hover{background:#f7fbfd}
 
 
 /* Dashboard daily trend */
+.top-sprinters{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #173d2410}
+.top-sprinters-list{display:grid;gap:13px;margin-top:14px}
+.top-sprinter-row{display:grid;grid-template-columns:30px minmax(100px,1fr) minmax(90px,2fr) auto;align-items:center;gap:12px}
+.top-sprinter-rank{width:28px;height:28px;border-radius:9px;background:#edf7f1;color:#168456;display:grid;place-items:center;font-size:11px;font-weight:800}
+.top-sprinter-name{font-size:11px;font-weight:700;color:#254238;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-sprinter-meta{font-size:9px;color:var(--muted);margin-top:3px}
+.top-sprinter-track{height:8px;background:#edf3ef;border-radius:99px;overflow:hidden}
+.top-sprinter-fill{height:100%;background:linear-gradient(90deg,#159b67,#54c58f);border-radius:99px}
+.top-sprinter-value{text-align:right;font-size:11px;font-weight:800;color:#183b30;white-space:nowrap}
+@media(max-width:560px){.top-sprinters{padding:14px}.top-sprinter-row{grid-template-columns:28px minmax(85px,1fr) minmax(55px,1fr) auto;gap:7px}.top-sprinter-value{font-size:10px}}
 .dashboard-trends{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
 .trend-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0;box-shadow:0 8px 24px #173d2410}
 .trend-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
@@ -266,7 +276,13 @@ tbody tr:hover{background:#f7fbfd}
 <div class="dashboard-trends">
   <div class="trend-card"><div class="trend-head"><h3>Tren Resi TTD</h3><span class="metric-icon icon-green">▦</span></div><div class="trend-sub">Jumlah resi yang diterima per hari</div><div id="trendTtd"><div class="trend-empty">Memuat grafik...</div></div></div>
   <div class="trend-card"><div class="trend-head"><h3>Tren Berat TTD</h3><span class="metric-icon icon-blue">⚖</span></div><div class="trend-sub">Total berat pengiriman per hari (kg)</div><div id="trendWeight"><div class="trend-empty">Memuat grafik...</div></div></div>
-</div></section>
+</div>
+<section class="top-sprinters">
+ <div class="trend-head"><h3>Top 5 Sprinter</h3><span class="metric-icon icon-green">★</span></div>
+ <div class="trend-sub">Peringkat berdasarkan jumlah resi TTD pada periode terpilih</div>
+ <div id="topSprinters"><div class="trend-empty">Memuat peringkat sprinter...</div></div>
+</section>
+</section>
 <section class="page" data-page="import"><div class="panel" id="import"><h2>Import data Excel</h2><div class="desc">Format ekspor waybill Delivery J&T Cargo (.xlsx, .xls, .csv).</div><div class="upload"><div class="ico">⇧</div><strong>Pilih file laporan delivery</strong><p>Data akan dipetakan berdasarkan nama kolom pada file sumber.</p><input type="file" id="file" accept=".xlsx,.xls,.csv"></div><div class="toolbar"><span class="muted" id="fileStatus">Belum ada file diimpor</span><button class="btn light" onclick="resetData()">Sinkronkan dari cloud</button></div><div class="note">File yang sama tidak dapat diimpor dua kali. File berbeda akan ditambahkan sebagai batch baru; pastikan periode/resinya tidak tumpang tindih. Data impor dan tarif fee disimpan di database cloud CargoFlow.</div></div></section><section class="page" data-page="fees"><div class="panel" id="fees"><h2>Pengaturan fee sprinter</h2><div class="desc">Kelola sprinter yang tersimpan di database cloud, termasuk gaji pokok dan fee per kg.</div><form id="sprinterForm" class="toolbar" style="justify-content:flex-start"><input id="newSprinterName" placeholder="Nama sprinter baru" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"><button class="btn" type="submit">Tambah sprinter</button></form><div class="tablewrap"><table><thead><tr><th>Nama sprinter</th><th class="r">Gaji pokok (Rp)</th><th class="r">Fee / kg (Rp)</th></tr></thead><tbody id="feeBody"><tr><td colspan="3" class="empty">Memuat data sprinter...</td></tr></tbody></table></div><div class="toolbar"><span class="muted">Gaji pokok dan fee disimpan ke Supabase.</span><button class="btn light" onclick="resetFees()">Reset fee ke Rp100</button></div></div></section>
 <section class="page" data-page="import"><section class="panel section" id="koliUpdate"><div class="toolbar"><div><h2>Perbarui Jumlah Koli dari CSV</h2><div class="desc" style="margin:4px 0 0">Cocokkan No. Resi dengan data yang sudah ada. Tidak membuat batch atau resi baru.</div></div></div><div class="toolbar" style="justify-content:flex-start"><input type="file" id="koliFile" accept=".csv,text/csv"><button class="btn" id="koliUpdateButton" type="button" disabled onclick="applyKoliUpdate()">Perbarui koli di database</button></div><div class="muted" id="koliStatus">Pilih CSV yang berisi kolom No. Resi dan Jumlah Koli.</div><div class="note">Untuk keamanan, sistem hanya mengisi package_count yang masih 0. Data koli yang sudah terisi tidak akan ditimpa. AWB yang tidak ditemukan atau muncul ganda akan dilewati.</div></section></section>
 <section class="page" data-page="freelancers"><section class="panel section" id="freelancers"><div class="toolbar"><div><h2>Master Data Freelance</h2><div class="desc" style="margin:4px 0 0">Daftarkan nama freelance dan atur tarif per koli. Tarif awal Rp8.000/koli.</div></div></div><form id="freelancerForm" class="toolbar" style="justify-content:flex-start;align-items:end"><label style="font-size:10px;color:var(--muted)">Nama freelance<br><input id="newFreelancerName" required placeholder="Nama sesuai kolom Sprinter delivery" style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><label style="font-size:10px;color:var(--muted)">Tarif per koli (Rp)<br><input id="newFreelancerFee" type="number" min="0" step="1" value="8000" required style="border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px"></label><button class="btn" type="submit">Tambah freelance</button></form><div class="tablewrap"><table><thead><tr><th>Nama freelance</th><th class="r">Tarif / koli (Rp)</th><th>Metode hitung</th></tr></thead><tbody id="freelancerBody"><tr><td colspan="3" class="empty">Memuat data freelance...</td></tr></tbody></table></div><div class="note">Pastikan nama ditulis sama persis dengan nama pada kolom "Sprinter delivery" di Excel. CargoFlow akan mencocokkan nama terdaftar untuk memisahkan payroll freelance dari payroll sprinter.</div></section></section>
@@ -529,6 +545,22 @@ for(let i=0;i<=4;i++){const y=top+plotH*i/4,val=max*(1-i/4);out+='<line x1="'+le
 rows.forEach((d,i)=>{const v=Math.max(0,Number(d[key])||0),bh=v/max*plotH,x=left+i*step+(step-bw)/2,y=top+plotH-bh,cx=left+i*step+step/2;out+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,bh).toFixed(1)+'" rx="5" fill="'+color+'"><title>'+d.label+': '+(key==='weight'?v.toLocaleString('id-ID',{maximumFractionDigits:2})+' kg':v+' resi')+'</title></rect>';if(rows.length<=20|| (v>0&&i%Math.ceil(rows.length/20)===0)){const valueText=key==='weight'?v.toLocaleString('id-ID',{maximumFractionDigits:1}):String(v);out+='<text x="'+cx.toFixed(1)+'" y="'+Math.max(13,y-7).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" fill="#425b50">'+valueText+'</text>'}if(rows.length<=14||i%Math.ceil(rows.length/14)===0)out+='<text x="'+cx.toFixed(1)+'" y="'+(H-12)+'" text-anchor="middle" font-size="9" fill="#82938a">'+d.short+'</text>'});
 out+='</svg>';return out;
 }
+function renderTopSprinters(records){
+ const grouped={};
+ records.forEach(r=>{
+  const name=String(r.sprinter||'Tanpa nama').trim();
+  if(!name||name==='Tanpa nama'||freelancerRows.some(f=>norm(f.name)===norm(name)))return;
+  if(!grouped[name])grouped[name]={name,count:0,weight:0};
+  grouped[name].count++;
+  grouped[name].weight+=Number(r.weight)||0;
+ });
+ const top=Object.values(grouped).sort((a,b)=>b.count-a.count||b.weight-a.weight||a.name.localeCompare(b.name)).slice(0,5);
+ const el=document.getElementById('topSprinters');
+ if(!el)return;
+ if(!top.length){el.innerHTML='<div class="trend-empty">Belum ada data sprinter pada periode ini.</div>';return}
+ const max=top[0].count||1;
+ el.innerHTML='<div class="top-sprinters-list">'+top.map((x,i)=>'<div class="top-sprinter-row"><div class="top-sprinter-rank">'+(i+1)+'</div><div><div class="top-sprinter-name">'+esc(x.name)+'</div><div class="top-sprinter-meta">'+kg(x.weight)+' kg</div></div><div class="top-sprinter-track"><div class="top-sprinter-fill" style="width:'+Math.max(4,x.count/max*100)+'%"></div></div><div class="top-sprinter-value">'+x.count.toLocaleString('id-ID')+' TTD</div></div>').join('')+'</div>';
+}
 function renderDashboardTrends(records){
 const grouped={};records.forEach(r=>{const day=r.ttdDate;if(!day)return;if(!grouped[day])grouped[day]={date:day,count:0,weight:0};grouped[day].count++;grouped[day].weight+=Number(r.weight)||0});
 const dates=Object.keys(grouped).sort();
@@ -551,6 +583,7 @@ document.getElementById('trendWeight').innerHTML=buildTrendSvg(rows,'weight','#3
 function render(){activeRecords=selected();let g=aggregate(),pg=aggregatePayroll(),totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0);
 document.getElementById('mTtd').textContent=activeRecords.length.toLocaleString('id-ID');document.getElementById('mWeight').textContent=kg(totalWeight)+' kg';document.getElementById('mCash').textContent=money(cod+dfod);document.getElementById('mPayroll').textContent=money(pay);
 renderDashboardTrends(activeRecords);
+ renderTopSprinters(activeRecords);
 document.getElementById('payBody').innerHTML=(pg.sprinters.length+pg.freelancers.length)?pg.sprinters.map(x=>`<tr><td>${esc(x.name)}</td><td>Sprinter</td><td class="r">${x.count}</td><td class="r">${kg(x.weight)}</td><td class="r">—</td><td class="r">${money(x.basicSalary)}</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">${money(x.loanDeduction)}</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`).concat(pg.freelancers.map(x=>`<tr><td>${esc(x.name)}</td><td>Freelance</td><td class="r">${x.count}</td><td class="r">—</td><td class="r">${x.koli}</td><td class="r">—</td><td class="r">${money(x.feeAmount)}</td><td class="r">${money(x.gross)}</td><td class="r">Rp0</td><td class="r">${money(x.penaltyDeduction)}</td><td class="r"><b>${money(x.total)}</b></td></tr>`)).join(''):'<tr><td colspan="10" class="empty">Tidak ada resi TTD pada periode ini.</td></tr>';
 if(document.getElementById('cashDate')&&!document.getElementById('cashDate').value) initCashDate();
 let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getElementById('feeBody').innerHTML=names.length?names.map(x=>`<tr><td>${esc(x)}</td><td class="r"><input class="feeinput" aria-label="Gaji pokok ${esc(x)}" type="number" min="0" step="1000" value="${Number(basicSalaries[x]??0)}" onchange="setBasicSalary('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td><td class="r"><input class="feeinput" aria-label="Fee per kg ${esc(x)}" type="number" min="0" step="1" value="${Number(fees[x]??100)}" onchange="setFee('${esc(x).replace(/'/g,'&#39;')}',this.value)"></td></tr>`).join(''):'<tr><td colspan="3" class="empty">Belum ada data sprinter.</td></tr>';renderRecords()}
