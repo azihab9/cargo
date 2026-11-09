@@ -1403,8 +1403,8 @@ document.getElementById('expenseForm').addEventListener('submit',async e=>{
  finally{button.disabled=false}
 });
 
-function printPayrollSlip(index){
- const x=arguments[1]?payrollHistorySlipRows[index]:payrollSlipRows[index];if(!x){alert('Data slip gaji tidak ditemukan.');return}
+function printPayrollSlip(index,fromHistory=false){
+ const x=fromHistory?payrollHistorySlipRows[index]:payrollSlipRows[index];if(!x){alert('Data slip gaji tidak ditemukan.');return}
  const fmt=v=>money(Number(v)||0),dateLabel=v=>v?new Date(v+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
  const isSp=x.type==='Sprinter';
  const detail=isSp
