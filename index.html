@@ -871,6 +871,28 @@ function toggleAttendanceDetail(encodedName){
  if(!row)return;row.style.display=row.style.display==='none'?'table-row':'none';
 }
 function attendanceEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function editAttendanceRecord(encodedName,date,currentStatus,currentLate){
+ if(!['admin','finance'].includes(currentUserRole)){alert('Koreksi absensi hanya dapat dilakukan oleh Admin atau Finance.');return}
+ const name=decodeURIComponent(encodedName);
+ const statusInput=prompt('Status absensi: hadir / izin / sakit / alpha',currentStatus);
+ if(statusInput===null)return;
+ const nextStatus=String(statusInput).trim().toLowerCase();
+ if(!['hadir','izin','sakit','alpha'].includes(nextStatus)){alert('Status tidak valid. Gunakan hadir, izin, sakit, atau alpha.');return}
+ const lateInput=prompt('Jumlah keterlambatan dalam menit (isi 0 jika tidak terlambat)',String(currentLate||0));
+ if(lateInput===null)return;
+ const nextLate=Number(lateInput);
+ if(!Number.isFinite(nextLate)||nextLate<0||!Number.isInteger(nextLate)){alert('Menit keterlambatan harus berupa angka bulat 0 atau lebih.');return}
+ if(nextStatus!=='hadir'&&nextLate!==0){alert('Menit keterlambatan hanya boleh diisi untuk status HADIR.');return}
+ if(!confirm('Simpan koreksi absensi '+name+' tanggal '+date+'?\\nStatus: '+currentStatus.toUpperCase()+' → '+nextStatus.toUpperCase()+'\\nTerlambat: '+currentLate+' → '+nextLate+' menit'))return;
+ try{
+  const {data,error}=await supabaseClient.from('attendance_records').update({attendance_status:nextStatus,late_minutes:nextLate}).eq('person_name',name).eq('attendance_date',date).select('person_name');
+  if(error)throw error;
+  if(!data||!data.length)throw new Error('Tidak ada baris yang diperbarui. Periksa izin akses dan kecocokan nama/tanggal.');
+  await loadAttendanceReport();
+  alert('Koreksi absensi berhasil disimpan.');
+ }catch(e){alert('Koreksi gagal disimpan: '+e.message)}
+}
+
 async function loadAttendanceReport(){
  const start=document.getElementById('attendanceFrom').value,end=document.getElementById('attendanceTo').value;
  const body=document.getElementById('attendanceReportBody'),status=document.getElementById('attendanceReportStatus');
@@ -901,7 +923,7 @@ async function loadAttendanceReport(){
   document.getElementById('attTotalSick').textContent=sum('sakit');
   document.getElementById('attTotalAlpha').textContent=sum('alpha');
   document.getElementById('attTotalLate').textContent=sum('late');
-  body.innerHTML=attendanceReportRows.length?attendanceReportRows.map(x=>{const key=norm(x.name),detailId='attendanceDetail_'+encodeURIComponent(key),encoded=encodeURIComponent(x.name).replace(/'/g,'%27');return '<tr><td><button class="smallbtn" type="button" onclick="toggleAttendanceDetail(\''+encoded+'\')">＋ '+attendanceEscape(x.name)+'</button></td><td>'+attendanceEscape(x.type)+'</td><td class="r">'+x.hadir+'</td><td class="r">'+x.late+'</td><td class="r">'+x.izin+'</td><td class="r">'+x.sakit+'</td><td class="r">'+x.alpha+'</td><td class="r">'+x.total+'</td></tr><tr id="'+detailId+'" style="display:none"><td colspan="8"><div class="desc" style="margin:8px 0">Detail absensi '+attendanceEscape(x.name)+'</div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Status</th><th class="r">Keterlambatan (menit)</th></tr></thead><tbody>'+((attendanceDetailData[key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(d=>'<tr><td>'+attendanceEscape(d.date)+'</td><td>'+attendanceEscape(d.status.toUpperCase())+'</td><td class="r">'+(d.late||0)+'</td></tr>').join('')||'<tr><td colspan="3" class="empty">Tidak ada detail.</td></tr>')+'</tbody></table></div></td></tr>'}).join(''):'<tr><td colspan="8" class="empty">Tidak ada data kehadiran pada periode ini.</td></tr>';
+  body.innerHTML=attendanceReportRows.length?attendanceReportRows.map(x=>{const key=norm(x.name),detailId='attendanceDetail_'+encodeURIComponent(key),encoded=encodeURIComponent(x.name).replace(/'/g,'%27');return '<tr><td><button class="smallbtn" type="button" onclick="toggleAttendanceDetail(\''+encoded+'\')">＋ '+attendanceEscape(x.name)+'</button></td><td>'+attendanceEscape(x.type)+'</td><td class="r">'+x.hadir+'</td><td class="r">'+x.late+'</td><td class="r">'+x.izin+'</td><td class="r">'+x.sakit+'</td><td class="r">'+x.alpha+'</td><td class="r">'+x.total+'</td></tr><tr id="'+detailId+'" style="display:none"><td colspan="8"><div class="desc" style="margin:8px 0">Detail absensi '+attendanceEscape(x.name)+'</div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Status</th><th class="r">Keterlambatan (menit)</th><th>Aksi</th></tr></thead><tbody>'+((attendanceDetailData[key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(d=>'<tr><td>'+attendanceEscape(d.date)+'</td><td>'+attendanceEscape(d.status.toUpperCase())+'</td><td class="r">'+(d.late||0)+'</td><td><button class="smallbtn" type="button" '+(['admin','finance'].includes(currentUserRole)?'':'disabled title="Hanya Admin/Finance"')+' onclick="editAttendanceRecord(\''+encodeURIComponent(x.name).replace(/'/g,'%27')+'\',\''+d.date+'\',\''+d.status+'\','+(d.late||0)+')">Koreksi</button></td></tr>').join('')||'<tr><td colspan="3" class="empty">Tidak ada detail.</td></tr>')+'</tbody></table></div></td></tr>'}).join(''):'<tr><td colspan="8" class="empty">Tidak ada data kehadiran pada periode ini.</td></tr>';
   status.textContent='Periode '+start+' sampai '+end+' • '+attendanceReportRows.length+' karyawan • '+(data||[]).length+' catatan absensi.';
  }catch(e){attendanceReportRows=[];status.textContent='Gagal memuat rekap: '+e.message;body.innerHTML='<tr><td colspan="8" class="empty">Gagal memuat data.</td></tr>'}
 }
