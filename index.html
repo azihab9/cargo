@@ -458,6 +458,126 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
   .auth-screen{min-height:100svh!important;padding:18px!important}
   .auth-card{width:100%!important;max-width:420px!important}
 }
+
+/* =========================================================
+   CARGOFLOW APPLE MINIMAL 2.0 — visual layer only
+   Backend, markup IDs, event handlers and Supabase logic untouched.
+   ========================================================= */
+:root{
+  --g:#16834b!important;--gd:#116b3d!important;--bg:#f5f5f7!important;
+  --ink:#1d1d1f!important;--muted:#86868b!important;--line:#e8e8ed!important;
+  --white:#fff!important;--nav:#fff!important;
+}
+html{background:#f5f5f7}
+body{background:#f5f5f7!important;color:#1d1d1f!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",sans-serif!important;letter-spacing:-.01em}
+.app{grid-template-columns:226px minmax(0,1fr)!important;background:#f5f5f7!important;min-height:100vh}
+.side{position:sticky!important;top:0!important;height:100vh!important;min-height:100vh!important;overflow-y:auto!important;background:rgba(255,255,255,.94)!important;color:#1d1d1f!important;border-right:1px solid #e8e8ed!important;padding:28px 14px 18px!important;gap:28px!important;backdrop-filter:blur(18px)}
+.brand{font-size:23px!important;font-weight:750!important;letter-spacing:-1.1px!important;color:#1d1d1f!important}
+.brand span{color:#16834b!important}
+.tag{color:#929297!important;font-size:9px!important;letter-spacing:1.15px!important}
+.nav{display:flex!important;flex-direction:column!important;gap:4px!important}
+.navlabel{color:#a0a0a5!important;font-size:9px!important;letter-spacing:1.4px!important;padding:0 12px!important;margin:0 0 7px!important}
+.nav a{display:flex!important;align-items:center!important;gap:8px!important;color:#55555b!important;background:transparent!important;border:1px solid transparent!important;border-radius:10px!important;padding:10px 12px!important;margin:0!important;font-size:12px!important;font-weight:550!important;transition:background .18s ease,color .18s ease!important;box-shadow:none!important}
+.nav a:hover{background:#f5f5f7!important;color:#1d1d1f!important;transform:none!important}
+.nav a.active{background:#eaf5ee!important;border-color:#dceee2!important;color:#147342!important;box-shadow:none!important;font-weight:700!important}
+.nav a.active:before{display:none!important}
+.foot{border-top:1px solid #ededf0!important;padding:14px 10px 0!important;color:#a0a0a5!important;font-size:9px!important;line-height:1.8!important}
+main{max-width:1540px!important;padding:32px 38px!important}
+.top{margin-bottom:25px!important;align-items:center!important}
+.eyebrow{color:#16834b!important;font-size:9px!important;letter-spacing:1.5px!important;font-weight:750!important}
+.top h1{font-size:27px!important;letter-spacing:-1px!important;font-weight:730!important;color:#1d1d1f!important;margin:5px 0!important}
+.muted{color:#929297!important;font-size:11px!important}
+.user{background:#fff!important;border:1px solid #e8e8ed!important;border-radius:999px!important;padding:10px 14px!important;color:#55555b!important}
+.logout{background:#fff!important;border:1px solid #e5e5ea!important;border-radius:999px!important;padding:9px 14px!important;color:#55555b!important}
+.card,.panel,.trend-card{background:#fff!important;border:1px solid #e9e9ee!important;border-radius:16px!important;box-shadow:0 2px 10px rgba(0,0,0,.025)!important;transition:box-shadow .2s ease,border-color .2s ease!important}
+.card:hover,.panel:hover,.trend-card:hover{box-shadow:0 5px 18px rgba(0,0,0,.045)!important;border-color:#dedee5!important;transform:none!important}
+.cards{gap:13px!important}
+.cards .card,.cards .card:nth-child(n){background:#fff!important;border:1px solid #e9e9ee!important;min-height:126px!important}
+.cards .card:after{display:none!important}
+.metric-label{color:#77777e!important;font-size:11px!important;font-weight:550!important}
+.metric{color:#1d1d1f!important;font-size:25px!important;font-weight:720!important;letter-spacing:-.8px!important}
+.cards .card:nth-child(n) .metric{color:#1d1d1f!important}
+.hint{color:#99999f!important;font-size:10px!important}
+.metric-icon{width:34px!important;height:34px!important;border-radius:10px!important;background:#f2f7f3!important;color:#16834b!important;font-size:14px!important}
+.icon-green,.icon-blue,.icon-orange,.icon-purple{background:#f0f6f2!important;color:#16834b!important}
+.dashboard-welcome{background:#fff!important;color:#1d1d1f!important;border:1px solid #e9e9ee!important;border-radius:17px!important;box-shadow:0 2px 10px rgba(0,0,0,.025)!important;padding:22px 25px!important}
+.dashboard-welcome:after{display:none!important}
+.welcome-kicker{color:#16834b!important;font-size:9px!important;letter-spacing:1.5px!important}
+.dashboard-welcome h2{color:#1d1d1f!important;font-size:21px!important;font-weight:700!important;letter-spacing:-.65px!important}
+.dashboard-welcome p{color:#85858b!important;font-size:11px!important}
+.welcome-mark{width:52px!important;height:52px!important;border-radius:15px!important;background:#f0f6f2!important;border:1px solid #e0eee5!important;color:#16834b!important;transform:none!important;font-size:16px!important}
+.welcome-mark span{color:#16834b!important}
+.dashboard-footnote{background:#f0f6f2!important;border:1px solid #e3eee6!important;border-radius:11px!important;color:#557362!important;padding:11px 14px!important;font-size:10px!important}
+.pulse-dot{background:#16834b!important;box-shadow:0 0 0 4px #16834b15!important}
+.panel h2,.trend-head h3{color:#29292e!important;font-size:14px!important;font-weight:680!important;letter-spacing:-.25px!important}
+.desc,.trend-sub{color:#929297!important;font-size:10px!important}
+.btn{background:#16834b!important;border:1px solid #16834b!important;border-radius:9px!important;padding:9px 14px!important;box-shadow:none!important;font-size:11px!important;font-weight:650!important}
+.btn:hover{background:#116b3d!important;transform:none!important}
+.btn.light{background:#f0f6f2!important;border-color:#e1eee5!important;color:#147342!important}
+.btn.dark{background:#303036!important;border-color:#303036!important;color:#fff!important}
+.smallbtn{background:#fff!important;border:1px solid #e5e5ea!important;border-radius:9px!important;color:#55555b!important;padding:8px 11px!important}
+.smallbtn:hover{background:#f7f7f9!important;border-color:#d8d8df!important;transform:none!important}
+.toolbar input,.toolbar select,.datefilters input,.auth-card input,.feeinput,
+input:not([type=file]):not([type=checkbox]):not([type=radio]),select,textarea{
+ background:#fff!important;border:1px solid #e3e3e8!important;border-radius:9px!important;color:#29292e!important;box-shadow:none!important
+}
+input:focus,select:focus,textarea:focus{border-color:#8ab99a!important;box-shadow:0 0 0 3px rgba(22,131,75,.09)!important;outline:none!important}
+.datefilters label{color:#77777e!important}
+.upload{background:#fafafa!important;border:1px dashed #c9c9d0!important;border-radius:13px!important;padding:21px!important}
+.upload .ico{color:#16834b!important}
+.upload strong{color:#29292e!important}
+.upload p{color:#929297!important}
+.tablewrap{border:1px solid #e9e9ee!important;border-radius:13px!important;box-shadow:none!important;background:#fff!important}
+.tablewrap table{font-size:11px!important}
+.tablewrap thead th,th{background:#fafafa!important;color:#85858b!important;border-bottom:1px solid #ededf0!important;font-size:9px!important;letter-spacing:.55px!important;font-weight:700!important;padding:12px 11px!important}
+.tablewrap tbody td,td{color:#4d4d53!important;border-bottom:1px solid #f0f0f2!important;padding:11px!important}
+.tablewrap tbody td:first-child{color:#29292e!important}
+.tablewrap tbody tr:hover{background:#fafcfb!important}
+.tablewrap tbody tr.cash-grand-total td{background:#edf6f0!important}
+.state-chip{border-radius:7px!important;font-size:9px!important;letter-spacing:.2px!important}
+.state-open{background:#fff6e8!important;color:#9a681c!important}
+.state-paid{background:#edf7f0!important;color:#167344!important}
+.state-draft{background:#f2f2f5!important;color:#707078!important}
+.state-final{background:#eef3fb!important;color:#416a9d!important}
+.pill{background:#edf7f0!important;color:#167344!important;border-radius:7px!important}
+.note{border:1px solid #f0e5c9!important;background:#fffaf0!important;border-radius:10px!important;color:#80662c!important}
+.auth-screen{background:#f5f5f7!important}
+.auth-card{max-width:400px!important;border:1px solid #e9e9ee!important;border-radius:19px!important;box-shadow:0 12px 42px rgba(0,0,0,.055)!important;padding:32px!important}
+.auth-logo{font-size:29px!important;letter-spacing:-1.2px!important;color:#1d1d1f!important}
+.auth-logo span{color:#16834b!important}
+.auth-card h1{font-size:22px!important;font-weight:720!important;letter-spacing:-.6px!important;color:#1d1d1f!important}
+.auth-card p,.auth-foot{color:#85858b!important}
+.auth-card label{color:#55555b!important}
+.auth-card .btn{border-radius:10px!important}
+.section{margin-top:14px!important}
+.page.active{animation:cargoPageEnter .25s ease both!important}
+.page.active>.panel,.page.active>section,.page.active>.cards,.page.active>.tablewrap,.page.active>h2,.page.active>.toolbar{animation:cargoItemEnter .22s ease both!important}
+@media(min-width:901px){
+ .app{grid-template-columns:226px minmax(0,1fr)!important}
+ .side{display:flex!important}
+ main{padding:32px clamp(24px,3vw,44px)!important}
+}
+@media(max-width:900px){
+ .app{display:block!important;grid-template-columns:minmax(0,1fr)!important}
+ .side{height:auto!important;min-height:0!important;padding:13px 14px 9px!important;gap:10px!important;border-right:0!important;border-bottom:1px solid #e8e8ed!important}
+ .nav{display:flex!important;flex-direction:row!important;overflow-x:auto!important;gap:5px!important}
+ .nav a{flex:0 0 auto!important;white-space:nowrap!important;padding:9px 11px!important}
+ main{padding:20px 17px 28px!important}
+}
+@media(max-width:560px){
+ main{padding:15px 12px 24px!important}
+ .top h1{font-size:22px!important}
+ .top{align-items:flex-start!important}
+ .cards,.dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .card,.panel,.trend-card{border-radius:13px!important;padding:14px!important}
+ .metric{font-size:20px!important}
+ .dashboard-welcome{padding:17px!important}
+ .dashboard-welcome h2{font-size:18px!important}
+ .user{display:none!important}
+ .toolbar{align-items:stretch!important}
+ .datefilters{gap:6px!important}
+}
+
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
