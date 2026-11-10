@@ -665,6 +665,12 @@ main{max-width:1680px;padding:30px 34px}
 .eligibility-status{background:var(--cf-achieved-bg)!important;color:var(--cf-achieved)!important}
 .eligibility-status.review{background:var(--cf-below-bg)!important;color:var(--cf-below)!important}
 .eligibility-status.neutral{background:var(--cf-neutral-bg)!important;color:var(--cf-neutral)!important}
+.sprinter-trend{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;font-size:10px;font-weight:700;white-space:nowrap}
+.sprinter-trend b{font-size:16px;line-height:1}
+.sprinter-trend.trend-up{background:#e8f7ee;color:#16834b}
+.sprinter-trend.trend-down{background:#fdecec;color:#c62828}
+.sprinter-trend.trend-neutral{background:#f0f2f5;color:#687386}
+
 .state-open{background:var(--cf-below-bg)!important;color:var(--cf-below)!important}
 .state-paid{background:var(--cf-achieved-bg)!important;color:var(--cf-achieved)!important}
 .state-draft{background:var(--cf-neutral-bg)!important;color:var(--cf-neutral)!important}
@@ -1391,6 +1397,18 @@ function renderSprinterEligibility(){
    const x=p.months[month];if(!x)return null;
    const days=Object.values(x.days),workDays=days.length;
    const avgDaily=workDays?days.reduce((sum,d)=>sum+(d.total?d.success/d.total*100:0),0)/workDays:0;
+   const previousDate=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-2,1);
+   const previousMonth=previousDate.getFullYear()+'-'+String(previousDate.getMonth()+1).padStart(2,'0');
+   const previous=p.months[previousMonth];
+   const previousDays=previous?Object.values(previous.days):[];
+   const previousAvg=previousDays.length?previousDays.reduce((sum,d)=>sum+(d.total?d.success/d.total*100:0),0)/previousDays.length:null;
+   let trend={symbol:'—',label:'Belum ada pembanding',className:'trend-neutral'};
+   if(workDays>=1&&previousAvg!==null&&previousDays.length>=1){
+    const delta=avgDaily-previousAvg;
+    if(delta>0.05)trend={symbol:'↑',label:'Naik '+delta.toFixed(1).replace('.',',')+' poin',className:'trend-up'};
+    else if(delta< -0.05)trend={symbol:'↓',label:'Turun '+Math.abs(delta).toFixed(1).replace('.',',')+' poin',className:'trend-down'};
+    else trend={symbol:'→',label:'Stabil',className:'trend-neutral'};
+   }
    let status='Data Belum Cukup',statusClass='neutral',score='—';
    if(workDays>=10){score=avgDaily.toFixed(1).replace('.',',')+'%';
     if(avgDaily>=95){status='Sangat Baik';statusClass=''}
@@ -1398,11 +1416,11 @@ function renderSprinterEligibility(){
     else if(avgDaily>=80){status='Perlu Pembinaan';statusClass='review'}
     else{status='Evaluasi Khusus';statusClass='review'}
    }
-   return {...x,name:p.name,workDays,avgDaily,status,statusClass,score};
+   return {...x,name:p.name,workDays,avgDaily,status,statusClass,score,trend};
   }).filter(Boolean).sort((a,b)=>b.avgDaily-a.avgDaily||b.total-a.total);
   if(!rows.length)return;
-  html+='<div class="trend-sub" style="margin:16px 0 8px;font-weight:800">'+monthLabel+'</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Hari Aktif</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>TTD Total</th><th>Skor Rata-rata Harian</th><th>Evaluasi</th></tr></thead><tbody>';
-  rows.forEach(x=>{const rate=x.total?x.success/x.total*100:0;const key=encodeURIComponent(x.name).replace(/'/g,'%27');html+='<tr><td><button type="button" class="sprinter-detail-toggle" onclick="toggleSprinterDetail(\''+key+'\')">'+esc(x.name)+' <span>⌄ Detail</span></button></td><td>'+x.workDays+'</td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td class="eligibility-rate '+(x.avgDaily<90?'eligibility-low':'')+'">'+x.score+'</td><td><span class="eligibility-status '+x.statusClass+'">'+x.status+'</span></td></tr><tr id="sprinterDetail_'+key+'" style="display:none"><td colspan="8"><div id="sprinterDetailContent_'+key+'"></div></td></tr>'});
+  html+='<div class="trend-sub" style="margin:16px 0 8px;font-weight:800">'+monthLabel+'</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Sprinter</th><th>Hari Aktif</th><th>Total Dibawa</th><th>Berhasil TTD</th><th>Belum TTD</th><th>TTD Total</th><th>Skor Rata-rata Harian</th><th>Kemajuan</th><th>Evaluasi</th></tr></thead><tbody>';
+  rows.forEach(x=>{const rate=x.total?x.success/x.total*100:0;const key=encodeURIComponent(x.name).replace(/'/g,'%27');html+='<tr><td><button type="button" class="sprinter-detail-toggle" onclick="toggleSprinterDetail(\''+key+'\')">'+esc(x.name)+' <span>⌄ Detail</span></button></td><td>'+x.workDays+'</td><td>'+x.total.toLocaleString('id-ID')+'</td><td>'+x.success.toLocaleString('id-ID')+'</td><td>'+x.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td><td class="eligibility-rate '+(x.avgDaily<90?'eligibility-low':'')+'">'+x.score+'</td><td><span class="sprinter-trend '+x.trend.className+'" title="'+x.trend.label+'"><b>'+x.trend.symbol+'</b> '+x.trend.label+'</span></td><td><span class="eligibility-status '+x.statusClass+'">'+x.status+'</span></td></tr><tr id="sprinterDetail_'+key+'" style="display:none"><td colspan="9"><div id="sprinterDetailContent_'+key+'"></div></td></tr>'});
   const daily={};rows.forEach(x=>Object.values(x.days).forEach(d=>{if(!daily[d.date])daily[d.date]={date:d.date,total:0,success:0,failed:0};daily[d.date].total+=d.total;daily[d.date].success+=d.success;daily[d.date].failed+=d.failed}));
   html+='</tbody></table></div><div class="trend-sub" style="margin:10px 0 6px">Ringkasan harian — '+monthLabel+'</div><div class="eligibility-table-wrap"><table class="eligibility-table"><thead><tr><th>Tanggal</th><th>Total Resi</th><th>Berhasil TTD</th><th>Belum TTD</th><th>Keberhasilan</th></tr></thead><tbody>';
   Object.values(daily).sort((a,b)=>b.date.localeCompare(a.date)).forEach(d=>{const rate=d.total?d.success/d.total*100:0;const date=new Date(d.date+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short'});html+='<tr><td>'+date+'</td><td>'+d.total.toLocaleString('id-ID')+'</td><td>'+d.success.toLocaleString('id-ID')+'</td><td>'+d.failed.toLocaleString('id-ID')+'</td><td class="eligibility-rate '+(rate<90?'eligibility-low':'')+'">'+rate.toFixed(1).replace('.',',')+'%</td></tr>'});
