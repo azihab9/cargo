@@ -934,13 +934,13 @@ async function loadAttendanceAudit(){
  if(!['admin','finance'].includes(currentUserRole)){body.innerHTML='<tr><td colspan="6" class="empty">Akses hanya untuk Admin/Finance.</td></tr>';return}
  body.innerHTML='<tr><td colspan="6" class="empty">Memuat riwayat...</td></tr>';
  try{
-  const {data,error}=await supabaseClient.from('attendance_audit_logs').select('person_name,attendance_date,old_status,new_status,old_late_minutes,new_late_minutes,changed_by,changed_at').order('changed_at',{ascending:false}).limit(100);
+  const {data,error}=await supabaseClient.from('attendance_audit_logs').select('person_name,attendance_date,old_status,new_status,old_late_minutes,new_late_minutes,changed_by_name,changed_by,changed_at').order('changed_at',{ascending:false}).limit(100);
   if(error)throw error;
   body.innerHTML=(data||[]).length?(data||[]).map(x=>{
    const when=x.changed_at?new Date(x.changed_at).toLocaleString('id-ID'):'-';
    const status=String(x.old_status||'-').toUpperCase()+' → '+String(x.new_status||'-').toUpperCase();
    const late=(Number(x.old_late_minutes)||0)+' → '+(Number(x.new_late_minutes)||0)+' menit';
-   return '<tr><td>'+attendanceEscape(when)+'</td><td>'+attendanceEscape(x.person_name)+'</td><td>'+attendanceEscape(String(x.attendance_date||'').slice(0,10))+'</td><td>'+attendanceEscape(status)+'</td><td>'+attendanceEscape(late)+'</td><td style="font-size:11px;word-break:break-all">'+attendanceEscape(x.changed_by||'Tidak diketahui')+'</td></tr>';
+   return '<tr><td>'+attendanceEscape(when)+'</td><td>'+attendanceEscape(x.person_name)+'</td><td>'+attendanceEscape(String(x.attendance_date||'').slice(0,10))+'</td><td>'+attendanceEscape(status)+'</td><td>'+attendanceEscape(late)+'</td><td style="font-size:11px;word-break:break-all">'+attendanceEscape(x.changed_by_name||x.changed_by||'Tidak diketahui')+'</td></tr>';
   }).join(''):'<tr><td colspan="6" class="empty">Belum ada riwayat koreksi.</td></tr>';
  }catch(e){
   body.innerHTML='<tr><td colspan="6" class="empty">Gagal memuat riwayat: '+attendanceEscape(e.message)+'</td></tr>';
