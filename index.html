@@ -647,7 +647,25 @@ main{max-width:1680px;padding:30px 34px}
 @media(max-width:900px){.app{grid-template-columns:1fr}.side{background:linear-gradient(100deg,#18263d,#1d4650);padding:13px 14px}.nav a.active{background:linear-gradient(110deg,#168b69,#347fc4)}main{padding:20px 16px}}
 @media(max-width:560px){main{padding:15px 11px}.top h1{font-size:22px}.dashboard-welcome{padding:19px;border-radius:18px}.cards .card{border-radius:16px}}
 
-</style><style id="cargoflow-premium-final">
+
+/* CargoFlow semantic achievement colors — shared across every menu */
+:root{
+  --cf-achieved:#16834b;
+  --cf-achieved-bg:#e8f7ee;
+  --cf-below:#c62828;
+  --cf-below-bg:#fdecec;
+  --cf-neutral:#687386;
+  --cf-neutral-bg:#f0f2f5;
+}
+.cf-achieved,.is-achieved{color:var(--cf-achieved)!important;background-color:var(--cf-achieved-bg)!important}
+.cf-below,.is-below,.is-not-achieved{color:var(--cf-below)!important;background-color:var(--cf-below-bg)!important}
+.cf-neutral,.is-neutral{color:var(--cf-neutral)!important;background-color:var(--cf-neutral-bg)!important}
+.eligibility-rate{color:var(--cf-achieved)!important}
+.eligibility-rate.eligibility-low{color:var(--cf-below)!important;background:var(--cf-below-bg)!important;border-radius:6px;padding:4px 7px}
+.eligibility-status{background:var(--cf-achieved-bg)!important;color:var(--cf-achieved)!important}
+.eligibility-status.review{background:var(--cf-below-bg)!important;color:var(--cf-below)!important}
+.eligibility-status.neutral{background:var(--cf-neutral-bg)!important;color:var(--cf-neutral)!important}
+\n</style><style id="cargoflow-premium-final">
 
 /* FINAL OVERRIDE — CargoFlow Premium Colorful Glass UI */
 :root{--g:#168b69;--gd:#11634f;--bg:#eef2f7;--ink:#1d2939;--muted:#758195;--line:#e5eaf1;--white:#fff;--nav:#17243b}
@@ -1370,7 +1388,7 @@ function renderSprinterEligibility(){
    const x=p.months[month];if(!x)return null;
    const days=Object.values(x.days),workDays=days.length;
    const avgDaily=workDays?days.reduce((sum,d)=>sum+(d.total?d.success/d.total*100:0),0)/workDays:0;
-   let status='Data Belum Cukup',statusClass='review',score='—';
+   let status='Data Belum Cukup',statusClass='neutral',score='—';
    if(workDays>=10){score=avgDaily.toFixed(1).replace('.',',')+'%';
     if(avgDaily>=95){status='Sangat Baik';statusClass=''}
     else if(avgDaily>=90){status='Baik';statusClass=''}
