@@ -601,7 +601,7 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
   </div>
   <div class="toolbar"><div class="muted" id="attendanceReportStatus">Pilih periode lalu tekan Tampilkan.</div><button class="btn light" onclick="exportAttendanceReport()">Export CSV</button></div>
   <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Jenis</th><th class="r">Hadir</th><th class="r">Terlambat</th><th class="r">Izin</th><th class="r">Sakit</th><th class="r">Alpha</th><th class="r">Total Hari</th></tr></thead><tbody id="attendanceReportBody"><tr><td colspan="8" class="empty">Belum ada data.</td></tr></tbody></table></div>
-  <div class="toolbar" style="margin-top:20px"><div><h3 style="margin:0">Riwayat Koreksi Absensi</h3><div class="desc" style="margin:4px 0 0">Catatan perubahan status dan keterlambatan absensi.</div></div><button class="btn light" type="button" onclick="loadAttendanceAudit()" \u0024{['admin','finance'].includes(currentUserRole)?'':'disabled title="Hanya Admin/Finance"'}>Muat Riwayat</button></div>
+  <div class="toolbar" style="margin-top:20px"><div><h3 style="margin:0">Riwayat Koreksi Absensi</h3><div class="desc" style="margin:4px 0 0">Catatan perubahan status dan keterlambatan absensi.</div></div><button class="btn light" type="button" onclick="loadAttendanceAudit()">Muat Riwayat</button></div>
   <div class="tablewrap"><table><thead><tr><th>Waktu</th><th>Nama</th><th>Tanggal Absensi</th><th>Status</th><th>Keterlambatan</th><th>ID Petugas</th></tr></thead><tbody id="attendanceAuditBody"><tr><td colspan="6" class="empty">Tekan Muat Riwayat untuk melihat koreksi.</td></tr></tbody></table></div>
  </section>
 </section>
