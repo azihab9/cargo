@@ -601,6 +601,8 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
   </div>
   <div class="toolbar"><div class="muted" id="attendanceReportStatus">Pilih periode lalu tekan Tampilkan.</div><button class="btn light" onclick="exportAttendanceReport()">Export CSV</button></div>
   <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Jenis</th><th class="r">Hadir</th><th class="r">Terlambat</th><th class="r">Izin</th><th class="r">Sakit</th><th class="r">Alpha</th><th class="r">Total Hari</th></tr></thead><tbody id="attendanceReportBody"><tr><td colspan="8" class="empty">Belum ada data.</td></tr></tbody></table></div>
+  <div class="toolbar" style="margin-top:20px"><div><h3 style="margin:0">Riwayat Koreksi Absensi</h3><div class="desc" style="margin:4px 0 0">Catatan perubahan status dan keterlambatan absensi.</div></div><button class="btn light" type="button" onclick="loadAttendanceAudit()" \u0024{['admin','finance'].includes(currentUserRole)?'':'disabled title="Hanya Admin/Finance"'}>Muat Riwayat</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Waktu</th><th>Nama</th><th>Tanggal Absensi</th><th>Status</th><th>Keterlambatan</th><th>ID Petugas</th></tr></thead><tbody id="attendanceAuditBody"><tr><td colspan="6" class="empty">Tekan Muat Riwayat untuk melihat koreksi.</td></tr></tbody></table></div>
  </section>
 </section>
 </main></div>
@@ -926,6 +928,23 @@ async function loadAttendanceReport(){
   body.innerHTML=attendanceReportRows.length?attendanceReportRows.map(x=>{const key=norm(x.name),detailId='attendanceDetail_'+encodeURIComponent(key),encoded=encodeURIComponent(x.name).replace(/'/g,'%27');return '<tr><td><button class="smallbtn" type="button" onclick="toggleAttendanceDetail(\''+encoded+'\')">＋ '+attendanceEscape(x.name)+'</button></td><td>'+attendanceEscape(x.type)+'</td><td class="r">'+x.hadir+'</td><td class="r">'+x.late+'</td><td class="r">'+x.izin+'</td><td class="r">'+x.sakit+'</td><td class="r">'+x.alpha+'</td><td class="r">'+x.total+'</td></tr><tr id="'+detailId+'" style="display:none"><td colspan="8"><div class="desc" style="margin:8px 0">Detail absensi '+attendanceEscape(x.name)+'</div><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Status</th><th class="r">Keterlambatan (menit)</th><th>Aksi</th></tr></thead><tbody>'+((attendanceDetailData[key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).map(d=>'<tr><td>'+attendanceEscape(d.date)+'</td><td>'+attendanceEscape(d.status.toUpperCase())+'</td><td class="r">'+(d.late||0)+'</td><td><button class="smallbtn" type="button" '+(['admin','finance'].includes(currentUserRole)?'':'disabled title="Hanya Admin/Finance"')+' onclick="editAttendanceRecord(\''+encodeURIComponent(x.name).replace(/'/g,'%27')+'\',\''+d.date+'\',\''+d.status+'\','+(d.late||0)+')">Koreksi</button></td></tr>').join('')||'<tr><td colspan="3" class="empty">Tidak ada detail.</td></tr>')+'</tbody></table></div></td></tr>'}).join(''):'<tr><td colspan="8" class="empty">Tidak ada data kehadiran pada periode ini.</td></tr>';
   status.textContent='Periode '+start+' sampai '+end+' • '+attendanceReportRows.length+' karyawan • '+(data||[]).length+' catatan absensi.';
  }catch(e){attendanceReportRows=[];status.textContent='Gagal memuat rekap: '+e.message;body.innerHTML='<tr><td colspan="8" class="empty">Gagal memuat data.</td></tr>'}
+}
+async function loadAttendanceAudit(){
+ const body=document.getElementById('attendanceAuditBody');
+ if(!['admin','finance'].includes(currentUserRole)){body.innerHTML='<tr><td colspan="6" class="empty">Akses hanya untuk Admin/Finance.</td></tr>';return}
+ body.innerHTML='<tr><td colspan="6" class="empty">Memuat riwayat...</td></tr>';
+ try{
+  const {data,error}=await supabaseClient.from('attendance_audit_logs').select('person_name,attendance_date,old_status,new_status,old_late_minutes,new_late_minutes,changed_by,changed_at').order('changed_at',{ascending:false}).limit(100);
+  if(error)throw error;
+  body.innerHTML=(data||[]).length?(data||[]).map(x=>{
+   const when=x.changed_at?new Date(x.changed_at).toLocaleString('id-ID'):'-';
+   const status=String(x.old_status||'-').toUpperCase()+' → '+String(x.new_status||'-').toUpperCase();
+   const late=(Number(x.old_late_minutes)||0)+' → '+(Number(x.new_late_minutes)||0)+' menit';
+   return '<tr><td>'+attendanceEscape(when)+'</td><td>'+attendanceEscape(x.person_name)+'</td><td>'+attendanceEscape(String(x.attendance_date||'').slice(0,10))+'</td><td>'+attendanceEscape(status)+'</td><td>'+attendanceEscape(late)+'</td><td style="font-size:11px;word-break:break-all">'+attendanceEscape(x.changed_by||'Tidak diketahui')+'</td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty">Belum ada riwayat koreksi.</td></tr>';
+ }catch(e){
+  body.innerHTML='<tr><td colspan="6" class="empty">Gagal memuat riwayat: '+attendanceEscape(e.message)+'</td></tr>';
+ }
 }
 function exportAttendanceReport(){
  if(!attendanceReportRows.length){alert('Belum ada data rekap untuk diekspor.');return}
