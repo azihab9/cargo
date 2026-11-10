@@ -589,7 +589,7 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
 </main></div>
 <script>
 const STORAGE='cargoflow_v3_records',FEEKEY='cargoflow_v3_fees';
-let allRecords=[],deliveryAttempts=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],loanInstallmentRows=[],penaltyRows=[],freelancerRows=[],freelancerIds={},officeStaffRows=[],pendingKoliUpdates=[],expenseRows=[],cashSettlementRows=[],cashLocks=[],savedPayrollByName={},currentUserRole='operations';
+let allRecords=[],deliveryAttempts=[],fees={},activeRecords=[],sprinterIds={},basicSalaries={},loanRows=[],loanInstallmentRows=[],penaltyRows=[],freelancerRows=[],freelancerIds={},officeStaffRows=[],pendingKoliUpdates=[],expenseRows=[],cashSettlementRows=[],cashLocks=[],savedPayrollByName={},attendanceBonusByName={},attendanceBonusPeriod='',attendanceBonusError='',payrollRunStatus='',currentUserRole='operations';
 const aliases={awb:['no. resi','no resi','awb','waybill'],sprinter:['sprinter delivery','sprinter','nama sprinter','kurir'],label:['label ttd','status ttd','status delivery'],weight:['perhitungan biaya berat','berat','berat kg','weight'],koli:['jumlah koli','jumlah paket','total koli'],cod:['jumlah pembayaran cod','cod','nominal cod'],dfod:['biaya dfod','dfod'],ttddate:['waktu tanda terima','tanggal ttd','waktu ttd'],delivery:['waktu delivery']};
 function norm(x){return String(x??'').toLowerCase().trim().replace(/[^a-z0-9]/g,'')}
 function col(headers,type){let h=headers.find(x=>aliases[type].some(a=>norm(x)===norm(a)));if(h)return h;return headers.find(x=>aliases[type].some(a=>norm(x).includes(norm(a))))||null}
@@ -791,11 +791,13 @@ function restorePayrollPeriod(){try{const p=JSON.parse(localStorage.getItem('car
 async function refreshPayrollStatus(){
  const el=document.getElementById('payrollStatus'),save=document.getElementById('savePayrollButton'),fin=document.getElementById('finalizePayrollButton'),paid=document.getElementById('paidPayrollButton');
  const start=document.getElementById('fromDate').value,end=document.getElementById('toDate').value;
- savedPayrollByName={};save.disabled=false;fin.disabled=true;paid.disabled=true;
- if(!start||!end){el.textContent='Pilih tanggal Dari dan Sampai untuk melihat status payroll.';render();return}
+ savedPayrollByName={};payrollRunStatus='';save.disabled=false;fin.disabled=true;paid.disabled=true;
+ if(!start||!end){attendanceBonusByName={};attendanceBonusPeriod='';el.textContent='Pilih tanggal Dari dan Sampai untuk melihat status payroll.';render();return}
  try{
+  await loadAttendanceBonuses(start,end);
   const run=await findPayrollRun({start,end});
-  if(!run){el.textContent='Belum ada payroll tersimpan untuk periode '+start+' sampai '+end+'.';save.disabled=false;render();return}
+  if(!run){el.textContent='Belum ada payroll tersimpan untuk periode '+start+' sampai '+end+'. Bonus kehadiran dihitung dari absensi.';save.disabled=false;render();return}
+  payrollRunStatus=run.status;
   const {data:items,error:itemError}=await supabaseClient.from('payroll_items').select('person_name,attendance_bonus,gross_amount,loan_deduction,penalty_deduction,net_amount').eq('payroll_run_id',run.id);
   if(itemError)throw itemError;
   (items||[]).forEach(x=>{savedPayrollByName[norm(x.person_name)]={attendanceBonus:Number(x.attendance_bonus)||0,gross:Number(x.gross_amount)||0,loanDeduction:Number(x.loan_deduction)||0,penaltyDeduction:Number(x.penalty_deduction)||0,total:Number(x.net_amount)||0}});
@@ -803,12 +805,57 @@ async function refreshPayrollStatus(){
   else if(run.status==='locked'){el.textContent='Status: FINAL • '+start+' sampai '+end+'. Payroll terkunci dan potongan kasbon sudah dicatat.';save.disabled=true;fin.disabled=true;paid.disabled=false}
   else if(run.status==='paid'){el.textContent='Status: SUDAH DIBAYAR • '+start+' sampai '+end+'.';save.disabled=true;fin.disabled=true;paid.disabled=true}
   render();
- }catch(e){el.textContent='Gagal membaca status payroll: '+e.message}
+ }catch(e){attendanceBonusError=e.message;el.textContent='Gagal membaca status payroll/bonus kehadiran: '+e.message;save.disabled=true;fin.disabled=true;render()}
 }
 function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}persistPayrollPeriod();render();refreshPayrollStatus()}
 function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';localStorage.removeItem('cargoflow_payroll_period');render();refreshPayrollStatus()}
 function selected(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;return allRecords.filter(r=>isTtd(r)&&r.ttdDate&&(!from||r.ttdDate>=from)&&(!to||r.ttdDate<=to))}
 function aggregate(){let g={};selected().forEach(r=>{let k=r.sprinter;if(!g[k])g[k]={name:k,count:0,weight:0,cod:0,dfod:0};g[k].count++;g[k].weight+=r.weight;g[k].cod+=r.cod;g[k].dfod+=r.dfod});return Object.values(g).sort((a,b)=>a.name.localeCompare(b.name))}
+async function loadAttendanceBonuses(start,end){
+ attendanceBonusByName={};attendanceBonusPeriod='';attendanceBonusError='';
+ const [{data:records,error:recordsError},{data:rules,error:rulesError}]=await Promise.all([
+  supabaseClient.from('attendance_records').select('person_name,person_type,attendance_date,attendance_status,late_minutes').gte('attendance_date',start).lte('attendance_date',end),
+  supabaseClient.from('attendance_bonus_rules').select('bonus_name,amount,person_types,min_present_days,max_late_days,max_izin_days,max_sakit_days,max_alpha_days').eq('active',true)
+ ]);
+ if(recordsError)throw new Error('Gagal membaca absensi: '+recordsError.message);
+ if(rulesError)throw new Error('Gagal membaca aturan bonus: '+rulesError.message);
+ const people={};
+ (records||[]).forEach(r=>{
+  const key=norm(r.person_name);if(!key)return;
+  if(!people[key])people[key]={name:r.person_name,type:String(r.person_type||'').toLowerCase(),hadir:new Set(),late:new Set(),izin:new Set(),sakit:new Set(),alpha:new Set()};
+  const p=people[key],day=String(r.attendance_date||'');if(!day)return;
+  const status=String(r.attendance_status||'').toLowerCase();
+  if(status==='hadir'){p.hadir.add(day);if(Number(r.late_minutes)>0)p.late.add(day)}
+  if(status==='izin')p.izin.add(day);
+  if(status==='sakit')p.sakit.add(day);
+  if(status==='alpha')p.alpha.add(day);
+ });
+ Object.values(people).forEach(p=>{
+  let amount=0,matched=[];
+  (rules||[]).forEach(rule=>{
+   const types=Array.isArray(rule.person_types)?rule.person_types.map(x=>String(x).toLowerCase()):[];
+   if(!types.includes(p.type))return;
+   if(p.hadir.size<Number(rule.min_present_days||0))return;
+   if(p.late.size>Number(rule.max_late_days??0))return;
+   if(p.izin.size>Number(rule.max_izin_days??0))return;
+   if(p.sakit.size>Number(rule.max_sakit_days??0))return;
+   if(p.alpha.size>Number(rule.max_alpha_days??0))return;
+   amount+=Number(rule.amount)||0;matched.push(rule.bonus_name||'Bonus kehadiran');
+  });
+  if(amount>0)attendanceBonusByName[norm(p.name)]={amount,detail:matched.join(', ')};
+ });
+ attendanceBonusPeriod=start+'|'+end;
+}
+function applyAttendanceBonuses(pg){
+ [...pg.sprinters,...pg.officeStaff].forEach(x=>{
+  const bonus=attendanceBonusByName[norm(x.name)]?.amount||0;
+  x.attendanceBonus=bonus;
+  x.gross=(Number(x.gross)||0)+bonus;
+  x.total=Math.max(0,x.gross-(Number(x.loanDeduction)||0)-(Number(x.penaltyDeduction)||0));
+ });
+ pg.freelancers.forEach(x=>{x.attendanceBonus=0});
+ return pg;
+}
 function aggregatePayroll(){
  const sp={},fr={},office={};
  officeStaffRows.forEach(x=>{office[x.id]={id:x.id,name:x.name,staffRole:x.staff_role,count:0,weight:0,fee:Number(x.fee_per_kg)||100,basicSalary:Number(x.basic_salary)||0,feeAmount:0,gross:0,loanDeduction:0,penaltyDeduction:0,total:0}});
@@ -969,7 +1016,7 @@ document.getElementById('trendWeight').innerHTML=buildTrendSvg(rows,'weight','#3
 }
 
 let payrollSlipRows=[],payrollHistorySlipRows=[];
-function render(){activeRecords=selected();let g=aggregate(),pg=aggregatePayroll();[...pg.sprinters,...pg.freelancers,...pg.officeStaff].forEach(x=>{const saved=savedPayrollByName[norm(x.name)];if(saved){x.attendanceBonus=saved.attendanceBonus;x.gross=saved.gross;x.loanDeduction=saved.loanDeduction;x.penaltyDeduction=saved.penaltyDeduction;x.total=saved.total}});let totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0)+pg.officeStaff.reduce((a,x)=>a+x.total,0);
+function render(){activeRecords=selected();let g=aggregate(),pg=applyAttendanceBonuses(aggregatePayroll());if(payrollRunStatus==='locked'||payrollRunStatus==='paid'){[...pg.sprinters,...pg.freelancers,...pg.officeStaff].forEach(x=>{const saved=savedPayrollByName[norm(x.name)];if(saved){x.attendanceBonus=saved.attendanceBonus;x.gross=saved.gross;x.loanDeduction=saved.loanDeduction;x.penaltyDeduction=saved.penaltyDeduction;x.total=saved.total}})}let totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0)+pg.officeStaff.reduce((a,x)=>a+x.total,0);
 const periodStart=document.getElementById('fromDate').value,periodEnd=document.getElementById('toDate').value;payrollSlipRows=[...pg.sprinters.map(x=>({...x,type:'Sprinter',periodStart,periodEnd})),...pg.freelancers.map(x=>({...x,type:'Freelance',periodStart,periodEnd})),...pg.officeStaff.map(x=>({...x,type:x.staffRole==='warehouse'?'Staff Gudang':'Admin',periodStart,periodEnd}))];
 document.getElementById('mTtd').textContent=activeRecords.length.toLocaleString('id-ID');document.getElementById('mWeight').textContent=kg(totalWeight)+' kg';document.getElementById('mCash').textContent=money(cod+dfod);document.getElementById('mPayroll').textContent=money(pay);
 renderDashboardTrends(activeRecords);
@@ -1045,16 +1092,16 @@ function payrollPeriod(){
  return {start,end};
 }
 function payrollPayload(){
- const pg=aggregatePayroll(),items=[];
+ const pg=applyAttendanceBonuses(aggregatePayroll()),items=[];
  pg.sprinters.forEach(x=>items.push({
   sprinter_id:sprinterIds[x.name]||null,freelancer_id:null,person_name:x.name,pay_type:'sprinter',
   basic_salary:x.basicSalary,ttd_weight_kg:x.weight,ttd_count:x.count,fee_per_kg:x.fee,package_count:x.bonusTtdCount,fee_per_package:1000,
-  gross_amount:x.gross,loan_deduction:x.loanDeduction,penalty_deduction:x.penaltyDeduction,net_amount:x.total
+  attendance_bonus:x.attendanceBonus||0,gross_amount:x.gross,loan_deduction:x.loanDeduction,penalty_deduction:x.penaltyDeduction,net_amount:x.total
  }));
- pg.officeStaff.forEach(x=>items.push({sprinter_id:null,freelancer_id:null,person_name:x.name,pay_type:x.staffRole,basic_salary:x.basicSalary,ttd_weight_kg:x.weight,ttd_count:x.count,fee_per_kg:x.fee,package_count:0,fee_per_package:0,gross_amount:x.gross,loan_deduction:0,penalty_deduction:0,net_amount:x.total}));
+ pg.officeStaff.forEach(x=>items.push({sprinter_id:null,freelancer_id:null,person_name:x.name,pay_type:x.staffRole,basic_salary:x.basicSalary,ttd_weight_kg:x.weight,ttd_count:x.count,fee_per_kg:x.fee,package_count:0,fee_per_package:0,attendance_bonus:x.attendanceBonus||0,gross_amount:x.gross,loan_deduction:0,penalty_deduction:0,net_amount:x.total}));
  pg.freelancers.forEach(x=>items.push({
   sprinter_id:null,freelancer_id:freelancerIds[norm(x.name)]||null,person_name:x.name,pay_type:'freelance',
-  basic_salary:0,ttd_weight_kg:0,ttd_count:x.count,fee_per_kg:0,package_count:x.method==='koli'?x.units:0,fee_per_package:x.fee,
+  attendance_bonus:0,basic_salary:0,ttd_weight_kg:0,ttd_count:x.count,fee_per_kg:0,package_count:x.method==='koli'?x.units:0,fee_per_package:x.fee,
   gross_amount:x.gross,loan_deduction:0,penalty_deduction:x.penaltyDeduction,net_amount:x.total
  }));
  return items;
@@ -1504,7 +1551,9 @@ async function savePayrollDraft(){
  const button=document.getElementById('savePayrollButton'),status=document.getElementById('payrollStatus');
  button.disabled=true;status.textContent='Menyimpan draft payroll...';
  try{
-  const period=payrollPeriod(),items=payrollPayload();
+  const period=payrollPeriod();
+  await loadAttendanceBonuses(period.start,period.end);
+  const items=payrollPayload();
   persistPayrollPeriod();
   if(!items.length)throw Error('Belum ada data payroll untuk disimpan.');
   const {data,error}=await supabaseClient.rpc('save_payroll_draft',{
