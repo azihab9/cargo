@@ -475,7 +475,7 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
 </div>
 <div class="app" id="cargoApp" style="display:none">
 <aside class="side"><div><div class="brand">Cargo<span>Flow</span></div><div class="tag">AREA RANTAU • OPERATION & PAYROLL</div></div>
-<nav class="nav"><div class="navlabel">Workspace</div><a class="active" href="#dashboard" data-page="dashboard">▦ &nbsp; Dashboard</a><a href="#import" data-page="import">⇧ &nbsp; Upload Excel</a><a href="#payroll" data-page="payroll">▤ &nbsp; Payroll Sprinter</a><a href="#payrollHistory" data-page="payrollHistory">▤ &nbsp; Riwayat Payroll</a><a href="#finance" data-page="finance">▤ &nbsp; Laporan Keuangan</a><a href="#cash" data-page="cash">◎ &nbsp; COD & DFOD</a><a href="#fees" data-page="fees">⚙ &nbsp; Pengaturan Fee</a><a href="#officeStaff" data-page="officeStaff">▤ &nbsp; Staff Kantor</a><a href="#freelancers" data-page="freelancers">▤ &nbsp; Data Freelance</a><a href="#loans" data-page="loans">▤ &nbsp; Pinjaman Karyawan</a><a href="#penalties" data-page="penalties">▤ &nbsp; Denda Karyawan</a><a href="#records" data-page="records">▣ &nbsp; Data Operasional</a></nav>
+<nav class="nav"><div class="navlabel">Workspace</div><a class="active" href="#dashboard" data-page="dashboard">▦ &nbsp; Dashboard</a><a href="#import" data-page="import">⇧ &nbsp; Upload Excel</a><a href="#payroll" data-page="payroll">▤ &nbsp; Payroll Sprinter</a><a href="#payrollHistory" data-page="payrollHistory">▤ &nbsp; Riwayat Payroll</a><a href="#finance" data-page="finance">▤ &nbsp; Laporan Keuangan</a><a href="#cash" data-page="cash">◎ &nbsp; COD & DFOD</a><a href="#fees" data-page="fees">⚙ &nbsp; Pengaturan Fee</a><a href="#officeStaff" data-page="officeStaff">▤ &nbsp; Staff Kantor</a><a href="#freelancers" data-page="freelancers">▤ &nbsp; Data Freelance</a><a href="#loans" data-page="loans">▤ &nbsp; Pinjaman Karyawan</a><a href="#penalties" data-page="penalties">▤ &nbsp; Denda Karyawan</a><a href="#records" data-page="records">▣ &nbsp; Data Operasional</a><a href="#attendance" data-page="attendance">▤ &nbsp; Rekap Kehadiran</a></nav>
 <div class="foot">CARGOFLOW • PROTOTYPE V3<br>Login, data impor, dan fee sprinter terhubung ke Supabase • Cache lokal untuk akses cepat</div></aside>
 <main id="dashboard">
 <div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="main-user"><div class="user" id="userBadge">● &nbsp; Memuat akun...</div><button class="logout" id="logoutButton" type="button">Keluar</button></div></div>
@@ -586,6 +586,23 @@ main{max-width:1600px;padding:34px 38px;margin:0 auto}
  <h2 style="margin:20px 0 10px">Riwayat Pembayaran</h2>
  <div class="tablewrap"><table><thead><tr><th>Waktu input</th><th>Sprinter</th><th>No. Resi</th><th>Metode</th><th>Tujuan awal</th><th class="r">Nominal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="cashPaymentBody"><tr><td colspan="8" class="empty">Belum ada pembayaran.</td></tr></tbody></table></div><h2 style="margin:20px 0 10px">Riwayat Penguncian Setoran</h2><div class="tablewrap"><table><thead><tr><th>Tanggal</th><th>Sprinter</th><th>Waktu dikunci</th><th>ID akun pengunci</th></tr></thead><tbody id="cashLockHistoryBody"><tr><td colspan="4" class="empty">Memuat riwayat...</td></tr></tbody></table></div>
 </div></section><section class="page" data-page="records"><div class="panel" id="records"><h2>Data operasional TTD</h2><div class="desc">Hanya resi TTD yang masuk ke perhitungan payroll dan uang COD/DFOD.</div><div class="toolbar"><input id="search" placeholder="Cari sprinter / nomor resi..." oninput="renderRecords()"><span class="muted" id="rowCount">0 baris</span></div><div class="tablewrap"><table><thead><tr><th>No. Resi</th><th>Sprinter</th><th class="r">Berat kg</th><th class="r">COD</th><th class="r">DFOD</th><th>Tanggal TTD</th></tr></thead><tbody id="recordBody"><tr><td colspan="6" class="empty">Belum ada data.</td></tr></tbody></table></div></div></section>
+
+<section class="page" data-page="attendance">
+ <section class="panel section">
+  <div class="toolbar"><div><h2>Rekap Kehadiran Karyawan</h2><div class="desc" style="margin:4px 0 0">Ringkasan absensi berdasarkan periode yang dipilih.</div></div>
+   <div class="datefilters"><label>Dari <input type="date" id="attendanceFrom"></label><label>Sampai <input type="date" id="attendanceTo"></label><button class="btn" onclick="loadAttendanceReport()">Tampilkan</button></div>
+  </div>
+  <div class="cards" style="margin:14px 0">
+   <div class="card"><div class="muted">Total Hadir</div><div class="value" id="attTotalPresent">0</div></div>
+   <div class="card"><div class="muted">Total Izin</div><div class="value" id="attTotalLeave">0</div></div>
+   <div class="card"><div class="muted">Total Sakit</div><div class="value" id="attTotalSick">0</div></div>
+   <div class="card"><div class="muted">Total Alpha</div><div class="value" id="attTotalAlpha">0</div></div>
+   <div class="card"><div class="muted">Hari Terlambat</div><div class="value" id="attTotalLate">0</div></div>
+  </div>
+  <div class="toolbar"><div class="muted" id="attendanceReportStatus">Pilih periode lalu tekan Tampilkan.</div><button class="btn light" onclick="exportAttendanceReport()">Export CSV</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Nama</th><th>Jenis</th><th class="r">Hadir</th><th class="r">Terlambat</th><th class="r">Izin</th><th class="r">Sakit</th><th class="r">Alpha</th><th class="r">Total Hari</th></tr></thead><tbody id="attendanceReportBody"><tr><td colspan="8" class="empty">Belum ada data.</td></tr></tbody></table></div>
+ </section>
+</section>
 </main></div>
 <script>
 const STORAGE='cargoflow_v3_records',FEEKEY='cargoflow_v3_fees';
@@ -846,6 +863,47 @@ async function markPayrollAdjustmentPaid(id){
   await loadPayrollAdjustments();
   alert('Koreksi payroll berhasil ditandai sudah dibayar.');
  }catch(e){alert('Gagal memproses pembayaran koreksi: '+e.message)}
+}
+
+let attendanceReportRows=[];
+function attendanceEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function loadAttendanceReport(){
+ const start=document.getElementById('attendanceFrom').value,end=document.getElementById('attendanceTo').value;
+ const body=document.getElementById('attendanceReportBody'),status=document.getElementById('attendanceReportStatus');
+ if(!start||!end){status.textContent='Tanggal awal dan akhir wajib dipilih.';return}
+ if(start>end){status.textContent='Tanggal awal tidak boleh melewati tanggal akhir.';return}
+ status.textContent='Memuat data kehadiran...';body.innerHTML='<tr><td colspan="8" class="empty">Memuat...</td></tr>';
+ try{
+  const {data,error}=await supabaseClient.from('attendance_records').select('person_name,person_type,attendance_date,attendance_status,late_minutes').gte('attendance_date',start).lte('attendance_date',end).order('person_name').order('attendance_date');
+  if(error)throw error;
+  const people={};
+  (data||[]).forEach(r=>{
+   const key=norm(r.person_name);if(!key)return;
+   if(!people[key])people[key]={name:r.person_name,type:r.person_type||'-',hadir:new Set(),late:new Set(),izin:new Set(),sakit:new Set(),alpha:new Set(),days:new Set()};
+   const p=people[key],day=String(r.attendance_date||'').slice(0,10),st=String(r.attendance_status||'').toLowerCase();
+   if(!day)return;p.days.add(day);
+   if(st==='hadir'){p.hadir.add(day);if(Number(r.late_minutes)>0)p.late.add(day)}
+   else if(st==='izin')p.izin.add(day);
+   else if(st==='sakit')p.sakit.add(day);
+   else if(st==='alpha')p.alpha.add(day);
+  });
+  attendanceReportRows=Object.values(people).sort((a,b)=>a.name.localeCompare(b.name)).map(p=>({name:p.name,type:p.type,hadir:p.hadir.size,late:p.late.size,izin:p.izin.size,sakit:p.sakit.size,alpha:p.alpha.size,total:p.days.size}));
+  const sum=k=>attendanceReportRows.reduce((a,x)=>a+x[k],0);
+  document.getElementById('attTotalPresent').textContent=sum('hadir');
+  document.getElementById('attTotalLeave').textContent=sum('izin');
+  document.getElementById('attTotalSick').textContent=sum('sakit');
+  document.getElementById('attTotalAlpha').textContent=sum('alpha');
+  document.getElementById('attTotalLate').textContent=sum('late');
+  body.innerHTML=attendanceReportRows.length?attendanceReportRows.map(x=>'<tr><td>'+attendanceEscape(x.name)+'</td><td>'+attendanceEscape(x.type)+'</td><td class="r">'+x.hadir+'</td><td class="r">'+x.late+'</td><td class="r">'+x.izin+'</td><td class="r">'+x.sakit+'</td><td class="r">'+x.alpha+'</td><td class="r">'+x.total+'</td></tr>').join(''):'<tr><td colspan="8" class="empty">Tidak ada data kehadiran pada periode ini.</td></tr>';
+  status.textContent='Periode '+start+' sampai '+end+' • '+attendanceReportRows.length+' karyawan • '+(data||[]).length+' catatan absensi.';
+ }catch(e){attendanceReportRows=[];status.textContent='Gagal memuat rekap: '+e.message;body.innerHTML='<tr><td colspan="8" class="empty">Gagal memuat data.</td></tr>'}
+}
+function exportAttendanceReport(){
+ if(!attendanceReportRows.length){alert('Belum ada data rekap untuk diekspor.');return}
+ const rows=[['Nama','Jenis','Hadir','Terlambat','Izin','Sakit','Alpha','Total Hari'],...attendanceReportRows.map(x=>[x.name,x.type,x.hadir,x.late,x.izin,x.sakit,x.alpha,x.total])];
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+ const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='rekap-kehadiran.csv';a.click();URL.revokeObjectURL(url);
 }
 function applyFilter(){let from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value;if(from&&to&&from>to){alert('Tanggal awal tidak boleh melewati tanggal akhir.');return}persistPayrollPeriod();render();refreshPayrollStatus()}
 function clearFilter(){document.getElementById('fromDate').value='';document.getElementById('toDate').value='';localStorage.removeItem('cargoflow_payroll_period');render();refreshPayrollStatus()}
@@ -1694,7 +1752,7 @@ document.getElementById('logoutButton').addEventListener('click',async()=>{
 function showCargoPage(page){
   document.querySelectorAll('.page[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
   document.querySelectorAll('.nav a[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
-  const titles={dashboard:'Dashboard Operasional',import:'Upload Excel',payroll:'Payroll Sprinter',payrollHistory:'Riwayat Payroll',finance:'Laporan Keuangan',cash:'COD & DFOD',fees:'Pengaturan Fee',freelancers:'Data Freelance',loans:'Pinjaman Karyawan',penalties:'Denda Karyawan',records:'Data Operasional'};
+  const titles={dashboard:'Dashboard Operasional',import:'Upload Excel',payroll:'Payroll Sprinter',payrollHistory:'Riwayat Payroll',finance:'Laporan Keuangan',cash:'COD & DFOD',fees:'Pengaturan Fee',freelancers:'Data Freelance',loans:'Pinjaman Karyawan',penalties:'Denda Karyawan',records:'Data Operasional',attendance:'Rekap Kehadiran'};
   const heading=document.querySelector('.top h1');
   if(heading)heading.textContent=titles[page]||'CargoFlow';
   window.scrollTo(0,0);
