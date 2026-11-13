@@ -2051,12 +2051,16 @@ let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getE
 
 
 async function editSprinter(oldName){
- const next=prompt('Masukkan nama sprinter yang benar:',oldName);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}if(name===oldName)return;
- if(Object.keys(sprinterIds).some(x=>norm(x)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||officeStaffRows.some(x=>norm(x.name)===norm(name))){alert('Nama tersebut sudah terdaftar.');return}
- const id=sprinterIds[oldName];if(!id){alert('ID sprinter tidak ditemukan. Muat ulang halaman.');return}
- const {error}=await supabaseClient.from('sprinters').update({name}).eq('id',id);
- if(error){alert('Gagal mengubah nama: '+error.message);return}
- await loadCloudData();alert('Nama sprinter berhasil diubah.');
+ const row=activeSprinterRows.find(x=>x.name===oldName);if(!row)return;
+ const next=prompt('Nama sprinter:',oldName);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}
+ if(name!==oldName&&(Object.keys(sprinterIds).some(x=>norm(x)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||officeStaffRows.some(x=>norm(x.name)===norm(name)))){alert('Nama tersebut sudah terdaftar.');return}
+ const start=prompt('Tanggal mulai bekerja (YYYY-MM-DD). Kosongkan jika tidak ingin membatasi masa kerja:',row.employment_start_date||'');if(start===null)return;
+ const end=prompt('Tanggal berhenti bekerja (YYYY-MM-DD). Kosongkan jika masih aktif:',row.employment_end_date||'');if(end===null)return;
+ if(start&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(start)||end&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(end)){alert('Format tanggal harus YYYY-MM-DD.');return}
+ if(start&&end&&end<start){alert('Tanggal berhenti tidak boleh sebelum tanggal mulai.');return}
+ const {error}=await supabaseClient.from('sprinters').update({name,employment_start_date:start||null,employment_end_date:end||null}).eq('id',row.id);
+ if(error){alert('Gagal memperbarui data sprinter: '+error.message);return}
+ await loadCloudData();alert('Data sprinter dan masa kerja berhasil diperbarui.');
 }
 async function deleteSprinter(name){
  if(!confirm('Nonaktifkan "'+name+'" dari master sprinter? Riwayat TTD tidak dihapus.'))return;
@@ -2067,11 +2071,15 @@ async function deleteSprinter(name){
 }
 async function editOfficeStaff(id){
  const row=officeStaffRows.find(x=>x.id===id);if(!row)return;
- const next=prompt('Masukkan nama staff kantor yang benar:',row.name);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}if(name===row.name)return;
- if(officeStaffRows.some(x=>x.id!==id&&norm(x.name)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||Object.keys(sprinterIds).some(x=>norm(x)===norm(name))){alert('Nama tersebut sudah terdaftar.');return}
- const {error}=await supabaseClient.from('office_staff').update({name}).eq('id',id);
- if(error){alert('Gagal mengubah nama staff: '+error.message);return}
- await loadCloudData();alert('Nama staff berhasil diubah.');
+ const next=prompt('Nama staff kantor:',row.name);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}
+ if(name!==row.name&&(officeStaffRows.some(x=>x.id!==id&&norm(x.name)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||Object.keys(sprinterIds).some(x=>norm(x)===norm(name)))){alert('Nama tersebut sudah terdaftar.');return}
+ const start=prompt('Tanggal mulai bekerja (YYYY-MM-DD). Kosongkan jika tidak ingin membatasi masa kerja:',row.employment_start_date||'');if(start===null)return;
+ const end=prompt('Tanggal berhenti bekerja (YYYY-MM-DD). Kosongkan jika masih aktif:',row.employment_end_date||'');if(end===null)return;
+ if(start&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(start)||end&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(end)){alert('Format tanggal harus YYYY-MM-DD.');return}
+ if(start&&end&&end<start){alert('Tanggal berhenti tidak boleh sebelum tanggal mulai.');return}
+ const {error}=await supabaseClient.from('office_staff').update({name,employment_start_date:start||null,employment_end_date:end||null}).eq('id',id);
+ if(error){alert('Gagal memperbarui data staff: '+error.message);return}
+ await loadCloudData();alert('Data staff dan masa kerja berhasil diperbarui.');
 }
 async function deleteOfficeStaff(id){
  const row=officeStaffRows.find(x=>x.id===id);if(!row)return;
