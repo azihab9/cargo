@@ -981,6 +981,13 @@ input:focus,select:focus,textarea:focus{outline:none!important;border-color:#69B
 .auth-logo{color:#123B2A!important}.auth-logo span{color:#21865A!important}
 a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style><style id="cargoflow-truck-accent">
+.dashboard-welcome{isolation:isolate}
+.dashboard-welcome>div:first-child{position:relative;z-index:2}
+.dashboard-welcome .welcome-truck{position:absolute;z-index:1;right:105px;bottom:-18px;width:min(38%,390px);opacity:.48;pointer-events:none;filter:drop-shadow(0 9px 12px rgba(5,35,22,.12))}
+.dashboard-welcome .welcome-truck svg{display:block;width:100%;height:auto}
+.dashboard-welcome .welcome-mark{z-index:2}
+@media(max-width:650px){.dashboard-welcome .welcome-truck{right:55px;width:48%;opacity:.28}.dashboard-welcome{min-height:130px}}
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
@@ -1035,7 +1042,7 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
  </details>
 </div></div>
 <section class="page active" data-page="dashboard"><div class="panel" style="margin-bottom:14px"><div class="toolbar" style="margin:0"><div><h2>Filter periode laporan</h2><div class="desc" style="margin:4px 0 0">Tanggal berdasarkan Waktu tanda terima (TTD)</div></div><div class="datefilters"><label>Dari <input type="date" id="fromDate"></label><label>Sampai <input type="date" id="toDate"></label><button class="btn light" onclick="applyFilter()">Terapkan</button><button class="smallbtn" onclick="clearFilter()">Semua tanggal</button></div></div></div>
-<div class="dashboard-welcome"><div><div class="welcome-kicker">CARGOFLOW • AREA RANTAU</div><h2>Ringkasan Operasional</h2><p>Pantau performa pengiriman dan payroll dalam satu tampilan.</p></div><div class="welcome-mark">CF<span>↗</span></div></div>
+<div class="dashboard-welcome"><div><div class="welcome-kicker">CARGOFLOW • AREA RANTAU</div><h2>Ringkasan Operasional</h2><p>Pantau performa pengiriman dan payroll dalam satu tampilan.</p></div><div class="welcome-truck" aria-hidden="true"><svg viewBox="0 0 360 150" xmlns="http://www.w3.org/2000/svg"><path d="M18 112h324" fill="none" stroke="#D8F8E5" stroke-width="3" stroke-linecap="round" opacity=".45"/><path d="M28 48h190a9 9 0 0 1 9 9v53H28z" fill="#D8F8E5" opacity=".20" stroke="#E9FFF1" stroke-width="3"/><path d="M227 73h51l42 38v-1h-93z" fill="#D8F8E5" opacity=".32" stroke="#E9FFF1" stroke-width="3" stroke-linejoin="round"/><path d="M245 80h28l25 25h-53z" fill="#123B2A" opacity=".30"/><path d="M18 110h324" stroke="#E9FFF1" stroke-width="5" stroke-linecap="round" opacity=".8"/><circle cx="82" cy="116" r="17" fill="#123B2A" stroke="#D8F8E5" stroke-width="5"/><circle cx="82" cy="116" r="6" fill="#D8F8E5"/><circle cx="281" cy="116" r="17" fill="#123B2A" stroke="#D8F8E5" stroke-width="5"/><circle cx="281" cy="116" r="6" fill="#D8F8E5"/><path d="M49 66h145M49 80h110" stroke="#E9FFF1" stroke-width="4" stroke-linecap="round" opacity=".45"/></svg></div><div class="welcome-mark">CF<span>↗</span></div></div>
 <section class="cards dashboard-metrics">
 <div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-green">▣</span><span class="metric-label">Total TTD</span></div><div class="metric" id="mTtd">0</div><div class="hint">Resi penerimaan normal</div></div>
 <div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-blue">⚖</span><span class="metric-label">Total berat TTD</span></div><div class="metric" id="mWeight">0 kg</div><div class="hint">Dasar penghitungan payroll</div></div>
