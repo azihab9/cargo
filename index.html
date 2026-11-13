@@ -1863,6 +1863,8 @@ function prorataCalendarSalary(monthlySalary,periodStart,periodEnd,employmentSta
 }
 function payrollProrataFor(person){
  const start=document.getElementById('fromDate')?.value,end=document.getElementById('toDate')?.value,monthlySalary=Number(person.basic_salary??person.basicSalary)||0;
+ // Legacy employees with no service dates retain the existing full monthly salary behavior.
+ if(!person.employment_start_date&&!person.employment_end_date)return {amount:monthlySalary,days:0,calendarDays:0,monthlySalary};
  if(!start||!end||start>end)return {amount:monthlySalary,days:0,calendarDays:0,monthlySalary};
  return {...prorataCalendarSalary(monthlySalary,start,end,person.employment_start_date||null,person.employment_end_date||null),monthlySalary};
 }
