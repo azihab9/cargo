@@ -1015,32 +1015,23 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 .cf-quick-grid span{display:flex;flex-direction:column;gap:3px;min-width:0}.cf-quick-grid b{font-size:11px;white-space:nowrap}.cf-quick-grid small{font-size:9px;color:#819087;white-space:nowrap}.cf-quick-grid em{margin-left:auto;color:#21865a;font-style:normal}
 @media(max-width:850px){.cf-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#dashboard .dashboard-welcome .welcome-truck{right:48px;width:48%;opacity:.45}}
 @media(max-width:560px){#dashboard>.top h1{font-size:22px}#dashboard .dashboard-welcome{min-height:142px;padding:21px 19px}#dashboard .dashboard-welcome h2{font-size:20px}#dashboard .dashboard-welcome .welcome-truck{right:15px;width:58%;opacity:.25}.cf-quick-access{padding:15px}.cf-quick-grid{gap:8px}.cf-quick-grid a{padding:10px;gap:8px}.cf-quick-grid i{width:32px;height:32px;flex-basis:32px}.cf-quick-grid b{font-size:10px}.cf-quick-grid small{font-size:8px}}
-</style><style id="cargoflow-dashboard-kpi-layout">
-@media(min-width:701px){
- #dashboard .dashboard-metrics{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:auto auto!important;gap:10px!important}
- #dashboard .dashboard-metrics .metric-card{min-height:88px!important;padding:12px 16px!important;display:grid!important;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center!important;column-gap:12px!important}
- #dashboard .dashboard-metrics .metric-card:nth-child(1){grid-column:1;grid-row:1}
- #dashboard .dashboard-metrics .metric-card:nth-child(2){grid-column:1;grid-row:2}
- #dashboard .dashboard-metrics .metric-card:nth-child(3){grid-column:2;grid-row:1}
- #dashboard .dashboard-metrics .metric-card:nth-child(4){grid-column:2;grid-row:2}
- #dashboard .dashboard-metrics .metric-top{grid-column:1;grid-row:1;display:flex;align-items:center;gap:9px}
- #dashboard .dashboard-metrics .metric{grid-column:2;grid-row:1 / span 2;font-size:22px!important;text-align:right;margin:0!important}
- #dashboard .dashboard-metrics .hint{grid-column:1;grid-row:2;margin:2px 0 0 40px!important}
- #dashboard .dashboard-metrics .metric-card:after{width:90px;height:45px}
- #dashboard .dashboard-filter{margin:0 0 10px!important;padding:10px 14px!important;border-radius:15px!important}
- #dashboard .dashboard-filter .toolbar{align-items:center!important;gap:12px!important}
- #dashboard .dashboard-filter h2{font-size:12px!important;margin:0!important}
- #dashboard .dashboard-filter .desc{font-size:9px!important;margin-top:2px!important}
- #dashboard .dashboard-filter .datefilters{gap:7px!important;align-items:center!important}
- #dashboard .dashboard-filter .datefilters label{font-size:9px!important;display:flex;align-items:center;gap:5px}
- #dashboard .dashboard-filter input[type=date]{height:32px!important;padding:5px 8px!important;font-size:10px!important;width:130px!important}
- #dashboard .dashboard-filter button{height:32px!important;padding:0 10px!important;font-size:10px!important}
-}
+</style><style id="cargoflow-dashboard-kpi-layout-v2">
+#dashboard .dashboard-metrics{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;align-items:stretch!important;margin:0 0 12px!important}
+#dashboard .metric-stack{display:grid;grid-template-rows:repeat(2,minmax(88px,auto));gap:10px;min-width:0}
+#dashboard .dashboard-metrics .metric-card{min-width:0;min-height:88px!important;padding:12px 15px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;align-items:center!important;column-gap:10px!important;border-radius:16px!important;overflow:hidden}
+#dashboard .dashboard-metrics .metric-top{grid-column:1;grid-row:1;display:flex;align-items:center;gap:8px;min-width:0}
+#dashboard .dashboard-metrics .metric-icon{width:32px;height:32px;flex:0 0 32px;border-radius:10px;font-size:14px}
+#dashboard .dashboard-metrics .metric-label{font-size:11px;white-space:normal}
+#dashboard .dashboard-metrics .metric{grid-column:2;grid-row:1 / span 2;font-size:clamp(16px,1.6vw,23px)!important;line-height:1.15!important;text-align:right!important;margin:0!important;overflow-wrap:anywhere}
+#dashboard .dashboard-metrics .hint{grid-column:1;grid-row:2;margin:3px 0 0 40px!important;font-size:9px}
+#dashboard .dashboard-metrics .kpi-ttd{background:linear-gradient(140deg,#e0f7eb,#f8fffb)!important;border-color:#c9eedb!important}
+#dashboard .dashboard-metrics .kpi-weight{background:linear-gradient(140deg,#e1efff,#f8fbff)!important;border-color:#cfe1fb!important}
+#dashboard .dashboard-metrics .kpi-cash{background:linear-gradient(140deg,#fff0df,#fffaf3)!important;border-color:#f5dfc4!important}
+#dashboard .dashboard-metrics .kpi-payroll{background:linear-gradient(140deg,#eee8ff,#fbf9ff)!important;border-color:#ded4fb!important}
 @media(max-width:700px){
- #dashboard .dashboard-metrics{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
- #dashboard .dashboard-metrics .metric-card{min-height:100px!important}
- #dashboard .dashboard-filter{padding:12px!important;margin-bottom:10px!important}
- #dashboard .dashboard-filter .toolbar{gap:8px!important}
+ #dashboard .dashboard-metrics{grid-template-columns:1fr!important;gap:9px!important}
+ #dashboard .metric-stack{grid-template-rows:repeat(2,minmax(82px,auto));gap:9px}
+ #dashboard .dashboard-metrics .metric-card{min-height:82px!important}
 }
 </style></head>
 <body>
@@ -1100,10 +1091,14 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 <div class="dashboard-welcome"><div><div class="welcome-kicker">CARGOFLOW • AREA RANTAU</div><h2>Ringkasan Operasional</h2><p>Pantau performa pengiriman dan payroll dalam satu tampilan.</p></div><div class="welcome-truck" aria-hidden="true"><svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg"><path d="M0 143Q105 76 205 120T420 103T620 92V210H0Z" fill="#BDEBD2" opacity=".16"/><path d="M0 160Q125 111 238 148T470 128T620 117" fill="none" stroke="#D9F9E7" stroke-width="3" opacity=".35"/><path d="M22 130h575" stroke="#D9F9E7" stroke-width="4" opacity=".55"/><path d="M65 92V46h112v84H65z" fill="#E4FFF0" opacity=".15" stroke="#E4FFF0" stroke-width="3"/><path d="M85 68h72M85 84h72M85 100h72" stroke="#E4FFF0" stroke-width="3" opacity=".3"/><path d="M315 61h164a12 12 0 0 1 12 12v57H315z" fill="#E4FFF0" opacity=".27" stroke="#E4FFF0" stroke-width="3"/><path d="M491 88h50l47 42H491z" fill="#E4FFF0" opacity=".34" stroke="#E4FFF0" stroke-width="3"/><path d="M508 96h27l34 29h-61z" fill="#123B2A" opacity=".35"/><path d="M294 129h303" stroke="#E4FFF0" stroke-width="6" opacity=".8"/><circle cx="369" cy="137" r="23" fill="#123B2A" stroke="#D9F9E7" stroke-width="6"/><circle cx="369" cy="137" r="8" fill="#D9F9E7"/><circle cx="542" cy="137" r="23" fill="#123B2A" stroke="#D9F9E7" stroke-width="6"/><circle cx="542" cy="137" r="8" fill="#D9F9E7"/><path d="M340 80h111M340 96h76" stroke="#E4FFF0" stroke-width="4" opacity=".42"/></svg></div>><div class="welcome-mark">CF<span>↗</span></div></div>
 <div class="panel dashboard-filter" style="margin-bottom:14px"><div class="toolbar" style="margin:0"><div><h2>Filter periode laporan</h2><div class="desc" style="margin:4px 0 0">Tanggal berdasarkan Waktu tanda terima (TTD)</div></div><div class="datefilters"><label>Dari <input type="date" id="fromDate"></label><label>Sampai <input type="date" id="toDate"></label><button class="btn light" onclick="applyFilter()">Terapkan</button><button class="smallbtn" onclick="clearFilter()">Semua tanggal</button></div></div></div>
 <section class="cards dashboard-metrics">
-<div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-green">▣</span><span class="metric-label">Total TTD</span></div><div class="metric" id="mTtd">0</div><div class="hint">Resi penerimaan normal</div></div>
-<div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-blue">⚖</span><span class="metric-label">Total berat TTD</span></div><div class="metric" id="mWeight">0 kg</div><div class="hint">Dasar penghitungan payroll</div></div>
-<div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-orange">↗</span><span class="metric-label">COD + DFOD (TTD)</span></div><div class="metric" id="mCash">Rp0</div><div class="hint">Hanya resi yang sudah TTD</div></div>
-<div class="card metric-card"><div class="metric-top"><span class="metric-icon icon-purple">Rp</span><span class="metric-label">Estimasi payroll</span></div><div class="metric" id="mPayroll">Rp0</div><div class="hint">Fee sprinter + tarif freelance</div></div>
+ <div class="metric-stack">
+  <div class="card metric-card kpi-ttd"><div class="metric-top"><span class="metric-icon icon-green">▣</span><span class="metric-label">Total TTD</span></div><div class="metric" id="mTtd">0</div><div class="hint">Resi penerimaan normal</div></div>
+  <div class="card metric-card kpi-weight"><div class="metric-top"><span class="metric-icon icon-blue">⚖</span><span class="metric-label">Total berat TTD</span></div><div class="metric" id="mWeight">0 kg</div><div class="hint">Dasar penghitungan payroll</div></div>
+ </div>
+ <div class="metric-stack">
+  <div class="card metric-card kpi-cash"><div class="metric-top"><span class="metric-icon icon-orange">↗</span><span class="metric-label">COD + DFOD (TTD)</span></div><div class="metric" id="mCash">Rp0</div><div class="hint">Hanya resi yang sudah TTD</div></div>
+  <div class="card metric-card kpi-payroll"><div class="metric-top"><span class="metric-icon icon-purple">Rp</span><span class="metric-label">Estimasi payroll</span></div><div class="metric" id="mPayroll">Rp0</div><div class="hint">Fee sprinter + tarif freelance</div></div>
+ </div>
 </section>
 <div class="dashboard-footnote"><span class="pulse-dot"></span> Data ringkasan mengikuti periode TTD yang dipilih di filter laporan.</div><section class="cf-quick-access" aria-label="Akses cepat"><div class="cf-quick-heading"><div><span>WORKSPACE SHORTCUTS</span><h3>Akses Cepat</h3></div><small>Pintasan menu operasional</small></div><div class="cf-quick-grid"><a href="#import"><i>⇧</i><span><b>Upload Excel</b><small>Impor data delivery</small></span><em>↗</em></a><a href="#payroll"><i>▤</i><span><b>Payroll Sprinter</b><small>Kelola perhitungan</small></span><em>↗</em></a><a href="#finance"><i>◈</i><span><b>Laporan Keuangan</b><small>Pantau arus keuangan</small></span><em>↗</em></a><a href="#cash"><i>◎</i><span><b>COD &amp; DFOD</b><small>Kelola kas setoran</small></span><em>↗</em></a></div></section>
 <div class="dashboard-trends">
