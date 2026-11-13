@@ -1146,6 +1146,107 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 }
 </style>
 
+
+<style id="cargoflow-mobile-layout-repair">
+/* Mobile-first layout repair: prevent desktop grids and sidebar rules from colliding */
+@media screen and (max-width:700px){
+ html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+ .app{display:block!important;width:100%!important;min-width:0!important;overflow-x:hidden!important}
+ .app>.side,.side{
+  position:sticky!important;top:0!important;z-index:100!important;
+  display:flex!important;flex-direction:column!important;gap:9px!important;
+  width:100%!important;height:auto!important;min-height:0!important;
+  padding:10px 12px 9px!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.14)!important;
+  border-radius:0!important;
+ }
+ .app>.side>div:first-child{display:flex;align-items:baseline;gap:8px;min-width:0}
+ .app>.side .brand{font-size:20px!important;line-height:1.1}
+ .app>.side .tag{font-size:8px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .app>.side>.nav,.side>.nav{
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  width:100%!important;max-width:100%!important;gap:7px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;padding:1px 1px 5px!important;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+ }
+ .app>.side>.nav::-webkit-scrollbar{display:none}
+ .app>.side .nav-group{display:contents!important}
+ .app>.side .navlabel,.app>.side .foot{display:none!important}
+ .app>.side .nav a{
+  display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-height:35px!important;
+  margin:0!important;padding:7px 10px!important;gap:7px!important;border-radius:10px!important;
+  white-space:nowrap!important;font-size:10px!important;scroll-snap-align:start;
+ }
+ .app>.side .nav a .nav-ico{width:21px!important;height:21px!important;flex-basis:21px!important}
+ .app>main{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:14px 12px 28px!important;overflow-x:hidden!important}
+ .app .page,.app .page>section{width:100%!important;min-width:0!important;max-width:100%!important}
+ #dashboard>.top{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;padding:2px 1px 13px!important;margin-bottom:13px!important}
+ #dashboard>.top h1{font-size:21px!important;line-height:1.2!important}
+ #dashboard>.top .main-user{width:100%!important;display:flex!important;justify-content:flex-start!important}
+ #dashboard .account-summary{max-width:100%!important;width:auto!important}
+ #dashboard .dashboard-welcome{
+  min-height:132px!important;padding:20px 17px!important;border-radius:17px!important;
+  overflow:hidden!important;margin-bottom:12px!important;
+ }
+ #dashboard .dashboard-welcome h2{font-size:19px!important;line-height:1.25!important;max-width:75%}
+ #dashboard .dashboard-welcome p{font-size:11px!important;line-height:1.5!important;max-width:72%}
+ #dashboard .dashboard-welcome .welcome-truck{right:-4px!important;bottom:-7px!important;width:62%!important;opacity:.24!important}
+ #dashboard .dashboard-welcome .welcome-mark{width:40px!important;height:40px!important;right:12px!important;top:12px!important}
+ #dashboard .dashboard-two-rows{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;
+  gap:9px!important;width:100%!important;margin:0 0 10px!important;
+ }
+ #dashboard .dashboard-two-rows>.metric-card{
+  grid-column:1!important;grid-row:auto!important;display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;
+  min-width:0!important;min-height:86px!important;padding:12px 13px!important;border-radius:14px!important;
+  column-gap:8px!important;row-gap:3px!important;
+ }
+ #dashboard .dashboard-two-rows .metric-top{grid-column:1!important;grid-row:1!important;min-width:0!important;gap:8px!important}
+ #dashboard .dashboard-two-rows .metric-icon{width:30px!important;height:30px!important;flex-basis:30px!important}
+ #dashboard .dashboard-two-rows .metric-label{font-size:11px!important;line-height:1.25!important}
+ #dashboard .dashboard-two-rows .metric{
+  grid-column:2!important;grid-row:1 / span 2!important;
+  max-width:48vw!important;font-size:clamp(15px,4.3vw,19px)!important;
+  line-height:1.15!important;white-space:normal!important;overflow-wrap:anywhere!important;
+ }
+ #dashboard .dashboard-two-rows .hint{grid-column:1!important;grid-row:2!important;margin:0 0 0 38px!important;font-size:9px!important}
+ #dashboard .summary-filter,#dashboard .summary-quick{
+  grid-column:1!important;grid-row:auto!important;width:100%!important;min-width:0!important;
+  margin:0!important;padding:13px!important;border-radius:14px!important;
+ }
+ #dashboard .summary-filter .datefilters{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;width:100%!important}
+ #dashboard .summary-filter .datefilters label{min-width:0!important}
+ #dashboard .summary-filter .datefilters input{width:100%!important;min-width:0!important;height:36px!important;font-size:11px!important}
+ #dashboard .summary-filter .datefilters button{width:100%!important;min-width:0!important;height:34px!important;font-size:10px!important}
+ #dashboard .summary-quick .cf-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ #dashboard .summary-quick .cf-quick-grid a{min-width:0!important;padding:9px!important;gap:7px!important}
+ #dashboard .summary-quick .cf-quick-grid b{font-size:9px!important;white-space:normal!important}
+ #dashboard .dashboard-footnote{font-size:9px!important;line-height:1.45!important;padding:9px 10px!important;margin-bottom:10px!important}
+ #dashboard .dashboard-trends{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ #dashboard .trend-card,#dashboard .top-sprinters{width:100%!important;min-width:0!important;padding:14px!important;border-radius:15px!important}
+ #dashboard .eligibility-panel{overflow:hidden!important}
+ .app .page>.panel,.app .page>section>.panel{padding:14px!important;border-radius:15px!important}
+ .app .page .toolbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important;padding:10px!important}
+ .app .page .toolbar>*{width:100%!important;max-width:100%!important;min-width:0!important}
+ .app .page input:not([type=checkbox]),.app .page select,.app .page textarea{max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ .app .page .datefilters{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;min-width:0!important}
+ .app .page .datefilters label{min-width:0!important}
+ .app .page .datefilters input{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+ .app .page .cards,.app .page .grid2,.app .page .finance-overview-grid{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ .app .page .tablewrap{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+ .app .page table{min-width:640px!important;font-size:10px!important}
+ .app .page .tablewrap td,.app .page .tablewrap th{white-space:nowrap!important}
+}
+@media screen and (max-width:390px){
+ .app>main{padding-left:9px!important;padding-right:9px!important}
+ #dashboard .dashboard-welcome{padding:17px 14px!important}
+ #dashboard .dashboard-welcome h2{font-size:17px!important}
+ #dashboard .dashboard-two-rows>.metric-card{padding:10px!important}
+ #dashboard .dashboard-two-rows .metric{font-size:15px!important;max-width:45vw!important}
+ #dashboard .summary-filter .datefilters{grid-template-columns:1fr!important}
+}
+</style>
+
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
