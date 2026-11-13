@@ -1597,6 +1597,53 @@ document.getElementById('payBody').innerHTML=payrollRows.length?payrollRows.map(
 if(document.getElementById('cashDate')&&!document.getElementById('cashDate').value) initCashDate();
 let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getElementById('feeBody').innerHTML=names.length?names.map(x=>'<tr><td>'+esc(x)+'</td><td class="r"><input class="feeinput" type="number" min="0" step="1000" value="'+Number(basicSalaries[x]??0)+'" onchange="setBasicSalary(\''+esc(x).replace(/'/g,'&#39;')+'\',this.value)"></td><td class="r"><input class="feeinput" type="number" min="0" step="1" value="'+Number(fees[x]??100)+'" onchange="setFee(\''+esc(x).replace(/'/g,'&#39;')+'\',this.value)"></td><td class="row-actions"><button class="smallbtn" type="button" data-master-action="edit-sprinter" data-master-name="'+esc(x)+'">Edit</button><button class="smallbtn danger-btn" type="button" data-master-action="delete-sprinter" data-master-name="'+esc(x)+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="4" class="empty">Belum ada data sprinter.</td></tr>';renderRecords()}
 
+
+async function editSprinter(oldName){
+ const next=prompt('Masukkan nama sprinter yang benar:',oldName);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}if(name===oldName)return;
+ if(Object.keys(sprinterIds).some(x=>norm(x)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||officeStaffRows.some(x=>norm(x.name)===norm(name))){alert('Nama tersebut sudah terdaftar.');return}
+ const id=sprinterIds[oldName];if(!id){alert('ID sprinter tidak ditemukan. Muat ulang halaman.');return}
+ const {error}=await supabaseClient.from('sprinters').update({name}).eq('id',id);
+ if(error){alert('Gagal mengubah nama: '+error.message);return}
+ await loadCloudData();alert('Nama sprinter berhasil diubah.');
+}
+async function deleteSprinter(name){
+ if(!confirm('Nonaktifkan "'+name+'" dari master sprinter? Riwayat TTD tidak dihapus.'))return;
+ const id=sprinterIds[name];if(!id){alert('ID sprinter tidak ditemukan.');return}
+ const {error}=await supabaseClient.from('sprinters').update({active:false}).eq('id',id);
+ if(error){alert('Gagal menonaktifkan sprinter: '+error.message);return}
+ await loadCloudData();alert('Sprinter berhasil dinonaktifkan.');
+}
+async function editOfficeStaff(id){
+ const row=officeStaffRows.find(x=>x.id===id);if(!row)return;
+ const next=prompt('Masukkan nama staff kantor yang benar:',row.name);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}if(name===row.name)return;
+ if(officeStaffRows.some(x=>x.id!==id&&norm(x.name)===norm(name))||freelancerRows.some(x=>norm(x.name)===norm(name))||Object.keys(sprinterIds).some(x=>norm(x)===norm(name))){alert('Nama tersebut sudah terdaftar.');return}
+ const {error}=await supabaseClient.from('office_staff').update({name}).eq('id',id);
+ if(error){alert('Gagal mengubah nama staff: '+error.message);return}
+ await loadCloudData();alert('Nama staff berhasil diubah.');
+}
+async function deleteOfficeStaff(id){
+ const row=officeStaffRows.find(x=>x.id===id);if(!row)return;
+ if(!confirm('Nonaktifkan "'+row.name+'" dari master staff kantor? Riwayat operasional tetap disimpan.'))return;
+ const {error}=await supabaseClient.from('office_staff').update({active:false}).eq('id',id);
+ if(error){alert('Gagal menonaktifkan staff: '+error.message);return}
+ await loadCloudData();alert('Staff kantor berhasil dinonaktifkan.');
+}
+async function editFreelancer(id){
+ const row=freelancerRows.find(x=>x.id===id);if(!row)return;
+ const next=prompt('Masukkan nama freelance yang benar:',row.name);if(next===null)return;const name=next.trim();if(!name){alert('Nama tidak boleh kosong.');return}if(name===row.name)return;
+ if(freelancerRows.some(x=>x.id!==id&&norm(x.name)===norm(name))||officeStaffRows.some(x=>norm(x.name)===norm(name))||Object.keys(sprinterIds).some(x=>norm(x)===norm(name))){alert('Nama tersebut sudah terdaftar.');return}
+ const {error}=await supabaseClient.from('freelancers').update({name}).eq('id',id);
+ if(error){alert('Gagal mengubah nama freelance: '+error.message);return}
+ await loadCloudData();alert('Nama freelance berhasil diubah.');
+}
+async function deleteFreelancer(id){
+ const row=freelancerRows.find(x=>x.id===id);if(!row)return;
+ if(!confirm('Nonaktifkan "'+row.name+'" dari master freelance? Riwayat TTD tidak dihapus.'))return;
+ const {error}=await supabaseClient.from('freelancers').update({active:false}).eq('id',id);
+ if(error){alert('Gagal menonaktifkan freelance: '+error.message);return}
+ await loadCloudData();alert('Freelance berhasil dinonaktifkan.');
+}
+
 document.addEventListener('click',event=>{
  const button=event.target.closest('[data-master-action]');if(!button)return;
  const action=button.dataset.masterAction;
