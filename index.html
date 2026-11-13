@@ -880,6 +880,72 @@ body{background-color:#edf3f5}
 .app>.side .foot{border-top:1px solid rgba(255,255,255,.13);padding:13px 9px 0;color:#a5bdc8!important;font-size:9px}
 @media(max-width:900px){.app>.side{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}.app>.side>.nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.app>.side .nav-group{min-width:0}.app>.side .navlabel{margin-top:5px}.app>.side .nav a{font-size:11px}}
 @media(max-width:560px){.app>.side>.nav{grid-template-columns:1fr 1fr;gap:6px 9px}.app>.side .nav a{min-height:36px;padding:7px 8px!important;font-size:10px;gap:7px}.app>.side .nav a .nav-ico{width:21px;height:21px;flex-basis:21px}}
+</style><style id="cargoflow-selacerita-theme">
+/* Sela Cerita inspired palette: warm peach, lavender, ivory and charcoal */
+:root{
+ --g:#bd806f;--gd:#986657;--bg:#f7f3ef;--ink:#34313b;--muted:#89818b;
+ --line:#e9e0df;--white:#fffdfb;--nav:#302d38;
+}
+html,body{background:#f7f3ef!important;color:#34313b!important}
+body{background:
+ radial-gradient(ellipse at 8% 0%,rgba(246,218,204,.72),transparent 35%),
+ radial-gradient(ellipse at 94% 8%,rgba(224,216,242,.72),transparent 34%),
+ linear-gradient(145deg,#fbf7f2 0%,#f4f0f2 55%,#f6f1eb 100%)!important}
+.app>.side,.side{
+ background:linear-gradient(160deg,#302d38 0%,#403847 52%,#514653 100%)!important;
+ border-right:1px solid rgba(255,255,255,.16)!important;
+ box-shadow:12px 0 34px rgba(56,43,54,.10)!important;
+}
+.app>.side:before{background:radial-gradient(circle,rgba(226,177,158,.22),transparent 70%)!important}
+.app>.side:after{background:radial-gradient(circle,rgba(192,174,222,.24),transparent 70%)!important}
+.side .brand span{color:#e6b6a4!important}
+.side .tag{color:#d5c7ce!important}
+.app>.side .navlabel{color:#c7b5c9!important}
+.app>.side .nav a{color:#eee6e9!important}
+.app>.side .nav a .nav-ico{background:rgba(255,255,255,.09)!important;color:#f0c5b3!important}
+.app>.side .nav a:hover{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.12)!important}
+.app>.side .nav a.active{
+ background:linear-gradient(105deg,rgba(211,157,139,.36),rgba(177,158,210,.32))!important;
+ border-color:rgba(239,203,187,.58)!important;color:#fff!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.17),0 8px 22px rgba(24,18,28,.18)!important
+}
+.app>.side .nav a.active .nav-ico{background:linear-gradient(145deg,#d9a28e,#a998c6)!important;color:#fff!important}
+.app>.side .foot{color:#c9bbc4!important;border-color:rgba(255,255,255,.15)!important}
+main{color:#34313b}
+.top h1,.app .page .panel h2,.panel h2{color:#39343e!important}
+.eyebrow{color:#a96f68!important}
+.user,.account-summary,.account-panel{background:rgba(255,253,250,.82)!important;border-color:rgba(255,255,255,.9)!important;color:#4b414b!important}
+.card,.panel{background:rgba(255,253,250,.78)!important;border:1px solid rgba(255,255,255,.92)!important;box-shadow:0 10px 30px rgba(75,57,68,.07),0 1px 3px rgba(75,57,68,.04)!important;backdrop-filter:blur(18px)}
+.dashboard-metrics .card:nth-child(1){background:linear-gradient(140deg,#f4e8df,#fffaf5)!important;border-color:#ead6c9!important}
+.dashboard-metrics .card:nth-child(2){background:linear-gradient(140deg,#ece7f5,#fcfaff)!important;border-color:#ded5ed!important}
+.dashboard-metrics .card:nth-child(3){background:linear-gradient(140deg,#f7e6e0,#fffaf7)!important;border-color:#edd7d0!important}
+.dashboard-metrics .card:nth-child(4){background:linear-gradient(140deg,#e9e2f0,#fbf8fd)!important;border-color:#ddd2e9!important}
+.dashboard-metrics .card:nth-child(1) .metric{color:#a56e5c!important}
+.dashboard-metrics .card:nth-child(2) .metric{color:#82719f!important}
+.dashboard-metrics .card:nth-child(3) .metric{color:#b87961!important}
+.dashboard-metrics .card:nth-child(4) .metric{color:#8c76a9!important}
+.dashboard-welcome{background:linear-gradient(112deg,#554653 0%,#927687 52%,#c58f80 100%)!important;border-color:#ffffff65!important;box-shadow:0 15px 34px rgba(99,69,83,.18)!important}
+.dashboard-welcome .welcome-kicker{color:#f7e5dc!important}
+.dashboard-footnote{background:linear-gradient(100deg,#f5e8e0,#eee9f5)!important;border-color:#eadde5!important;color:#75616d!important}
+.btn{background:linear-gradient(110deg,#b77d6c,#927eaa)!important;box-shadow:0 5px 14px rgba(153,111,122,.18)!important}
+.btn.light{background:#f3e9e5!important;color:#96685f!important;box-shadow:none!important}
+.btn.dark{background:#49424f!important;color:#fff!important}
+.logout{background:#fffaf7!important;border-color:#e9deda!important;color:#665a62!important}
+input:not([type="checkbox"]),select,textarea,.feeinput,.smallbtn{
+ border-color:#e7dcdf!important;color:#453d48!important;background:rgba(255,253,251,.88)!important
+}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#c69b9f!important;box-shadow:0 0 0 3px rgba(198,155,159,.15)!important}
+.upload{background:linear-gradient(125deg,rgba(249,235,226,.82),rgba(239,234,247,.82))!important;border-color:#d9bdc1!important}
+.tablewrap{background:rgba(255,253,251,.82)!important;border-color:#e9dfe2!important}
+.tablewrap thead th,.tablewrap th,.app .page table thead th{background:#f0eaf0!important;color:#776b7a!important;border-color:#e6dce4!important}
+.tablewrap tbody td,.app .page table tbody td{color:#4c4550!important;border-color:#eee7e8!important}
+.tablewrap tbody tr:hover,.app .page table tbody tr:hover td{background:#f8f0ed!important}
+.app .page .note,.note{background:rgba(250,241,226,.82)!important;border-color:#eddfc9!important;color:#816c58!important}
+.status,.pill{border-radius:30px}
+.auth-screen{background:radial-gradient(circle at 12% 12%,#f4ded3,transparent 37%),radial-gradient(circle at 90% 85%,#e5def1,transparent 38%),#f7f3ef!important}
+.auth-card{background:rgba(255,253,250,.88)!important;border-color:#fff!important;box-shadow:0 25px 70px rgba(75,57,68,.13)!important}
+.auth-logo{color:#39343e!important}.auth-logo span{color:#b77d6c!important}
+@media(prefers-reduced-motion:reduce){.app>.side .nav a{transition:none!important}}
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
