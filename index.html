@@ -1247,6 +1247,23 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 }
 </style>
 
+
+<style id="cargoflow-mobile-filter-first">
+/* On phones, put the report filter before the KPI cards */
+@media screen and (max-width:700px){
+ #dashboard .dashboard-two-rows .summary-filter{
+  grid-column:1 / -1!important;
+  grid-row:1!important;
+  order:-1!important;
+ }
+ #dashboard .dashboard-two-rows .summary-ttd{grid-column:1!important;grid-row:2!important}
+ #dashboard .dashboard-two-rows .summary-cash{grid-column:1!important;grid-row:3!important}
+ #dashboard .dashboard-two-rows .summary-weight{grid-column:1!important;grid-row:4!important}
+ #dashboard .dashboard-two-rows .summary-payroll{grid-column:1!important;grid-row:5!important}
+ #dashboard .dashboard-two-rows .summary-quick{grid-column:1 / -1!important;grid-row:6!important}
+}
+</style>
+
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
