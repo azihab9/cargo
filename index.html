@@ -2743,6 +2743,21 @@ document.querySelector('.nav').addEventListener('click',event=>{
   showCargoPage(link.dataset.page);
   history.replaceState(null,'','#'+link.getAttribute('href').slice(1));
 });
+
+// Account Center closes safely on outside interaction, Escape, or navigation.
+// Keep this inside the main app script so it cannot be injected into print templates.
+const accountMenu=document.getElementById('accountDropdown');
+if(accountMenu){
+ document.addEventListener('pointerdown',event=>{
+  if(accountMenu.open&&!accountMenu.contains(event.target))accountMenu.open=false;
+ },true);
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&accountMenu.open){
+   accountMenu.open=false;
+   accountMenu.querySelector('summary')?.focus();
+  }
+ });
+}
 showCargoPage('dashboard');
 document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});initFinancePeriod();load();render();
 </script><!-- CargoFlow deploy refresh: 2026-11-06 -->
