@@ -1692,7 +1692,10 @@ async function refreshPayrollStatus(){
   if(!run){el.textContent='Belum ada payroll tersimpan untuk periode '+start+' sampai '+end+'. Bonus kehadiran dihitung dari absensi.';save.disabled=false;await loadPayrollAdjustments(null);render();return}
   payrollRunStatus=run.status;
   await loadPayrollAdjustments(run.id);
-  const {data:items,error:itemError}=await supabaseClient.from('payroll_items').select('person_name,attendance_bonus,gross_amount,loan_deduction,penalty_deduction,net_amount').eq('payroll_run_id',run.id);
+  const {data:items,error:itemError}=await supabaseClient.from('payroll_items').select('id,person_name,individual_status,attendance_bonus,gross_amount,loan_deduction,penalty_deduction,net_amount').eq('payroll_run_id',run.id);
+   if(itemError)throw itemError;
+   payrollItemStateByName={};
+   (items||[]).forEach(x=>{payrollItemStateByName[norm(x.person_name)]={id:x.id,status:x.individual_status||'draft'};});
   if(itemError)throw itemError;
   (items||[]).forEach(x=>{savedPayrollByName[norm(x.person_name)]={attendanceBonus:Number(x.attendance_bonus)||0,gross:Number(x.gross_amount)||0,loanDeduction:Number(x.loan_deduction)||0,penaltyDeduction:Number(x.penalty_deduction)||0,total:Number(x.net_amount)||0}});
   if(run.status==='draft'){el.textContent='Status: DRAFT • '+start+' sampai '+end+'. Bonus kehadiran dan rincian payroll mengikuti data draft tersimpan.';save.disabled=false;fin.disabled=false}
@@ -2080,6 +2083,7 @@ document.getElementById('trendWeight').innerHTML=buildTrendSvg(rows,'weight','#3
 }
 
 let payrollSlipRows=[],payrollHistorySlipRows=[],payrollAdjustmentsByName={};
+let payrollItemStateByName={};
 function render(){activeRecords=selected();let g=aggregate(),pg=applyAttendanceBonuses(aggregatePayroll());if(payrollRunStatus==='locked'||payrollRunStatus==='paid'){[...pg.sprinters,...pg.freelancers,...pg.officeStaff].forEach(x=>{const saved=savedPayrollByName[norm(x.name)];if(saved){x.attendanceBonus=saved.attendanceBonus;x.gross=saved.gross;x.loanDeduction=saved.loanDeduction;x.penaltyDeduction=saved.penaltyDeduction;x.total=saved.total}})}let totalWeight=activeRecords.reduce((a,r)=>a+r.weight,0),cod=activeRecords.reduce((a,r)=>a+r.cod,0),dfod=activeRecords.reduce((a,r)=>a+r.dfod,0),pay=pg.sprinters.reduce((a,x)=>a+x.total,0)+pg.freelancers.reduce((a,x)=>a+x.total,0)+pg.officeStaff.reduce((a,x)=>a+x.total,0);
 const periodStart=document.getElementById('fromDate').value,periodEnd=document.getElementById('toDate').value;payrollSlipRows=[...pg.sprinters.map(x=>({...x,type:'Sprinter',periodStart,periodEnd,adjustmentPaid:payrollAdjustmentsByName[norm(x.name)]||0})),...pg.freelancers.map(x=>({...x,type:'Freelance',periodStart,periodEnd,adjustmentPaid:payrollAdjustmentsByName[norm(x.name)]||0})),...pg.officeStaff.map(x=>({...x,type:x.staffRole==='warehouse'?'Staff Gudang':'Admin',periodStart,periodEnd,adjustmentPaid:payrollAdjustmentsByName[norm(x.name)]||0}))];
 document.getElementById('mTtd').textContent=activeRecords.length.toLocaleString('id-ID');document.getElementById('mWeight').textContent=kg(totalWeight)+' kg';document.getElementById('mCash').textContent=money(cod+dfod);document.getElementById('mPayroll').textContent=money(pay);
@@ -2087,7 +2091,7 @@ renderDashboardTrends(activeRecords);
  renderTopSprinters(activeRecords);
  renderSprinterEligibility();
 const payrollRows=[...pg.sprinters.map(x=>({x,type:'Sprinter'})),...pg.freelancers.map(x=>({x,type:'Freelance'})),...pg.officeStaff.map(x=>({x,type:x.staffRole==='warehouse'?'Staff Gudang':'Admin'}))];
-document.getElementById('payBody').innerHTML=payrollRows.length?payrollRows.map(({x,type},i)=>'<tr><td>'+esc(x.name)+'</td><td>'+type+'</td><td class="r">'+(x.count||0)+'</td><td class="r">'+(type==='Freelance'?'—':kg(x.weight))+'</td><td class="r">'+(type==='Freelance'?x.koli:'—')+'</td><td class="r">'+(type==='Freelance'?'—':money(x.basicSalary)+(x.prorataDays&&x.monthlySalary!==x.basicSalary?'<div class="hint">Prorata '+x.prorataDays+'/'+x.calendarDays+' hari • Bulanan '+money(x.monthlySalary)+'</div>':''))+'</td><td class="r">'+money(x.feeAmount)+'</td><td class="r">'+(type==='Sprinter'?money(x.bonusTtd)+'<div class="hint">'+x.bonusTtdCount+' resi bonus</div>':'Rp0')+'</td><td class="r">'+money(x.attendanceBonus||0)+'</td><td class="r">'+money(x.gross)+'</td><td class="r">'+money(x.loanDeduction||0)+'</td><td class="r">'+money(x.penaltyDeduction||0)+'</td><td class="r"><b>'+money(x.total)+'</b></td><td><button class="smallbtn" onclick="printPayrollSlip('+i+')">Cetak Slip</button></td></tr>').join(''):'<tr><td colspan="14" class="empty">Belum ada data payroll pada periode ini.</td></tr>'
+document.getElementById('payBody').innerHTML=payrollRows.length?payrollRows.map(({x,type},i)=>'<tr><td>'+esc(x.name)+'</td><td>'+type+'</td><td class="r">'+(x.count||0)+'</td><td class="r">'+(type==='Freelance'?'—':kg(x.weight))+'</td><td class="r">'+(type==='Freelance'?x.koli:'—')+'</td><td class="r">'+(type==='Freelance'?'—':money(x.basicSalary)+(x.prorataDays&&x.monthlySalary!==x.basicSalary?'<div class="hint">Prorata '+x.prorataDays+'/'+x.calendarDays+' hari • Bulanan '+money(x.monthlySalary)+'</div>':''))+'</td><td class="r">'+money(x.feeAmount)+'</td><td class="r">'+(type==='Sprinter'?money(x.bonusTtd)+'<div class="hint">'+x.bonusTtdCount+' resi bonus</div>':'Rp0')+'</td><td class="r">'+money(x.attendanceBonus||0)+'</td><td class="r">'+money(x.gross)+'</td><td class="r">'+money(x.loanDeduction||0)+'</td><td class="r">'+money(x.penaltyDeduction||0)+'</td><td class="r"><b>'+money(x.total)+'</b></td><td>'+renderPayrollIndividualAction(x.name)+' <button class="smallbtn" onclick="printPayrollSlip('+i+')">Cetak Slip</button></td></tr>').join(''):'<tr><td colspan="14" class="empty">Belum ada data payroll pada periode ini.</td></tr>'
 if(document.getElementById('cashDate')&&!document.getElementById('cashDate').value) initCashDate();
 let names=Object.keys(sprinterIds).sort((a,b)=>a.localeCompare(b));document.getElementById('feeBody').innerHTML=names.length?names.map(x=>'<tr><td>'+esc(x)+'</td><td class="r"><input class="feeinput" type="number" min="0" step="1000" value="'+Number(basicSalaries[x]??0)+'" onchange="setBasicSalary(\''+esc(x).replace(/'/g,'&#39;')+'\',this.value)"></td><td class="r"><input class="feeinput" type="number" min="0" step="1" value="'+Number(fees[x]??100)+'" onchange="setFee(\''+esc(x).replace(/'/g,'&#39;')+'\',this.value)"></td><td class="row-actions"><button class="smallbtn" type="button" data-master-action="edit-sprinter" data-master-name="'+esc(x)+'">Edit</button><button class="smallbtn danger-btn" type="button" data-master-action="delete-sprinter" data-master-name="'+esc(x)+'">Hapus</button></td></tr>').join(''):'<tr><td colspan="4" class="empty">Belum ada data sprinter.</td></tr>';renderRecords()}
 
@@ -2747,6 +2751,29 @@ async function markPayrollPaid(){
   alert('Status payroll berhasil diubah menjadi Sudah Dibayar.');
  }catch(e){status.textContent='Status pembayaran gagal diperbarui: '+e.message;alert('Status pembayaran gagal diperbarui: '+e.message)}
  finally{button.disabled=false}
+}
+function renderPayrollIndividualAction(name){
+ const item=payrollItemStateByName[norm(name)];
+ if(!item)return '<span class="hint">Simpan draft</span>';
+ if(item.status==='paid')return '<span class="hint">SUDAH DIBAYAR</span>';
+ if(item.status==='final')return '<button class="smallbtn" onclick="markPayrollIndividualPaid(\''+item.id+'\')">Tandai Dibayar</button> <span class="hint">FINAL</span>';
+ return '<button class="smallbtn" onclick="finalizePayrollIndividual(\''+item.id+'\')">Finalisasi Individual</button> <span class="hint">DRAFT</span>';
+}
+async function finalizePayrollIndividual(itemId){
+ if(!confirm('Finalisasi payroll karyawan ini saja? Kasbon dan denda akan dicatat satu kali. Karyawan lain tetap draft.'))return;
+ const status=document.getElementById('payrollStatus');
+ try{status.textContent='Memfinalisasi payroll individual...';
+  const {error}=await supabaseClient.rpc('finalize_payroll_item',{p_item_id:itemId});if(error)throw error;
+  await refreshPayrollStatus();await loadPayrollHistory();status.textContent='Payroll karyawan berhasil difinalisasi. Karyawan lain tetap draft.';alert('Payroll individual berhasil difinalisasi.');
+ }catch(e){status.textContent='Finalisasi individual gagal: '+e.message;alert('Finalisasi individual gagal: '+e.message)}
+}
+async function markPayrollIndividualPaid(itemId){
+ if(!confirm('Konfirmasi gaji karyawan ini benar-benar sudah dibayarkan?'))return;
+ const status=document.getElementById('payrollStatus');
+ try{status.textContent='Memperbarui status pembayaran individual...';
+  const {error}=await supabaseClient.rpc('mark_payroll_item_paid',{p_item_id:itemId});if(error)throw error;
+  await refreshPayrollStatus();await loadPayrollHistory();status.textContent='Status pembayaran karyawan berhasil diperbarui.';alert('Status pembayaran individual berhasil diperbarui.');
+ }catch(e){status.textContent='Pembaruan pembayaran gagal: '+e.message;alert('Pembaruan pembayaran gagal: '+e.message)}
 }
 function exportPayroll(){let pg=aggregatePayroll(),period=[document.getElementById('fromDate').value,document.getElementById('toDate').value],rows=[['Nama','Jenis','Jumlah TTD','Berat (kg)','Jumlah koli','Gaji pokok','Fee berat','Bonus TTD','Gaji kotor','Cicilan kasbon','Potongan denda','Gaji bersih','Periode dari','Periode sampai'],...pg.sprinters.map(x=>[x.name,'Sprinter',x.count,x.weight,'',x.basicSalary,x.feeAmount,x.bonusTtd,x.gross,x.loanDeduction,x.penaltyDeduction,x.total,...period]),...pg.freelancers.map(x=>[x.name,'Freelance',x.count,'',x.koli,'',x.feeAmount,0,x.gross,0,x.penaltyDeduction,x.total,...period]),...pg.officeStaff.map(x=>[x.name,x.staffRole==='warehouse'?'Staff Gudang':'Admin',x.count,x.weight,'',x.basicSalary,x.feeAmount,0,x.gross,0,0,x.total,...period])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.download='CargoFlow-Payroll.csv';a.click();URL.revokeObjectURL(a.href)}
 
