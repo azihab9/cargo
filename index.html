@@ -855,7 +855,32 @@ body{background-color:#edf3f5}
  .app .page table{font-size:10px}
 }
 </style>
-<style id="master-row-actions-style">.row-actions{white-space:nowrap;display:flex;gap:6px;align-items:center}.danger-btn{color:#b33b43;border-color:#f1d3d5;background:#fff7f7}.danger-btn:hover{background:#fdebed;border-color:#eab9bd}</style></head>
+<style id="master-row-actions-style">.row-actions{white-space:nowrap;display:flex;gap:6px;align-items:center}.danger-btn{color:#b33b43;border-color:#f1d3d5;background:#fff7f7}.danger-btn:hover{background:#fdebed;border-color:#eab9bd}</style><style id="cargoflow-sidebar-categories">
+/* Categorized glass sidebar */
+.app>.side{
+ position:relative;isolation:isolate;overflow:hidden;
+ background:linear-gradient(158deg,#14243b 0%,#183b50 48%,#155b58 100%)!important;
+ border-right:1px solid rgba(255,255,255,.12);
+ box-shadow:14px 0 40px rgba(22,45,67,.10);
+ padding:25px 14px 18px!important;
+}
+.app>.side:before,.app>.side:after{content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(2px)}
+.app>.side:before{width:230px;height:230px;right:-130px;top:90px;background:radial-gradient(circle,rgba(74,222,180,.22),transparent 70%)}
+.app>.side:after{width:250px;height:250px;left:-160px;bottom:90px;background:radial-gradient(circle,rgba(67,147,231,.2),transparent 70%)}
+.app>.side>.nav{display:flex;flex-direction:column;gap:13px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent;padding:0 1px 10px}
+.app>.side .nav-group{padding:0 0 3px}
+.app>.side .navlabel{font-size:9px;letter-spacing:1.55px;font-weight:800;color:#8fb6c2!important;padding:0 11px;margin:7px 0 6px}
+.app>.side .nav a{display:flex!important;align-items:center;gap:11px;min-height:39px;padding:9px 11px!important;margin:2px 0!important;border:1px solid transparent;border-radius:11px!important;color:#d4e2eb!important;font-size:11.5px;font-weight:650;letter-spacing:.05px;transition:background .2s,border-color .2s,transform .2s}
+.app>.side .nav a .nav-ico{width:23px;height:23px;flex:0 0 23px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.075);color:#9fe8d0;font-size:13px}
+.app>.side .nav a:hover{background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.1);transform:translateX(2px)}
+.app>.side .nav a.active{background:linear-gradient(105deg,rgba(36,190,145,.32),rgba(57,143,213,.25))!important;border-color:rgba(123,235,206,.48)!important;color:#fff!important;box-shadow:inset 0 1px rgba(255,255,255,.13),0 7px 20px rgba(4,25,38,.12)}
+.app>.side .nav a.active .nav-ico{background:linear-gradient(145deg,#37d6a6,#2586b7);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.16)}
+.app>.side .brand{font-size:23px;letter-spacing:-.8px}
+.app>.side .tag{font-size:9px;letter-spacing:1.15px;color:#b2c9d5!important}
+.app>.side .foot{border-top:1px solid rgba(255,255,255,.13);padding:13px 9px 0;color:#a5bdc8!important;font-size:9px}
+@media(max-width:900px){.app>.side{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}.app>.side>.nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.app>.side .nav-group{min-width:0}.app>.side .navlabel{margin-top:5px}.app>.side .nav a{font-size:11px}}
+@media(max-width:560px){.app>.side>.nav{grid-template-columns:1fr 1fr;gap:6px 9px}.app>.side .nav a{min-height:36px;padding:7px 8px!important;font-size:10px;gap:7px}.app>.side .nav a .nav-ico{width:21px;height:21px;flex-basis:21px}}
+</style></head>
 <body>
 <div class="auth-screen" id="authScreen">
   <form class="auth-card" id="loginForm">
@@ -872,7 +897,26 @@ body{background-color:#edf3f5}
 </div>
 <div class="app" id="cargoApp" style="display:none">
 <aside class="side"><div><div class="brand">Cargo<span>Flow</span></div><div class="tag">AREA RANTAU • OPERATION & PAYROLL</div></div>
-<nav class="nav"><div class="navlabel">Workspace</div><a class="active" href="#dashboard" data-page="dashboard">▦ &nbsp; Dashboard</a><a href="#import" data-page="import">⇧ &nbsp; Upload Excel</a><a href="#payroll" data-page="payroll">▤ &nbsp; Payroll Sprinter</a><a href="#payrollHistory" data-page="payrollHistory">▤ &nbsp; Riwayat Payroll</a><a href="#finance" data-page="finance">▤ &nbsp; Laporan Keuangan</a><a href="#cash" data-page="cash">◎ &nbsp; COD & DFOD</a><a href="#fees" data-page="fees">⚙ &nbsp; Pengaturan Fee</a><a href="#officeStaff" data-page="officeStaff">▤ &nbsp; Staff Kantor</a><a href="#freelancers" data-page="freelancers">▤ &nbsp; Data Freelance</a><a href="#loans" data-page="loans">▤ &nbsp; Pinjaman Karyawan</a><a href="#penalties" data-page="penalties">▤ &nbsp; Denda Karyawan</a><a href="#records" data-page="records">▣ &nbsp; Data Operasional</a><a href="#attendance" data-page="attendance">▤ &nbsp; Rekap Kehadiran</a></nav>
+<nav class="nav" aria-label="Navigasi utama">
+<div class="nav-group"><div class="navlabel">Ringkasan</div>
+<a class="active" href="#dashboard" data-page="dashboard"><span class="nav-ico">▦</span>Dashboard</a></div>
+<div class="nav-group"><div class="navlabel">Data & Import</div>
+<a href="#import" data-page="import"><span class="nav-ico">⇧</span>Upload Excel</a>
+<a href="#records" data-page="records"><span class="nav-ico">▣</span>Data Operasional</a>
+<a href="#attendance" data-page="attendance"><span class="nav-ico">◷</span>Rekap Kehadiran</a></div>
+<div class="nav-group"><div class="navlabel">Payroll & Keuangan</div>
+<a href="#payroll" data-page="payroll"><span class="nav-ico">▤</span>Payroll Sprinter</a>
+<a href="#payrollHistory" data-page="payrollHistory"><span class="nav-ico">◫</span>Riwayat Payroll</a>
+<a href="#finance" data-page="finance"><span class="nav-ico">◈</span>Laporan Keuangan</a></div>
+<div class="nav-group"><div class="navlabel">Operasional</div>
+<a href="#cash" data-page="cash"><span class="nav-ico">◎</span>COD & DFOD</a></div>
+<div class="nav-group"><div class="navlabel">Master Data & Pengaturan</div>
+<a href="#fees" data-page="fees"><span class="nav-ico">⚙</span>Pengaturan Fee</a>
+<a href="#officeStaff" data-page="officeStaff"><span class="nav-ico">♙</span>Staff Kantor</a>
+<a href="#freelancers" data-page="freelancers"><span class="nav-ico">♧</span>Data Freelance</a>
+<a href="#loans" data-page="loans"><span class="nav-ico">↗</span>Pinjaman Karyawan</a>
+<a href="#penalties" data-page="penalties"><span class="nav-ico">!</span>Denda Karyawan</a></div>
+</nav>
 <div class="foot">CARGOFLOW • PROTOTYPE V3<br>Login, data impor, dan fee sprinter terhubung ke Supabase • Cache lokal untuk akses cepat</div></aside>
 <main id="dashboard">
 <div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="main-user">
