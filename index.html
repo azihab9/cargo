@@ -227,7 +227,7 @@ tbody tr:hover{background:#f7fbfd}
 .top-sprinters{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #173d2410}
 .top-sprinters-list{display:grid;gap:13px;margin-top:14px}
 .sprinter-detail-toggle{border:0;background:transparent;padding:0;color:#168456;font:inherit;font-weight:800;cursor:pointer;text-align:left}.sprinter-detail-toggle span{font-size:9px;color:var(--muted);font-weight:600;margin-left:5px}.sprinter-detail-box{padding:12px;background:#f8fbf9;border-radius:12px;text-align:left}.sprinter-detail-title{font-size:12px;font-weight:800;color:#183b30}.sprinter-detail-sub{font-size:10px;color:var(--muted);margin:5px 0 10px}
-.eligibility-table-wrap{overflow-x:auto;margin-top:12px}.eligibility-table{width:100%;border-collapse:collapse;min-width:620px;font-size:11px}.eligibility-table th,.eligibility-table td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.eligibility-table th:first-child,.eligibility-table td:first-child{text-align:left}.eligibility-table th{color:var(--muted);font-size:10px;font-weight:700;background:#f8fbf9}.eligibility-rate{font-weight:800;color:#168456}.eligibility-low{color:#c66a27}.eligibility-status{display:inline-block;padding:4px 7px;border-radius:7px;background:#edf7f1;color:#168456;font-size:9px;font-weight:800}.eligibility-status.review{background:#fff4e8;color:#b66a24}
+.eligibility-table-wrap{overflow-x:auto;margin-top:12px}.eligibility-table{width:100%;border-collapse:collapse;min-width:620px;font-size:11px}.eligibility-table th,.eligibility-table td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.eligibility-table th:first-child,.eligibility-table td:first-child{text-align:left}.eligibility-table th{color:var(--muted);font-size:10px;font-weight:700;background:#f8fbf9}.eligibility-rate{font-weight:800;color:#168456}.eligibility-low{color:#dc2626!important}.eligibility-status{display:inline-block;padding:4px 7px;border-radius:7px;background:#edf7f1;color:#168456;font-size:9px;font-weight:800}.eligibility-status.review{background:#feecec;color:#dc2626}
 .top-sprinter-row{display:grid;grid-template-columns:30px minmax(100px,1fr) minmax(90px,2fr) auto;align-items:center;gap:12px}
 .top-sprinter-rank{width:28px;height:28px;border-radius:9px;background:#edf7f1;color:#168456;display:grid;place-items:center;font-size:11px;font-weight:800}
 .top-sprinter-name{font-size:11px;font-weight:700;color:#254238;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1061,32 +1061,6 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 .sprinter-trend.trend-neutral{background:#eef3f0;color:#75877d}
 .eligibility-table-wrap+.trend-sub{color:#74877b}
 @media(max-width:700px){.eligibility-table th,.eligibility-table td{padding:10px 9px}}
-</style><style id="cargoflow-eligibility-green-override">
-/* Explicit overrides for the actual classes rendered by the sprinter tables */
-.eligibility-table-wrap .eligibility-rate,
-.eligibility-table-wrap .eligibility-low,
-.eligibility-table-wrap td.eligibility-rate,
-.eligibility-table-wrap td.eligibility-low{
- color:#078653!important;
- font-weight:850!important;
-}
-.eligibility-table-wrap .eligibility-status,
-.eligibility-table-wrap .eligibility-status.review{
- color:#087b4d!important;
- background:linear-gradient(135deg,#e2f7e9,#d3f1df)!important;
- border:1px solid #bfe8cf!important;
- border-radius:999px!important;
- padding:5px 9px!important;
- box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;
-}
-.eligibility-table-wrap .eligibility-table th{
- background:#e8f6ed!important;
- color:#347454!important;
- border-bottom:1px solid #d1e9da!important;
-}
-.eligibility-table-wrap .eligibility-table tbody tr:nth-child(even) td{background:#f5fbf7!important}
-.eligibility-table-wrap .eligibility-table tbody tr:hover td{background:#eaf7ef!important}
-.eligibility-table-wrap .sprinter-detail-toggle{color:#078653!important}
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
