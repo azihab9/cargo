@@ -1264,6 +1264,27 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 }
 </style>
 
+
+<style id="cargoflow-hr-menu-group">
+.app>.side .nav-accordion{margin:2px 0 0;border:1px solid transparent;border-radius:12px;overflow:hidden}
+.app>.side .nav-accordion>summary{list-style:none;display:flex;align-items:center;gap:11px;min-height:40px;padding:9px 11px;border-radius:11px;color:#d4e2eb;font-size:11.5px;font-weight:700;cursor:pointer;user-select:none}
+.app>.side .nav-accordion>summary::-webkit-details-marker{display:none}
+.app>.side .nav-accordion>summary .nav-ico{width:23px;height:23px;flex:0 0 23px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.075);color:#9fe8d0;font-size:13px}
+.app>.side .nav-accordion>summary:hover{background:rgba(255,255,255,.09)}
+.app>.side .nav-accordion[open]>summary{color:#fff;background:rgba(255,255,255,.075)}
+.app>.side .nav-accordion:has(.nav-submenu a.active)>summary{color:#fff;background:rgba(33,134,90,.24)}
+.app>.side .nav-chevron{margin-left:auto;transition:transform .18s;color:#9fb8c2}
+.app>.side .nav-accordion[open]>.nav-chevron,.app>.side .nav-accordion[open]>summary .nav-chevron{transform:rotate(180deg)}
+.app>.side .nav-submenu{display:grid;gap:3px;padding:4px 0 5px 13px}
+.app>.side .nav-submenu a{min-height:35px;padding:7px 10px!important;margin:0!important;font-size:10.5px!important;border-radius:9px!important}
+.app>.side .nav-submenu a .nav-ico{width:21px;height:21px;flex-basis:21px;font-size:11px}
+@media(max-width:900px){
+ .app>.side>.nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app>.side .nav-accordion{min-width:0}
+ .app>.side .nav-submenu{padding-left:8px}
+}
+</style>
+
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
@@ -1298,9 +1319,13 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 <a href="#cash" data-page="cash"><span class="nav-ico">◎</span>COD & DFOD</a></div>
 <div class="nav-group"><div class="navlabel">Master Data & Pengaturan</div>
 <a href="#fees" data-page="fees"><span class="nav-ico">⚙</span>Pengaturan Fee</a>
+<details class="nav-accordion">
+<summary><span class="nav-ico">♙</span><span>Manajemen SDM</span><span class="nav-chevron">⌄</span></summary>
+<div class="nav-submenu">
 <a href="#officeStaff" data-page="officeStaff"><span class="nav-ico">♙</span>Staff Kantor</a>
 <a href="#employment" data-page="employment"><span class="nav-ico">◷</span>Masa Kerja Karyawan</a>
-<a href="#freelancers" data-page="freelancers"><span class="nav-ico">♧</span>Data Freelance</a></div>
+<a href="#freelancers" data-page="freelancers"><span class="nav-ico">♧</span>Data Freelance</a>
+</div></details></div>
 </nav>
 <div class="foot">CARGOFLOW • PROTOTYPE V3<br>Login, data impor, dan fee sprinter terhubung ke Supabase • Cache lokal untuk akses cepat</div></aside>
 <main id="dashboard">
@@ -2778,7 +2803,7 @@ document.getElementById('logoutButton').addEventListener('click',async()=>{
 function showCargoPage(page){
   document.querySelectorAll('.page[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
   document.querySelectorAll('.nav a[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
-  const titles={dashboard:'Dashboard Operasional',import:'Upload Excel',payroll:'Payroll Sprinter',payrollHistory:'Riwayat Payroll',finance:'Laporan Keuangan',cash:'COD & DFOD',fees:'Pengaturan Fee',freelancers:'Data Freelance',loans:'Pinjaman Karyawan',penalties:'Denda Karyawan',records:'Data Operasional',attendance:'Rekap Kehadiran'};
+  const titles={dashboard:'Dashboard Operasional',import:'Upload Excel',payroll:'Payroll Sprinter',payrollHistory:'Riwayat Payroll',finance:'Laporan Keuangan',cash:'COD & DFOD',fees:'Pengaturan Fee',freelancers:'Data Freelance',loans:'Pinjaman Karyawan',penalties:'Denda Karyawan',records:'Data Operasional',attendance:'Rekap Kehadiran',officeStaff:'Staff Kantor',employment:'Masa Kerja Karyawan',freelancers:'Data Freelance'};
   const heading=document.querySelector('.top h1');
   if(heading)heading.textContent=titles[page]||'CargoFlow';
   window.scrollTo(0,0);
