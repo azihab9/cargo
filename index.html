@@ -1065,7 +1065,88 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 /* TTD Total: red below 90%, green at/above 90% */
 .eligibility-table-wrap td.eligibility-rate.eligibility-low{color:#dc2626!important;font-weight:850!important}
 .eligibility-table-wrap td.eligibility-rate:not(.eligibility-low){color:#168456!important;font-weight:850!important}
-</style></head>
+</style>
+<style id="cargoflow-dashboard-color-polish">
+/* Dashboard color polish — richer emerald accents, same layout and data logic */
+#dashboard .dashboard-welcome{
+ background:linear-gradient(112deg,#0d3d2b 0%,#146b45 48%,#239b69 100%)!important;
+ border:1px solid rgba(160,235,194,.55)!important;
+ box-shadow:0 18px 38px rgba(18,91,55,.19),inset 0 1px rgba(255,255,255,.16)!important;
+}
+#dashboard .dashboard-welcome:before{
+ content:"";position:absolute;inset:0;pointer-events:none;opacity:.9;
+ background:radial-gradient(ellipse at 82% 18%,rgba(190,255,215,.24),transparent 28%),linear-gradient(115deg,transparent 35%,rgba(255,255,255,.07) 72%,transparent);
+}
+#dashboard .dashboard-welcome .welcome-truck{opacity:.78!important;filter:drop-shadow(0 12px 16px rgba(3,35,19,.25))!important}
+#dashboard .dashboard-welcome .welcome-mark{
+ background:linear-gradient(145deg,rgba(255,255,255,.30),rgba(255,255,255,.10))!important;
+ border:1px solid rgba(220,255,235,.55)!important;box-shadow:0 8px 22px rgba(3,35,19,.15),inset 0 1px rgba(255,255,255,.3)!important
+}
+#dashboard .dashboard-two-rows>.metric-card{
+ position:relative;isolation:isolate;overflow:hidden;
+ border:1px solid rgba(255,255,255,.95)!important;
+ box-shadow:0 10px 25px rgba(30,70,50,.075),inset 0 1px rgba(255,255,255,.9)!important;
+ transition:transform .2s ease,box-shadow .2s ease!important;
+}
+#dashboard .dashboard-two-rows>.metric-card:before{
+ content:"";position:absolute;z-index:-1;width:150px;height:150px;border-radius:50%;
+ right:-62px;bottom:-92px;background:var(--kpi-glow,rgba(67,190,125,.16));
+ box-shadow:0 0 0 18px rgba(255,255,255,.12),0 0 0 38px rgba(255,255,255,.08);
+}
+#dashboard .dashboard-two-rows>.metric-card:hover{transform:translateY(-3px)!important;box-shadow:0 16px 30px rgba(30,70,50,.12),inset 0 1px #fff!important}
+#dashboard .summary-ttd{--kpi-glow:rgba(40,184,111,.23);background:linear-gradient(135deg,#e1f8e9 0%,rgba(255,255,255,.91) 78%)!important;border-color:#c7ead4!important}
+#dashboard .summary-cash{--kpi-glow:rgba(20,166,143,.22);background:linear-gradient(135deg,#dcf7ef 0%,rgba(255,255,255,.92) 78%)!important;border-color:#c6e9dd!important}
+#dashboard .summary-weight{--kpi-glow:rgba(57,143,196,.19);background:linear-gradient(135deg,#e4f2fb 0%,rgba(255,255,255,.92) 78%)!important;border-color:#d0e6f3!important}
+#dashboard .summary-payroll{--kpi-glow:rgba(151,126,196,.18);background:linear-gradient(135deg,#eee9fa 0%,rgba(255,255,255,.92) 78%)!important;border-color:#dfd6f0!important}
+#dashboard .summary-ttd .metric-icon{background:linear-gradient(145deg,#c9f2d8,#e9fbef)!important;color:#13824d!important}
+#dashboard .summary-cash .metric-icon{background:linear-gradient(145deg,#c8eee4,#e8faf4)!important;color:#0b8b78!important}
+#dashboard .summary-weight .metric-icon{background:linear-gradient(145deg,#d3eafb,#edf7ff)!important;color:#287cae!important}
+#dashboard .summary-payroll .metric-icon{background:linear-gradient(145deg,#e1d8f5,#f4effd)!important;color:#7659ad!important}
+#dashboard .summary-ttd .metric{color:#117d49!important}
+#dashboard .summary-cash .metric{color:#087f70!important}
+#dashboard .summary-weight .metric{color:#2875a6!important}
+#dashboard .summary-payroll .metric{color:#7456a9!important}
+#dashboard .dashboard-two-rows .metric-label{color:#405c50!important;font-weight:800!important}
+#dashboard .dashboard-two-rows .hint{color:#788d81!important}
+#dashboard .summary-filter{
+ background:linear-gradient(145deg,rgba(232,248,239,.94),rgba(255,255,255,.88))!important;
+ border:1px solid #cfe9d8!important;box-shadow:0 10px 25px rgba(29,105,65,.08),inset 0 1px #fff!important;
+}
+#dashboard .summary-filter-title strong{color:#17613d!important;font-size:12px}
+#dashboard .summary-filter-title small{color:#789284!important}
+#dashboard .summary-filter .datefilters input{
+ background:rgba(255,255,255,.9)!important;border-color:#d6e9dc!important;color:#315443!important;
+}
+#dashboard .summary-filter .btn.light{background:linear-gradient(110deg,#168b58,#269c72)!important;border:0!important;color:#fff!important;box-shadow:0 4px 10px rgba(22,139,88,.16)!important}
+#dashboard .summary-filter .smallbtn{background:rgba(255,255,255,.82)!important;border-color:#d8e9de!important;color:#47715b!important}
+#dashboard .summary-quick{
+ background:linear-gradient(145deg,rgba(226,246,235,.94),rgba(255,255,255,.88))!important;
+ border:1px solid #d0e9d9!important;box-shadow:0 10px 25px rgba(29,105,65,.075),inset 0 1px #fff!important;
+}
+#dashboard .summary-quick .cf-quick-heading h3{color:#174e34!important}
+#dashboard .summary-quick .cf-quick-grid a{
+ background:linear-gradient(135deg,#fff,rgba(240,250,244,.94))!important;
+ border-color:#d8ecdf!important;box-shadow:0 3px 9px rgba(28,91,57,.035)!important;
+}
+#dashboard .summary-quick .cf-quick-grid a:hover{background:linear-gradient(135deg,#e5f8ec,#f5fcf7)!important;border-color:#9bd5b1!important;box-shadow:0 7px 16px rgba(28,126,72,.10)!important}
+#dashboard .summary-quick .cf-quick-grid i{background:linear-gradient(145deg,#d5f3df,#eaf9ef)!important;color:#168653!important}
+#dashboard .summary-quick .cf-quick-grid b{color:#315744!important}
+#dashboard .summary-quick .cf-quick-grid em{color:#15905b!important}
+#dashboard .dashboard-footnote{background:linear-gradient(100deg,#e7f7ed,#f0f8f3)!important;border-color:#d3eadb!important;color:#557765!important}
+#dashboard .trend-card,#dashboard .top-sprinters{
+ border-color:#dcece2!important;box-shadow:0 10px 26px rgba(20,83,51,.065)!important;
+}
+#dashboard .trend-card:first-child .metric-icon{background:#ddf5e6!important;color:#168653!important}
+#dashboard .trend-card:nth-child(2) .metric-icon{background:#e1f1fa!important;color:#287ba8!important}
+#dashboard .trend-head h3{color:#214b36!important}
+@media(max-width:700px){
+ #dashboard .dashboard-two-rows>.metric-card{border-radius:15px!important}
+ #dashboard .summary-filter,#dashboard .summary-quick{border-radius:15px!important}
+ #dashboard .dashboard-welcome .welcome-truck{opacity:.32!important}
+}
+</style>
+
+</head>
 <body>
 <div class="auth-screen" id="authScreen">
   <form class="auth-card" id="loginForm">
