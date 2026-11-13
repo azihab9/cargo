@@ -779,6 +779,32 @@ main{max-width:1680px;padding:30px 34px}
 }
 </style>
 
+<style id="cargoflow-glass-refresh">
+:root{--glass-line:rgba(255,255,255,.72);--glass-shadow:0 14px 38px rgba(31,55,78,.075)}
+body{background-color:#edf3f5}
+.app>.side{background:linear-gradient(155deg,rgba(20,39,63,.96),rgba(20,69,78,.91))!important;border-right:1px solid rgba(255,255,255,.12);box-shadow:12px 0 38px rgba(25,48,68,.10);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.app>main{position:relative}
+.app .top{padding:4px 2px 18px;border-bottom:1px solid rgba(255,255,255,.62)}
+.app .top .user,.app .account-summary{background:rgba(255,255,255,.66)!important;border:1px solid rgba(255,255,255,.88)!important;box-shadow:0 9px 28px rgba(38,64,86,.09),inset 0 1px 0 rgba(255,255,255,.95)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.app .panel,.app .card,.app .toolbar,.app .upload,.app .tablewrap{border:1px solid rgba(255,255,255,.82)!important;box-shadow:var(--glass-shadow),inset 0 1px 0 rgba(255,255,255,.72)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.app .panel,.app .toolbar,.app .tablewrap{background:linear-gradient(145deg,rgba(255,255,255,.83),rgba(255,255,255,.64))!important;border-radius:20px!important}
+.app .card{background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.62))!important;border-radius:19px!important}
+.app .cards .card:nth-child(1){background:linear-gradient(135deg,rgba(224,249,237,.88),rgba(255,255,255,.66))!important}
+.app .cards .card:nth-child(2){background:linear-gradient(135deg,rgba(225,240,255,.9),rgba(255,255,255,.66))!important}
+.app .cards .card:nth-child(3){background:linear-gradient(135deg,rgba(255,240,222,.9),rgba(255,255,255,.66))!important}
+.app .cards .card:nth-child(4){background:linear-gradient(135deg,rgba(241,232,255,.9),rgba(255,255,255,.66))!important}
+.app .panel:hover,.app .card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(31,55,78,.11),inset 0 1px 0 rgba(255,255,255,.85)!important}
+.app .nav a{border:1px solid transparent;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.app .nav a:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.12);transform:translateX(2px)}
+.app .nav a.active{box-shadow:0 8px 22px rgba(15,130,108,.2),inset 0 1px 0 rgba(255,255,255,.22)!important}
+.app input:not([type="checkbox"]),.app select,.app textarea{background:rgba(255,255,255,.72)!important;border:1px solid rgba(211,222,231,.9)!important;border-radius:11px!important;box-shadow:inset 0 1px 2px rgba(30,50,70,.025);backdrop-filter:blur(10px)}
+.app input:focus,.app select:focus,.app textarea:focus{outline:none;border-color:rgba(31,157,126,.55)!important;box-shadow:0 0 0 3px rgba(31,157,126,.10)!important}
+.app .account-panel{background:rgba(249,253,252,.84)!important;border:1px solid rgba(255,255,255,.92)!important;box-shadow:0 22px 60px rgba(25,43,65,.19),inset 0 1px 0 #fff!important;backdrop-filter:blur(28px)!important;-webkit-backdrop-filter:blur(28px)!important}
+.app table thead th{background:rgba(237,244,248,.78)!important}
+.app table tbody tr:hover{background:rgba(230,245,239,.38)}
+@media(max-width:900px){.app .panel,.app .toolbar,.app .tablewrap,.app .card{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}}
+@media(prefers-reduced-motion:reduce){.app .panel,.app .card,.app .nav a{transition:none!important}}
+</style>
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
