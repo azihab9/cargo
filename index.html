@@ -805,6 +805,56 @@ body{background-color:#edf3f5}
 @media(max-width:900px){.app .panel,.app .toolbar,.app .tablewrap,.app .card{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}}
 @media(prefers-reduced-motion:reduce){.app .panel,.app .card,.app .nav a{transition:none!important}}
 </style>
+<style id="cargoflow-page-polish">
+/* Consistent spacing and glass surfaces across every workspace page */
+.app>main{min-width:0}
+.app .page{min-width:0}
+.app .page>.panel,.app .page>section,.app .page>.cards,.app .page>.grid2,.app .page>.toolbar,.app .page>.tablewrap{margin-bottom:18px}
+.app .page>.panel,.app .page>section>.panel{padding:22px!important}
+.app .page .panel h2,.app .page section h2{font-size:15px;font-weight:800;letter-spacing:-.2px;color:#20394d;margin-bottom:7px}
+.app .page .desc,.app .page .muted{line-height:1.65}
+.app .page .toolbar{padding:12px 14px;border-radius:16px!important;gap:10px}
+.app .page .upload{border-radius:17px!important;background:linear-gradient(120deg,rgba(232,249,241,.82),rgba(237,245,255,.82))!important;border:1px dashed rgba(111,190,158,.55)!important}
+.app .page .tablewrap{overflow:auto;border-radius:15px!important;background:rgba(255,255,255,.68)!important}
+.app .page table{border-collapse:separate;border-spacing:0;min-width:100%}
+.app .page table thead th{padding:13px 11px;background:rgba(235,243,248,.86)!important;color:#607487;font-size:9px;letter-spacing:.55px;text-transform:uppercase;border-bottom:1px solid rgba(213,225,233,.8)}
+.app .page table tbody td{padding:12px 11px;border-bottom:1px solid rgba(222,231,237,.72);color:#34475a}
+.app .page table tbody tr:last-child td{border-bottom:0}
+.app .page table tbody tr:hover td{background:rgba(231,247,239,.42)}
+.app .page .note{border-radius:13px;background:rgba(255,248,232,.78);border-color:rgba(240,220,174,.75);line-height:1.7}
+.app .page input:not([type="checkbox"]):not([type="file"]),.app .page select,.app .page textarea{min-height:38px}
+.app .page input[type="file"]{max-width:100%;padding:9px;border:1px solid rgba(210,223,232,.85);border-radius:12px;background:rgba(255,255,255,.68)}
+.app .page .btn,.app .page .smallbtn{border-radius:11px;min-height:36px}
+.app .page .cards{gap:15px}
+.app .page .grid2{gap:16px}
+.app .page .empty{padding:28px 14px;color:#8998a7}
+.app .page .pill,.app .page .status{border-radius:30px}
+.app .page .datefilters{padding:10px 12px;border:1px solid rgba(255,255,255,.78);border-radius:15px;background:rgba(255,255,255,.48);box-shadow:0 8px 22px rgba(31,55,78,.04);backdrop-filter:blur(14px)}
+.app .page .section{margin-top:20px}
+.app .page .section>h2{margin-bottom:12px}
+.app .page .feeinput{text-align:right}
+.app .page .upload strong{color:#30495b}
+.app .page .upload p{line-height:1.6}
+.app .page .toolbar>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.app .page .toolbar .btn{white-space:nowrap}
+.app .page [style*="background:#fff"],.app .page [style*="background: white"]{border-radius:12px}
+@media(max-width:900px){
+ .app>main{padding:20px 16px}
+ .app .page>.panel,.app .page>section>.panel{padding:17px!important}
+ .app .page .toolbar{align-items:stretch}
+ .app .page .toolbar>*{max-width:100%}
+ .app .page .tablewrap{max-width:100%}
+}
+@media(max-width:560px){
+ .app>main{padding:15px 12px}
+ .app .page>.panel,.app .page>section>.panel{padding:15px!important;border-radius:16px!important}
+ .app .page .toolbar{padding:10px;border-radius:13px!important}
+ .app .page .toolbar input,.app .page .toolbar select{width:100%;min-width:0}
+ .app .page .datefilters{width:100%;align-items:stretch}
+ .app .page .datefilters input{min-width:0;flex:1}
+ .app .page table{font-size:10px}
+}
+</style>
 </head>
 <body>
 <div class="auth-screen" id="authScreen">
