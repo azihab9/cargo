@@ -1879,25 +1879,32 @@ function applyAttendanceBonuses(pg){
 const PAYROLL_EXCLUDED_NAMES=new Set(['TTDCSHQ','Admin Outlet','ADMINKPG','KPG003A','Roni','Yayan'].map(norm));
 function isPayrollExcluded(name){return PAYROLL_EXCLUDED_NAMES.has(norm(name))}
 function prorataCalendarSalary(monthlySalary,periodStart,periodEnd,employmentStart=null,employmentEnd=null){
- const start=new Date(periodStart+'T00:00:00'),end=new Date(periodEnd+'T00:00:00');
- if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||start>end)return {amount:Number(monthlySalary)||0,days:0,calendarDays:0};
+ const start=new Date(periodStart+'T00:00:00'),end=new Date(periodEnd+'T00:00:00'),salary=Number(monthlySalary)||0;
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||start>end)return {amount:salary,days:0,calendarDays:0};
  const empStart=employmentStart?new Date(employmentStart+'T00:00:00'):new Date('1900-01-01T00:00:00');
  const empEnd=employmentEnd?new Date(employmentEnd+'T00:00:00'):new Date('2999-12-31T00:00:00');
- const from=new Date(Math.max(start.getTime(),empStart.getTime())),to=new Date(Math.min(end.getTime(),empEnd.getTime()));
- if(from>to)return {amount:0,days:0,calendarDays:0};
- let amount=0,days=0,calendarDays=0,cursor=new Date(from.getFullYear(),from.getMonth(),1);
- while(cursor<=to){
+ // Payroll range selects the months to pay; service dates determine whether each month is prorated.
+ let amount=0,days=0,calendarDays=0,cursor=new Date(start.getFullYear(),start.getMonth(),1);
+ const lastMonth=new Date(end.getFullYear(),end.getMonth(),1);
+ while(cursor<=lastMonth){
+  const monthStart=new Date(cursor.getFullYear(),cursor.getMonth(),1);
   const monthEnd=new Date(cursor.getFullYear(),cursor.getMonth()+1,0);
-  const a=new Date(Math.max(from.getTime(),cursor.getTime())),b=new Date(Math.min(to.getTime(),monthEnd.getTime()));
-  if(a<=b){const activeDays=Math.round((b-a)/86400000)+1,monthDays=monthEnd.getDate();days+=activeDays;calendarDays+=monthDays;amount+=(Number(monthlySalary)||0)*activeDays/monthDays;}
+  const a=new Date(Math.max(monthStart.getTime(),empStart.getTime()));
+  const b=new Date(Math.min(monthEnd.getTime(),empEnd.getTime()));
+  const monthDays=monthEnd.getDate();
+  if(a<=b){
+   const activeDays=Math.round((b-a)/86400000)+1;
+   days+=activeDays;calendarDays+=monthDays;
+   amount+=salary*activeDays/monthDays;
+  }
   cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1);
  }
  return {amount:Math.round(amount),days,calendarDays};
 }
 function payrollProrataFor(person){
  const start=document.getElementById('fromDate')?.value,end=document.getElementById('toDate')?.value,monthlySalary=Number(person.basic_salary??person.basicSalary)||0;
- // Legacy employees with no service dates retain the existing full monthly salary behavior.
- if(!person.employment_start_date&&!person.employment_end_date)return {amount:monthlySalary,days:0,calendarDays:0,monthlySalary};
+ // An employee without an end date receives full salary for every payroll month.
+ // A start date prorates only the first partial month; an end date prorates the final partial month.
  if(!start||!end||start>end)return {amount:monthlySalary,days:0,calendarDays:0,monthlySalary};
  return {...prorataCalendarSalary(monthlySalary,start,end,person.employment_start_date||null,person.employment_end_date||null),monthlySalary};
 }
