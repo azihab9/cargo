@@ -1412,6 +1412,8 @@ function applyAttendanceBonuses(pg){
  pg.freelancers.forEach(x=>{x.attendanceBonus=0});
  return pg;
 }
+const PAYROLL_EXCLUDED_NAMES=new Set(['TTDCSHQ','Admin Outlet','ADMINKPG','KPG003A','Roni','Yayan'].map(norm));
+function isPayrollExcluded(name){return PAYROLL_EXCLUDED_NAMES.has(norm(name))}
 function aggregatePayroll(){
  const sp={},fr={},office={};
  officeStaffRows.forEach(x=>{office[x.id]={id:x.id,name:x.name,staffRole:x.staff_role,count:0,weight:0,fee:Number(x.fee_per_kg)||100,basicSalary:Number(x.basic_salary)||0,feeAmount:0,gross:0,loanDeduction:0,penaltyDeduction:0,total:0}});
@@ -1462,7 +1464,7 @@ function aggregatePayroll(){
   x.penaltyDeduction=Math.min(x.gross,pdue);
   x.total=x.gross-x.penaltyDeduction;
  });
- return {sprinters:Object.values(sp).sort((a,b)=>a.name.localeCompare(b.name)),freelancers:Object.values(fr).sort((a,b)=>a.name.localeCompare(b.name)),officeStaff:Object.values(office).sort((a,b)=>a.name.localeCompare(b.name))};
+ return {sprinters:Object.values(sp).filter(x=>!isPayrollExcluded(x.name)).sort((a,b)=>a.name.localeCompare(b.name)),freelancers:Object.values(fr).filter(x=>!isPayrollExcluded(x.name)).sort((a,b)=>a.name.localeCompare(b.name)),officeStaff:Object.values(office).filter(x=>!isPayrollExcluded(x.name)).sort((a,b)=>a.name.localeCompare(b.name))};
 }
 
 function buildTrendSvg(rows,key,color,suffix){
