@@ -2569,24 +2569,7 @@ function printPayrollSlip(index,fromHistory=false){
  const rows=detail.map(d=>'<tr><td>'+esc(d[0])+(d[2]?'<small>'+esc(d[2])+'</small>':'')+'</td><td class="amount">'+esc(d[1])+'</td></tr>').join('');
  const w=window.open('','_blank','width=850,height=900');if(!w){alert('Izinkan pop-up untuk mencetak slip gaji.');return}
  w.document.write('<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Slip Gaji - '+esc(x.name)+'</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#17251e;margin:0;padding:30px;background:#f3f6f4}.slip{max-width:760px;margin:auto;background:#fff;border:1px solid #dce7e0;padding:34px 38px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #159b67;padding-bottom:18px}.brand{font-size:22px;font-weight:800;color:#07864f}.sub{font-size:11px;color:#60736a;margin-top:5px}.tag{font-size:11px;font-weight:bold;color:#07864f;background:#e9f8f0;padding:8px 12px;border-radius:20px;height:max-content}.title{font-size:21px;font-weight:800;margin:25px 0 5px}.period{font-size:12px;color:#617168;margin-bottom:22px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f5faf7;padding:15px;border-radius:8px;margin-bottom:22px}.meta label{display:block;font-size:10px;color:#718078;margin-bottom:4px}.meta strong{font-size:13px}.section{font-size:12px;font-weight:bold;margin:18px 0 8px}table{width:100%;border-collapse:collapse;font-size:12px}td{padding:11px 8px;border-bottom:1px solid #e7eee9}td small{display:block;color:#718078;font-size:10px;margin-top:4px}.amount{text-align:right;font-weight:600;white-space:nowrap}.total{margin-top:18px;background:#eaf8f0;border-left:4px solid #159b67;padding:16px;display:flex;justify-content:space-between;align-items:center}.total span{font-size:12px;font-weight:bold}.total strong{font-size:22px;color:#07864f}.note{font-size:10px;color:#7b8982;margin-top:18px}.sign{display:flex;justify-content:space-between;margin-top:48px;font-size:11px;text-align:center}.sign div{width:180px}.line{border-top:1px solid #9aa9a0;margin-top:55px;padding-top:7px}@media print{body{background:#fff;padding:0}.slip{border:0;max-width:none;padding:20px}.no-print{display:none}}@page{size:A4;margin:12mm}</style></head><body><main class="slip"><div class="head"><div><div class="brand">J&T CARGO</div><div class="sub">AREA RANTAU • CARGOFLOW PAYROLL</div></div><div class="tag">SLIP GAJI</div></div><div class="title">Rincian Penghasilan</div><div class="period">Periode: '+dateLabel(x.periodStart)+' s/d '+dateLabel(x.periodEnd)+'</div><div class="meta"><div><label>Nama</label><strong>'+esc(x.name)+'</strong></div><div><label>Status</label><strong>'+esc(x.type)+'</strong></div></div><div class="section">Rincian penghasilan</div><table>'+rows+'</table><div class="section">Potongan</div><table><tr><td>Cicilan kasbon</td><td class="amount">'+fmt(x.loanDeduction)+'</td></tr><tr><td>Potongan denda</td><td class="amount">'+fmt(x.penaltyDeduction)+'</td></tr></table><div class="total"><span>GAJI BERSIH DITERIMA</span><strong>'+fmt((Number(x.total)||0)+(Number(x.adjustmentPaid)||0))+'</strong></div><div class="note">Total mencakup penyesuaian tambahan yang telah dibayar secara terpisah.</div><div class="note">Slip ini dibuat otomatis oleh CargoFlow. Simpan sebagai bukti rincian penghasilan.</div><div class="sign"><div>Mengetahui<div class="line">J&T CARGO KPG003A</div></div><div>Penerima<div class="line">'+esc(x.name)+'</div></div></div><div class="no-print" style="text-align:center;margin-top:28px"><button onclick="window.print()" style="border:0;border-radius:7px;background:#159b67;color:#fff;padding:11px 20px;font-weight:bold;cursor:pointer">Cetak / Simpan PDF</button></div></main>
-<script id="cargoflow-account-auto-close">
-(()=>{
- const menu=document.getElementById('accountDropdown');
- if(!menu)return;
- // Close the account panel whenever the user interacts outside it.
- document.addEventListener('pointerdown',event=>{
-  if(menu.open&&!menu.contains(event.target))menu.open=false;
- },true);
- // Escape closes the panel without changing the current page.
- document.addEventListener('keydown',event=>{
-  if(event.key==='Escape'&&menu.open){menu.open=false;menu.querySelector('summary')?.focus()}
- });
- // Selecting an item in the workspace navigation always dismisses it.
- document.querySelector('.nav')?.addEventListener('click',event=>{
-  if(event.target.closest('a[data-page]'))menu.open=false;
- });
-})();
-</script>
+
 
 </body></html>');
  w.document.close();w.focus();
@@ -2766,4 +2749,20 @@ document.querySelector('.nav').addEventListener('click',event=>{
 showCargoPage('dashboard');
 document.getElementById('today').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});initFinancePeriod();load();render();
 </script><!-- CargoFlow deploy refresh: 2026-11-06 -->
+
+<script id="cargoflow-account-auto-close">
+(()=>{
+ const menu=document.getElementById('accountDropdown');
+ if(!menu)return;
+ document.addEventListener('pointerdown',event=>{
+  if(menu.open&&!menu.contains(event.target))menu.open=false;
+ },true);
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&menu.open){menu.open=false;menu.querySelector('summary')?.focus()}
+ });
+ document.querySelector('.nav')?.addEventListener('click',event=>{
+  if(event.target.closest('a[data-page]'))menu.open=false;
+ });
+})();
+</script>
 </body></html>
