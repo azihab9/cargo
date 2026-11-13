@@ -674,7 +674,41 @@ main{max-width:1680px;padding:30px 34px}
 .state-open{background:var(--cf-below-bg)!important;color:var(--cf-below)!important}
 .state-paid{background:var(--cf-achieved-bg)!important;color:var(--cf-achieved)!important}
 .state-draft{background:var(--cf-neutral-bg)!important;color:var(--cf-neutral)!important}
-\n</style><style id="cargoflow-premium-final">
+\n
+/* Native account dropdown: isolated from authentication flow */
+.main-user{display:flex!important;align-items:center;gap:0!important}
+.account-dropdown{position:relative;z-index:40}
+.account-summary{list-style:none;display:flex;align-items:center;gap:11px;min-width:226px;padding:8px 12px 8px 8px;border:1px solid rgba(255,255,255,.9);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(237,248,245,.88));box-shadow:0 8px 25px rgba(34,65,82,.08),inset 0 1px 0 #fff;backdrop-filter:blur(16px);cursor:pointer;color:#263447}
+.account-summary::-webkit-details-marker{display:none}
+.account-avatar{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:14px;color:#fff;font-size:13px;font-weight:900;background:radial-gradient(circle at 28% 20%,#8af0d0 0,#2dbb91 38%,#237bb5 100%);box-shadow:0 5px 13px rgba(35,143,133,.22)}
+.account-summary-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.account-summary-copy strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px}
+.account-summary-copy small{font-size:9px;letter-spacing:1px;color:#168b69;font-weight:850}
+.account-chevron{color:#778496;font-size:17px}
+.account-dropdown[open] .account-chevron{transform:rotate(180deg)}
+.account-panel{position:absolute;right:0;top:calc(100% + 10px);width:270px;padding:12px;border:1px solid #e5ebef;border-radius:18px;background:rgba(255,255,255,.98);box-shadow:0 18px 50px rgba(25,43,65,.17);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.account-panel-title{font-size:12px;font-weight:850;color:#253448;padding:4px 5px 12px;border-bottom:1px solid #edf0f3}
+.account-profile{display:flex;align-items:center;gap:10px;padding:12px 5px}
+.account-profile-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#e9f7f1;color:#168b69}
+.account-profile div{display:flex;flex-direction:column;gap:3px}
+.account-profile strong{font-size:11px;color:#344256}
+.account-profile small{font-size:9px;color:#8994a2}
+.account-section-label{font-size:9px;letter-spacing:1px;font-weight:850;color:#8b96a4;padding:8px 5px 6px}
+.account-language{display:flex;gap:7px;padding:0 4px 9px}
+.account-language-btn{flex:1;border:1px solid #e5ebef;border-radius:9px;background:#fff;color:#687587;padding:8px;font-size:10px;cursor:pointer}
+.account-language-btn.active{border-color:#b9e5d2;background:#eaf7f0;color:#117a58;font-weight:800}
+.account-action{width:100%;display:flex;align-items:center;gap:10px;padding:11px 8px;border:0;border-radius:10px;background:transparent;text-align:left;color:#354257;font-size:11px;cursor:pointer}
+.account-action:hover{background:#f1f7f5}
+.account-action>span{width:17px;text-align:center;color:#168b69;font-size:14px}
+.account-action b{margin-left:auto;color:#9aa4b2;font-size:17px;font-weight:400}
+.account-separator{height:1px;background:#edf0f3;margin:5px 0}
+.account-action.account-logout{color:#c03939}
+.account-action.account-logout>span{color:#c03939}
+.account-action.account-logout:hover{background:#fff2f1}
+@media(max-width:900px){.account-summary{min-width:0;padding:6px 9px 6px 6px;gap:7px}.account-avatar{width:35px;height:35px;flex-basis:35px;border-radius:11px}.account-summary-copy strong{font-size:10px;max-width:105px}.account-summary-copy small{font-size:8px}.account-panel{width:255px}}
+@media(max-width:560px){.account-panel{right:0;width:min(270px,calc(100vw - 28px))}.account-summary-copy strong{max-width:88px}}
+
+</style><style id="cargoflow-premium-final">
 
 /* FINAL OVERRIDE — CargoFlow Premium Colorful Glass UI */
 :root{--g:#168b69;--gd:#11634f;--bg:#eef2f7;--ink:#1d2939;--muted:#758195;--line:#e5eaf1;--white:#fff;--nav:#17243b}
@@ -765,7 +799,20 @@ main{max-width:1680px;padding:30px 34px}
 <nav class="nav"><div class="navlabel">Workspace</div><a class="active" href="#dashboard" data-page="dashboard">▦ &nbsp; Dashboard</a><a href="#import" data-page="import">⇧ &nbsp; Upload Excel</a><a href="#payroll" data-page="payroll">▤ &nbsp; Payroll Sprinter</a><a href="#payrollHistory" data-page="payrollHistory">▤ &nbsp; Riwayat Payroll</a><a href="#finance" data-page="finance">▤ &nbsp; Laporan Keuangan</a><a href="#cash" data-page="cash">◎ &nbsp; COD & DFOD</a><a href="#fees" data-page="fees">⚙ &nbsp; Pengaturan Fee</a><a href="#officeStaff" data-page="officeStaff">▤ &nbsp; Staff Kantor</a><a href="#freelancers" data-page="freelancers">▤ &nbsp; Data Freelance</a><a href="#loans" data-page="loans">▤ &nbsp; Pinjaman Karyawan</a><a href="#penalties" data-page="penalties">▤ &nbsp; Denda Karyawan</a><a href="#records" data-page="records">▣ &nbsp; Data Operasional</a><a href="#attendance" data-page="attendance">▤ &nbsp; Rekap Kehadiran</a></nav>
 <div class="foot">CARGOFLOW • PROTOTYPE V3<br>Login, data impor, dan fee sprinter terhubung ke Supabase • Cache lokal untuk akses cepat</div></aside>
 <main id="dashboard">
-<div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="main-user"><div class="user" id="userBadge">● &nbsp; Memuat akun...</div><button class="logout" id="logoutButton" type="button">Keluar</button></div></div>
+<div class="top"><div><div class="eyebrow">Operational overview</div><h1>Dashboard Operasional</h1><div class="muted" id="today"></div></div><div class="main-user">
+ <details class="account-dropdown" id="accountDropdown">
+  <summary class="account-summary"><span class="account-avatar">CF</span><span class="account-summary-copy"><strong id="userBadge">Memuat akun...</strong><small>ACCOUNT CENTER</small></span><span class="account-chevron">⌄</span></summary>
+  <div class="account-panel">
+   <div class="account-panel-title">Pengaturan Akun</div>
+   <div class="account-profile"><span class="account-profile-icon">◉</span><div><strong>Profil akun</strong><small id="accountProfileHint">Informasi akun CargoFlow yang sedang aktif</small></div></div>
+   <div class="account-section-label">BAHASA</div>
+   <div class="account-language"><button type="button" class="account-language-btn active" data-lang="id">Indonesia</button><button type="button" class="account-language-btn" data-lang="en">English</button></div>
+   <button type="button" class="account-action" id="changePasswordButton"><span>⌑</span> Ganti kata sandi <b>›</b></button>
+   <div class="account-separator"></div>
+   <button class="account-action account-logout" id="logoutButton" type="button"><span>↗</span> Keluar</button>
+  </div>
+ </details>
+</div></div>
 <section class="page active" data-page="dashboard"><div class="panel" style="margin-bottom:14px"><div class="toolbar" style="margin:0"><div><h2>Filter periode laporan</h2><div class="desc" style="margin:4px 0 0">Tanggal berdasarkan Waktu tanda terima (TTD)</div></div><div class="datefilters"><label>Dari <input type="date" id="fromDate"></label><label>Sampai <input type="date" id="toDate"></label><button class="btn light" onclick="applyFilter()">Terapkan</button><button class="smallbtn" onclick="clearFilter()">Semua tanggal</button></div></div></div>
 <div class="dashboard-welcome"><div><div class="welcome-kicker">CARGOFLOW • AREA RANTAU</div><h2>Ringkasan Operasional</h2><p>Pantau performa pengiriman dan payroll dalam satu tampilan.</p></div><div class="welcome-mark">CF<span>↗</span></div></div>
 <section class="cards dashboard-metrics">
@@ -2082,6 +2129,23 @@ document.getElementById('loginForm').addEventListener('submit',async event=>{
   if(error){authMessage(error.message==='Invalid login credentials'?'Email atau password salah.':error.message)}
   else{await enterApp(data.session)}
   button.disabled=false;button.textContent='Masuk';
+});
+document.querySelectorAll('.account-language-btn').forEach(button=>{
+ button.addEventListener('click',()=>{
+  document.querySelectorAll('.account-language-btn').forEach(item=>item.classList.toggle('active',item===button));
+  const language=button.dataset.lang;
+  document.documentElement.lang=language;
+  try{localStorage.setItem('cargoflow_language',language)}catch(error){}
+ });
+});
+document.getElementById('changePasswordButton').addEventListener('click',async()=>{
+ const password=prompt('Masukkan kata sandi baru (minimal 6 karakter):');
+ if(password===null)return;
+ if(password.length<6){alert('Kata sandi minimal 6 karakter.');return}
+ const {error}=await supabaseClient.auth.updateUser({password});
+ if(error){alert('Gagal mengganti kata sandi: '+error.message);return}
+ alert('Kata sandi berhasil diperbarui.');
+ document.getElementById('accountDropdown').open=false;
 });
 document.getElementById('logoutButton').addEventListener('click',async()=>{
   const {error}=await supabaseClient.auth.signOut();
