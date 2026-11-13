@@ -1061,6 +1061,32 @@ a{accent-color:#21865A}::selection{background:#BCE9CE;color:#123B2A}
 .sprinter-trend.trend-neutral{background:#eef3f0;color:#75877d}
 .eligibility-table-wrap+.trend-sub{color:#74877b}
 @media(max-width:700px){.eligibility-table th,.eligibility-table td{padding:10px 9px}}
+</style><style id="cargoflow-eligibility-green-override">
+/* Explicit overrides for the actual classes rendered by the sprinter tables */
+.eligibility-table-wrap .eligibility-rate,
+.eligibility-table-wrap .eligibility-low,
+.eligibility-table-wrap td.eligibility-rate,
+.eligibility-table-wrap td.eligibility-low{
+ color:#078653!important;
+ font-weight:850!important;
+}
+.eligibility-table-wrap .eligibility-status,
+.eligibility-table-wrap .eligibility-status.review{
+ color:#087b4d!important;
+ background:linear-gradient(135deg,#e2f7e9,#d3f1df)!important;
+ border:1px solid #bfe8cf!important;
+ border-radius:999px!important;
+ padding:5px 9px!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+.eligibility-table-wrap .eligibility-table th{
+ background:#e8f6ed!important;
+ color:#347454!important;
+ border-bottom:1px solid #d1e9da!important;
+}
+.eligibility-table-wrap .eligibility-table tbody tr:nth-child(even) td{background:#f5fbf7!important}
+.eligibility-table-wrap .eligibility-table tbody tr:hover td{background:#eaf7ef!important}
+.eligibility-table-wrap .sprinter-detail-toggle{color:#078653!important}
 </style></head>
 <body>
 <div class="auth-screen" id="authScreen">
